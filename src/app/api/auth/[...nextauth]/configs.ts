@@ -101,7 +101,10 @@ export const authConfigs: NextAuthConfig = {
             };
 
             user = await User.create(newUserData);
+          }else{
+            throw new Error("Account already exists");
           }
+
           token._id = user._id.toString();
           token.userName = user.userName;
           token.firstName = user.firstName;
