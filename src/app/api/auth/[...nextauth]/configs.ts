@@ -24,20 +24,16 @@ export const authConfigs: NextAuthConfig = {
             .join(", ");
           throw new Error(`Validation failed: ${errorMessage}`);
         }
-        
+
         try {
+          const { email, userName, password } = result?.data;
           const user = await User.findOne({
-            $or: [
-              { email: credentials.email },
-              { userName: credentials.userName },
-            ],
+            $or: [{ email }, { userName }],
           });
           if (!user) {
             throw new Error("Invalid credentials or User not found");
           }
-          const isPasswdCorrect = await user.isPasswordCorrect(
-            credentials.password
-          );
+          const isPasswdCorrect = await user.isPasswordCorrect(password);
           if (!isPasswdCorrect) {
             throw new Error("Invalid credentials");
           }
