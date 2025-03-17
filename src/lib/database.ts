@@ -14,19 +14,18 @@ if (!cached) {
   };
 }
 
-export async function connectDB(){
+export async function connectDB() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
     const options = {
+      dbName: "streamX",
       bufferCommands: true,
       maxPoolSize: 5,
     };
 
-    cached.promise = mongoose
-    .connect(MONGODB_URI, options)
-    .then((conn) => {
-      console.log("MongoDB connected");
+    cached.promise = mongoose.connect(MONGODB_URI, options).then((conn) => {
+      console.log("MongoDB connected to database:", conn.connection.name);
       return conn.connection;
     });
   }
@@ -39,4 +38,4 @@ export async function connectDB(){
   }
 
   return cached.conn;
-};
+}

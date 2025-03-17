@@ -1,4 +1,4 @@
-import { Schema, Document, models, model} from "mongoose";
+import { Schema, Document, models, model } from "mongoose";
 import bcrypt from "bcryptjs";
 
 export interface IUser extends Document {
@@ -9,7 +9,50 @@ export interface IUser extends Document {
   phoneNumber: string;
   email: string;
   password: string;
-  location: string;
+  country:
+    | "None"
+    | "Afghanistan"
+    | "Pakistan"
+    | "India"
+    | "United States"
+    | "United Kingdom"
+    | "Canada"
+    | "Australia"
+    | "Germany"
+    | "France"
+    | "Brazil"
+    | "China"
+    | "Japan"
+    | "Russia"
+    | "South Korea"
+    | "Italy"
+    | "Mexico"
+    | "South Africa"
+    | "Nigeria"
+    | "Egypt"
+    | "Turkey"
+    | "Indonesia"
+    | "Bangladesh"
+    | "Vietnam"
+    | "Philippines"
+    | "Thailand"
+    | "Malaysia"
+    | "Argentina"
+    | "Colombia"
+    | "Spain"
+    | "Netherlands"
+    | "Saudi Arabia"
+    | "United Arab Emirates"
+    | "Sweden"
+    | "Norway"
+    | "Denmark"
+    | "Finland"
+    | "Belgium"
+    | "Switzerland"
+    | "Austria"
+    | "New Zealand"
+    | "Singapore"
+    | "Hong Kong";
   bio: string;
   isVerified: boolean;
   verificationCode?: string | null;
@@ -74,18 +117,16 @@ const userSchema = new Schema<IUser>(
         "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)",
       ],
     },
-    location: {
+    country: {
       type: String,
       required: [true, "Location is required"],
       trim: true,
-      minLength: [2, "Location must be at least 2 characters"],
-      maxLength: [100, "Location must be at most 100 characters"],
+      default: "None",
     },
     phoneNumber: {
       type: String,
-      required: [true, "Phone number is required"],
       trim: true,
-      unique: true,
+      default: null,
       minLength: [11, "Phone number must be at least 11 characters"],
       maxLength: [11, "Phone number must be at most 11 characters"],
       match: [/^0\d{10}$/, "Please enter a valid 11-digit phone number"],
@@ -142,6 +183,7 @@ userSchema.pre("save", async function (this: IUser, next) {
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
   try {
+    console.log("Comparing password:", password, "with hash:", this.password);
     return await bcrypt.compare(password, this.password);
   } catch (error) {
     console.log("Error comparing password: ", error);

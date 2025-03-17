@@ -6,17 +6,8 @@ import { ApiResponse } from "@/lib/api/ApiResponse";
 
 export async function POST(request: NextRequest) {
   try {
-    const {
-      firstName,
-      lastName,
-      userName,
-      channelName,
-      email,
-      password,
-      location,
-      phoneNumber,
-      bio,
-    } = await request.json();
+    const { firstName, lastName, userName, channelName, email, password } =
+      await request.json();
 
     const trimmedData = {
       firstName: firstName?.trim(),
@@ -25,9 +16,6 @@ export async function POST(request: NextRequest) {
       channelName: channelName?.trim(),
       email: email?.trim(),
       password: password?.trim(),
-      location: location?.trim(),
-      phoneNumber: phoneNumber?.trim(),
-      bio: bio?.trim(),
     };
 
     const fields = Object.values(trimmedData);
@@ -55,7 +43,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    if (trimmedData.channelName.length < 2 || trimmedData.channelName.length > 60) {
+    if (
+      trimmedData.channelName.length < 2 ||
+      trimmedData.channelName.length > 60
+    ) {
       return NextResponse.json(
         new ApiError("Channel name must be between 2 and 60 characters long"),
         { status: 400 }
@@ -77,9 +68,7 @@ export async function POST(request: NextRequest) {
     }
     if (trimmedData.password.length < 10 || trimmedData.password.length > 256) {
       return NextResponse.json(
-        new ApiError(
-          "Password must be between 10 and 256 characters long"
-        ),
+        new ApiError("Password must be between 10 and 256 characters long"),
         { status: 400 }
       );
     }
@@ -90,24 +79,6 @@ export async function POST(request: NextRequest) {
         new ApiError(
           "Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character"
         ),
-        { status: 400 }
-      );
-    }
-    if (trimmedData.location.length < 2 || trimmedData.location.length > 100) {
-      return NextResponse.json(
-        new ApiError("Location must be between 2 and 100 characters long"),
-        { status: 400 }
-      );
-    }
-    if (trimmedData.phoneNumber.length !== 11) {
-      return NextResponse.json(
-        new ApiError("Phone number must be 11 characters long"),
-        { status: 400 }
-      );
-    }
-    if (trimmedData.bio.length > 500) {
-      return NextResponse.json(
-        new ApiError("Bio must be at most 500 characters long"),
         { status: 400 }
       );
     }
@@ -126,20 +97,19 @@ export async function POST(request: NextRequest) {
     const user = await User.create({
       firstName: trimmedData.firstName,
       lastName: trimmedData.lastName,
-      userName: trimmedData.userName,
+      userName: trimmedData.userName.toLowerCase(),
       channelName: trimmedData.channelName,
       email: trimmedData.email,
       password: trimmedData.password,
-      location: trimmedData.location,
-      phoneNumber: trimmedData.phoneNumber,
-      bio: trimmedData.bio,
+      phoneNumber: null,
+      country: "None",
       isVerified: false,
       verificationCode: null,
       accountStatus: "active",
     });
 
     return NextResponse.json(
-      new ApiResponse(201, "User created successfully", user)
+      new ApiResponse(201, "User created successfully", user.select("-password -verificationCode")),
     );
   } catch (error) {
     console.error(error);
