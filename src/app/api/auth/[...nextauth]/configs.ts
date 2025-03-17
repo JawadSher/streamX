@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import User from "@/models/user.model";
+import loginSchema from "./loginSchema";
 
 export const authConfigs: NextAuthConfig = {
   providers: [
@@ -15,6 +16,15 @@ export const authConfigs: NextAuthConfig = {
       },
       async authorize(credentials: any): Promise<any> {
         await connectDB();
+
+        const result = loginSchema.safeParse(credentials);
+        if (!result.success) {
+          const errorMessage = result.error.issues
+            .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+            .join(", ");
+          throw new Error(`Validation failed: ${errorMessage}`);
+        }
+        
         try {
           const user = await User.findOne({
             $or: [
@@ -80,14 +90,17 @@ export const authConfigs: NextAuthConfig = {
           await connectDB();
           let user = await User.findOne({ email: token.email });
           if (!user) {
-
             const nameParts = token.name?.split(" ");
             const firstName = nameParts?.[0] || "Unknown";
             const lastName = nameParts?.[1] || "User";
             const date = Date.now();
-            const userName = `@${token.name?.toLowerCase().replace(/[.\s]/g, "")}${date}`;
-            const channelName = token.name ? `${firstName}-Channel` : "Unknown Channel";
-            const password = `streamX@${date}`
+            const userName = `@${token.name
+              ?.toLowerCase()
+              .replace(/[.\s]/g, "")}${date}`;
+            const channelName = token.name
+              ? `${firstName}-Channel`
+              : "Unknown Channel";
+            const password = `streamX@${date}`;
 
             const newUserData: any = {
               email: token.email,
