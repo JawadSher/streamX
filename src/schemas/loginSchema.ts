@@ -1,35 +1,56 @@
 import { z } from "zod";
 
-const loginSchema = z
+export const loginSchema = z
   .object({
     email: z
       .string()
+      .trim()
+      .max(70, "Email cannot exceed 70 characters")
+      .email("Please enter a valid email address")
       .regex(
-        /^[a-zA-Z0-9](?:[a-zA-Z0-9.]{0,}[a-zA-Z0-9])?(?:\+[a-zA-Z0-9]+)?@gmail\.com$/,
+        /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*@gmail\.com$/,
         "Please enter a valid Gmail address (e.g., username@gmail.com)"
       )
-      .optional(),
+      .optional()
+      .refine((val) => val !== "", {
+        message: "Email cannot be empty if provided",
+      }),
 
     userName: z
       .string()
-      .min(2, "Username must be at least 2 characters long")
-      .max(50, "Username must be less than 50 characters")
+      .trim()
+      .min(2, "Username must be at least 2 characters")
+      .max(50, "Username cannot exceed 50 characters")
       .regex(
         /^[a-zA-Z0-9_]+$/,
         "Username can only contain letters, numbers, and underscores"
       )
-      .optional(),
+      .optional()
+      .refine((val) => val !== "", {
+        message: "Username cannot be empty if provided",
+      }),
+
     password: z
       .string()
+      .trim()
+      .min(10, "Password must be at least 10 characters")
+      .max(256, "Password cannot exceed 256 characters")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{10,256}$/,
-        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*), and be 10-256 characters long"
+        "Password must include one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)"
       )
-      .optional(),
+      .refine((val) => val.length > 0, {
+        message: "Password is required",
+      }),
   })
   .refine(
-    (data) => data.email || data.userName,
-    "Either email or username must be provided"
+    (data) => !!data.email || !!data.userName,
+    {
+      message: "Either email or username must be provided",
+      path: [], // Top-level error
+    }
   );
+
+export type LoginData = z.infer<typeof loginSchema>;
 
 export default loginSchema;

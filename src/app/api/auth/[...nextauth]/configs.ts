@@ -17,26 +17,29 @@ export const authConfigs: NextAuthConfig = {
       async authorize(credentials: any): Promise<any> {
         await connectDB();
 
-        const result = loginSchema.safeParse(credentials);
-        if (!result.success) {
-          const errorMessage = result.error.issues
+        const parsedData = loginSchema.safeParse(credentials);
+        if (!parsedData.success) {
+          const errorMessage = parsedData.error.issues
             .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
             .join(", ");
           throw new Error(`Validation failed: ${errorMessage}`);
         }
 
         try {
-          const { email, userName, password } = result?.data;
+          const { email, userName, password } = parsedData.data;
           const user = await User.findOne({
-            $or: [{ email }, { userName }],
+            $or: [{ email: email?.toLowerCase() }, { userName: userName?.toLowerCase() }],
           });
+
           if (!user) {
             throw new Error("Invalid credentials or User not found");
           }
+
           const isPasswdCorrect = await user.isPasswordCorrect(password);
           if (!isPasswdCorrect) {
             throw new Error("Invalid credentials");
           }
+          
           return {
             _id: user._id.toString(),
             email: user.email,
