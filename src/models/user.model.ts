@@ -99,10 +99,9 @@ const userSchema = new Schema<IUser>(
       required: [true, "Email is required"],
       trim: true,
       unique: true,
-      minLength: [6, "Email must be at least 6 characters"],
       maxLength: [70, "Email must be at most 70 characters"],
       match: [
-        /^[a-zA-Z0-9](?:[a-zA-Z0-9.]{0,}[a-zA-Z0-9])?(?:\+[a-zA-Z0-9]+)?@gmail\.com$/,
+        /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
         "Please enter a valid gmail address (e.g., username@gmail.com)",
       ],
     },

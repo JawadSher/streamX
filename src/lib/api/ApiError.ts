@@ -1,12 +1,24 @@
-export class ApiError {
+export class ApiError extends Error {
   public success: boolean;
-  public error: {
-    message: string;
-    statusCode?: number;
-  };
+  public message: string;
+  public statusCode: number;
+  public stack?: string;
 
-  constructor(message: string, statusCode?: number) {
+  constructor(message: string = "An error occurred", statusCode: number = 500) {
+    super(message);
     this.success = false;
-    this.error = { message, statusCode };
+    this.message = message;
+    this.statusCode = statusCode;
+    if (process.env.NODE_ENV === 'development') {
+      this.stack = this.stack;
+    }
+  }
+
+  get error() {
+    return {
+      message: this.message,
+      statusCode: this.statusCode,
+      ...(this.stack && { stack: this.stack })
+    };
   }
 }

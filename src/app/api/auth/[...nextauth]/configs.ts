@@ -4,7 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import User from "@/models/user.model";
-import loginSchema from "./loginSchema";
+import loginSchema from "../../../../schemas/loginSchema";
 
 export const authConfigs: NextAuthConfig = {
   providers: [
