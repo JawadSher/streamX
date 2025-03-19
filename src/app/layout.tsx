@@ -25,15 +25,13 @@ export default async function RootLayout({
   console.log("RootLayout Session:", session);
   return (
     <html lang="en">
-      <ThemeProvider>
-        <AuthProvider session={session}>
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
-            {children}
-          </body>
-        </AuthProvider>
-      </ThemeProvider>
+      <AuthProvider session={session}>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <ThemeProvider>{children}</ThemeProvider>
+        </body>
+      </AuthProvider>
     </html>
   );
 }
