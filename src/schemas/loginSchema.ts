@@ -37,7 +37,7 @@ export const loginSchema = z
       .max(256, "Password cannot exceed 256 characters")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{10,256}$/,
-        "Password must include one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*)"
+        "Password must include uppercase, lowercase, number, & special char (!@#$%^&*)"
       )
       .refine((val) => val.length > 0, {
         message: "Password is required",

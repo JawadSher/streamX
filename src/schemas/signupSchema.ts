@@ -26,17 +26,6 @@ export const signupSchema = z.object({
     )
     .refine(val => val.length > 0, "Username is required"),
 
-  channelName: z
-    .string()
-    .trim()
-    .min(2, "Channel name must be at least 2 characters")
-    .max(60, "Channel name cannot exceed 60 characters")
-    .regex(
-      /^[a-zA-Z][a-zA-Z0-9 ]{1,59}$/,
-      "Channel name must start with a letter and contain only letters, numbers, and spaces"
-    )
-    .refine(val => val.length > 0, "Channel name is required"),
-
   email: z
     .string()
     .trim()
@@ -51,7 +40,7 @@ export const signupSchema = z.object({
     .max(256, "Password cannot exceed 256 characters")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*_.,-])[A-Za-z\d!@#$%^&*_.,-]{10,256}$/,
-      "Password must include one lowercase, one uppercase, one number, and one special character (!@#$%^&*_.,-)"
+      "Password must include uppercase, lowercase, number, & special char (!@#$%^&*)"
     )
     .refine(val => val.length > 0, "Password is required"),
 });

@@ -8,6 +8,7 @@ import { authSignin } from "@/app/actions/auth-actions/authSignin";
 import loginSchema from "@/schemas/loginSchema";
 import { useActionState, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 type AuthSigninResult = {
   success: boolean;
@@ -162,9 +163,9 @@ export function LoginForm({
         </Form>
         <div className="text-center text-sm">
           Don&apos;t have an account?{" "}
-          <a href="#" className="underline underline-offset-4">
+          <Link href="/sign-up" className="underline underline-offset-4">
             Sign up
-          </a>
+          </Link>
         </div>
       </div>
     </div>

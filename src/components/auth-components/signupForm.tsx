@@ -8,6 +8,8 @@ import { authSignin } from "@/app/actions/auth-actions/authSignin";
 import { useActionState, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signupSchema } from "@/schemas/signupSchema";
+import confPassSchema from "@/schemas/confirmPasswdSchema";
+import Link from "next/link";
 
 type AuthSigninResult = {
   success: boolean;
@@ -15,10 +17,10 @@ type AuthSigninResult = {
     firstName?: string[];
     lastName?: string[];
     userName?: string[];
-    email?: string[]; 
+    email?: string[];
     password?: string[];
     confirmPasswd?: string[];
-};
+  };
   error?: string;
 };
 
@@ -52,19 +54,37 @@ export function SignupForm({
   ): Promise<any> => {
     const { name, value } = event.target;
 
-    const firstNameValue = name === "email" ? value : firstNameRef.current?.value || "";
-    const lastNameValue = name === "email" ? value : lastNameRef.current?.value || "";
-    const userNameValue = name === "email" ? value : userNameRef.current?.value || "";
+    const firstNameValue =
+      name === "email" ? value : firstNameRef.current?.value || "";
+    const lastNameValue =
+      name === "email" ? value : lastNameRef.current?.value || "";
+    const userNameValue =
+      name === "email" ? value : userNameRef.current?.value || "";
     const emailValue = name === "email" ? value : emailRef.current?.value || "";
     const passwordValue =
       name === "password" ? value : passwordRef.current?.value || "";
     const confirmPasswdValue =
       name === "confirmPasswd" ? value : confirmPasswdRef.current?.value || "";
 
+    const passwdData = {
+      passwd: passwordValue,
+      confPasswd: confirmPasswdValue,
+    };
+
+    const passwdResult = confPassSchema.safeParse(passwdData);
+    if (!passwdResult.success) {
+      const fieldErrors = passwdResult.error.flatten().fieldErrors;
+      setErrors({
+        confirmPasswd: fieldErrors.confPasswd?.[0],
+      });
+    } else {
+      setErrors(null);
+    }
+
     const data = {
-        firstName: firstNameValue,
-        lastName: lastNameValue,
-        userName: userNameValue,
+      firstName: firstNameValue,
+      lastName: lastNameValue,
+      userName: userNameValue,
       email: emailValue,
       password: passwordValue,
     };
@@ -86,9 +106,9 @@ export function SignupForm({
 
   const handleSubmit = async (formData: FormData) => {
     const data = {
-        firstName: formData.get('firstName'),
-        lastName: formData.get('lastName'),
-        userName: formData.get('userName'),
+      firstName: formData.get("firstName"),
+      lastName: formData.get("lastName"),
+      userName: formData.get("userName"),
       email: formData.get("email"),
       password: formData.get("password"),
     };
@@ -211,7 +231,9 @@ export function SignupForm({
                 aria-invalid={errors?.confirmPasswd ? "true" : "false"}
               />
               {errors?.confirmPasswd && (
-                <p className="text-sm text-destructive">{errors?.confirmPasswd}</p>
+                <p className="text-sm text-destructive">
+                  {errors?.confirmPasswd}
+                </p>
               )}
             </div>
             <Button
@@ -219,7 +241,7 @@ export function SignupForm({
               className="w-full cursor-pointer"
               disabled={isPending}
             >
-              Login {isPending && <Loader2 className="animate-spin" />}
+              Sign up {isPending && <Loader2 className="animate-spin" />}
             </Button>
           </div>
         </Form>
@@ -245,9 +267,9 @@ export function SignupForm({
         </Form>
         <div className="text-center text-sm">
           Already have an account?{" "}
-          <a href="/sign-in" className="underline underline-offset-4">
+          <Link href="/sign-in" className="underline underline-offset-4">
             Sign in
-          </a>
+          </Link>
         </div>
       </div>
     </div>
