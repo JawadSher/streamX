@@ -1,46 +1,29 @@
-"use client";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { LoginForm } from "@/components/auth-components/loginForm";
+import { Home } from "lucide-react";
+import Link from "next/link";
 
-export default function SignInPage() {
-  const { data: session, status } = useSession();
-
-  console.log("SignInPage Status:", status, "Session:", session);
-
-  if (session) {
-    return (
-      <div>
-        Signed in as {session?.user?.email} <br />
-        <button onClick={() => signOut({ callbackUrl: "/" })}>Sign out</button>
-      </div>
-    );
-  }
-
+export default function LoginPage() {
   return (
-    <div className="w-full h-screen bg-gray-800 flex flex-col justify-center items-center">
-      <p>Not signed in (Status: {status})</p>
-      <button
-        onClick={async () => {
-          const result = await signIn("credentials", {
-            email: "john@gmail.com", 
-            password: "Passwd@123", 
-            redirect: false,
-          });
-          console.log("Credentials SignIn Result:", result);
-        }}
+    <div className="grid min-h-svh lg:grid-cols-2">
+      <div className="relative hidden bg-muted lg:flex items-center justify-center">
+        <h1 className="text-6xl font-mono cursor-pointer hover:text-gray-800">streamX</h1>
+      </div>
+      <div className="flex flex-col gap-4 p-6 md:p-10">
+        <div className="hidden lg:flex justify-start gap-2">
+          <Link href="/" className="flex items-center gap-2 font-medium">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Home className="size-4" />
+            </div>
+            streamX
+          </Link>
+        </div>
 
-        className="border-1 bg-blue-800 p-1 rounded-xl hover:bg-blue-500 cursor-pointer"
-      >
-        Sign in with Email/Password
-      </button>
-      <button
-        onClick={async () => {
-          const result = await signIn("google", { redirect: false });
-          console.log("Google SignIn Result:", result);
-        }}
-        className="mt-5 border-1 bg-purple-800 p-1 rounded-xl hover:bg-purple-500 cursor-pointer"
-      >
-        Sign in with Google
-      </button>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-xs">
+            <LoginForm />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,9 +3,13 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,9 +25,15 @@ export default async function RootLayout({
   console.log("RootLayout Session:", session);
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AuthProvider session={session}>{children}</AuthProvider>
-      </body>
+      <ThemeProvider>
+        <AuthProvider session={session}>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            {children}
+          </body>
+        </AuthProvider>
+      </ThemeProvider>
     </html>
   );
 }
