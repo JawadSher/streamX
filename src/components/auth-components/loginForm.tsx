@@ -1,53 +1,155 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Form from "next/form";
 import { authSignin } from "@/app/actions/auth-actions/authSignin";
+import loginSchema from "@/schemas/loginSchema";
+import { useActionState, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
+
+type AuthSigninResult = {
+  success: boolean;
+  errors?: { email?: string[]; password?: string[] };
+  error?: string;
+};
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+  } | null>(null);
+
+  const [state, formAction, isPending] = useActionState<
+    AuthSigninResult | null,
+    FormData
+  >(authSignin, null);
+
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const handleInputChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): Promise<any> => {
+    const { name, value } = event.target;
+
+    const emailValue = name === "email" ? value : emailRef.current?.value || "";
+    const passwordValue =
+      name === "password" ? value : passwordRef.current?.value || "";
+
+    const data = {
+      email: emailValue,
+      password: passwordValue,
+    };
+
+    const result = loginSchema.safeParse(data);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+      });
+    } else {
+      setErrors(null);
+    }
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    const data = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
+
+    const result = loginSchema.safeParse(data);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+      });
+      return;
+    }
+
+    formAction(formData);
+  };
+
   return (
-    <Form action={authSignin}>
-      <form className={cn("flex flex-col gap-6", className)} {...props}>
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Welcome Back</h1>
-          <p className="text-balance text-sm text-muted-foreground">
-            Enter your email below to login to your account
-          </p>
-        </div>
-        <div className="grid gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email/Username</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-            />
+    <div className="flex flex-col gap-4">
+      <div>
+        <Form
+          className={cn("flex flex-col gap-6", className)}
+          {...props}
+          action={handleSubmit}
+        >
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1 className="text-2xl font-bold">Welcome Back</h1>
+            <p className="text-balance text-sm text-muted-foreground">
+              Enter your email below to login to your account
+            </p>
           </div>
-          <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
-              <a
-                href="#"
-                className="ml-auto text-sm underline-offset-4 hover:underline"
-              >
-                Forgot your password?
-              </a>
+          <div className="grid gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email/Username</Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="m@example.com"
+                required
+                ref={emailRef}
+                aria-invalid={errors?.email ? "true" : "false"}
+              />
+              {errors?.password && (
+                <p className="text-sm text-destructive">{errors?.email}</p>
+              )}
             </div>
-            <Input id="password" type="password" required />
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <a
+                  href="#"
+                  className="ml-auto text-sm underline-offset-4 hover:underline"
+                >
+                  Forgot your password?
+                </a>
+              </div>
+              <Input
+                id="password"
+                ref={passwordRef}
+                onChange={handleInputChange}
+                type="password"
+                name="password"
+                required
+                aria-invalid={errors?.password ? "true" : "false"}
+              />
+              {errors?.password && (
+                <p className="text-sm text-destructive">{errors?.password}</p>
+              )}
+            </div>
+            isPending ?{" "}
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
+              disabled={isPending}
+            >
+              Login {isPending && <Loader2 className="animate-spin" />}
+            </Button>
           </div>
-          <Button type="submit" className="w-full cursor-pointer">
-            Login
-          </Button>
-          <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-            <span className="relative z-10 bg-background px-2 text-muted-foreground">
-              Or continue with
-            </span>
-          </div>
+        </Form>
+      </div>
+
+      <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+        <span className="relative z-10 bg-background px-2 text-muted-foreground">
+          Or continue with
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <Form action="">
           <Button variant="outline" className="w-full cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path
@@ -57,14 +159,14 @@ export function LoginForm({
             </svg>
             Login with Google
           </Button>
-        </div>
+        </Form>
         <div className="text-center text-sm">
           Don&apos;t have an account?{" "}
           <a href="#" className="underline underline-offset-4">
             Sign up
           </a>
         </div>
-      </form>
-    </Form>
+      </div>
+    </div>
   );
 }
