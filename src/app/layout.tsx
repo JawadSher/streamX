@@ -1,9 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
-import { ThemeProvider } from "@/components/theme-provider";
+import ClientRootLayout from "./clientRootLayout";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -23,22 +24,14 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   console.log("RootLayout Session:", session);
+
   return (
     <html lang="en">
-      <AuthProvider session={session}>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </body>
-      </AuthProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <AuthProvider session={session}>
+          <ClientRootLayout>{children}</ClientRootLayout>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

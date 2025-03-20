@@ -24,13 +24,17 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useSession } from "next-auth/react";
+
+const session = useSession();
 
 const data = {
   user: {
-    name: "shadcn",
+    name: `${session?.data?.user?.firstName} ${session?.data?.user?.lastName}`,
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
+
   teams: [
     {
       name: "Acme Inc",
@@ -159,30 +163,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar
-  collapsible="icon"
-  {...props}
-  className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
->
-  <SidebarHeader className="p-4 border-b">
-    <h1 className="text-4xl font-mono text-center transition-all duration-200">
-      {state === "expanded" ? "streamX" : "X"}
-    </h1>
-  </SidebarHeader>
+      collapsible="icon"
+      {...props}
+      className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
+    >
+      <SidebarHeader className="p-4 border-b">
+        <h1 className="text-4xl font-mono text-center transition-all duration-200">
+          {state === "expanded" ? "streamX" : "X"}
+        </h1>
+      </SidebarHeader>
 
-  <SidebarContent className="overflow-y-auto">
-  <NavMain items={data.navMain} />
-  {Array.from({ length: 3 }).map((_, i) => (
-    <NavProjects key={i} projects={data.projects} />
-  ))}
-</SidebarContent>
+      <SidebarContent className="overflow-y-auto">
+        <NavMain items={data.navMain} />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <NavProjects key={i} projects={data.projects} />
+        ))}
+      </SidebarContent>
 
+      <SidebarFooter className="border-t p-2">
+        <NavUser user={data.user} />
+      </SidebarFooter>
 
-  <SidebarFooter className="border-t p-2">
-    <NavUser user={data.user} />
-  </SidebarFooter>
-
-  <SidebarRail />
-</Sidebar>
-
+      <SidebarRail />
+    </Sidebar>
   );
 }
