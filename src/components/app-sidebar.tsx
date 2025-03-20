@@ -171,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   <SidebarContent className="overflow-y-auto">
   <NavMain items={data.navMain} />
-  {Array.from({ length: 20 }).map((_, i) => (
+  {Array.from({ length: 3 }).map((_, i) => (
     <NavProjects key={i} projects={data.projects} />
   ))}
 </SidebarContent>

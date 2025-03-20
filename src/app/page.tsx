@@ -1,4 +1,5 @@
 "use client";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,8 @@ const Home = () => {
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
         <AppSidebar />
-
-        <div className="flex-1 flex flex-col h-screen relative px-4 overflow-auto">
-          <header className="sticky top-2 p-4 z-50  backdrop-blur-sm shadow-sm h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">
+        <div className="flex-1 flex flex-col h-screen px-4 overflow-auto">
+        <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg ">
             <div className="flex items-center gap-3 w-full">
               <SidebarTrigger className="-ml-1" />
               <DropdownMenu>
@@ -48,10 +48,10 @@ const Home = () => {
               </DropdownMenu>
             </div>
           </header>
-
-          <main className="flex-1 py-4 mx-auto">
+          
+          <main className="flex-1 py-4 mx-auto grow w-full">
             <div className="w-full">
-              <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="grid gap-x-2 gap-y-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {Array.from({ length: 25 }).map((_, i) => (
                   <VideoCard
                     key={i}
