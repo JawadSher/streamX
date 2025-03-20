@@ -25,6 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
+import axios from "axios";
 
 export function NavUser({
   user,
@@ -37,6 +38,15 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/auth/sign-out');
+      window.location.href = '/sign-in'
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -116,7 +126,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

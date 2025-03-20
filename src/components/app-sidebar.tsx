@@ -9,9 +9,10 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import Image from "next/image";
+import defaultUser from "../../public/defaultUser.png";
 
 type UserData = {
   _id?: string;
@@ -48,7 +49,7 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
     >
       <SidebarHeader className="p-4 border-b">
         <h1 className="text-4xl font-mono text-center transition-all duration-200">
-          {state === "expanded" ? "streamX" : "sX"}
+          {state === "expanded" ? "streamX" : "X"}
         </h1>
       </SidebarHeader>
 
@@ -64,15 +65,24 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
           <NavUser
             user={{
               name: fullName,
-              email: data?.email || "guest@example.com",
+              email: data?.email || "",
 
               image: data?.image || "../../public/defaultUser.png",
               isVerified: data?.isVerified || false,
             }}
           />
         ) : (
-          <Link href="/sign-in">
-            <Button>Login</Button>
+          <Link href="/sign-in" className="w-full flex grow">
+            {state === "collapsed" ? (
+              <Image
+                src={defaultUser}
+                alt="Login"
+                width={32}
+                height={32}
+              />
+            ) : (
+              <Button className="w-full flex grow cursor-pointer">Login</Button>
+            )}
           </Link>
         )}
       </SidebarFooter>
