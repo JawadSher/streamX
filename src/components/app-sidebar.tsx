@@ -170,9 +170,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   </SidebarHeader>
 
   <SidebarContent className="overflow-y-auto">
-    <NavMain items={data.navMain} />
-    {Array(20).fill(<NavProjects projects={data.projects} />)}
-  </SidebarContent>
+  <NavMain items={data.navMain} />
+  {Array.from({ length: 20 }).map((_, i) => (
+    <NavProjects key={i} projects={data.projects} />
+  ))}
+</SidebarContent>
+
 
   <SidebarFooter className="border-t p-2">
     <NavUser user={data.user} />
