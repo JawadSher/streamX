@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Form from "next/form";
-import { authSignin } from "@/app/actions/auth-actions/authSignin";
+import { authSignin, authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
 import loginSchema from "@/schemas/loginSchema";
 import { useActionState, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -150,7 +150,7 @@ export function LoginForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <Form action="">
+        <Form action={authProviderSignIn}>
           <Button variant="outline" className="w-full cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path
@@ -161,6 +161,7 @@ export function LoginForm({
             Login with Google
           </Button>
         </Form>
+
         <div className="text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/sign-up" className="underline underline-offset-4">
@@ -168,6 +169,7 @@ export function LoginForm({
           </Link>
         </div>
       </div>
+
     </div>
   );
 }
