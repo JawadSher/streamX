@@ -1,9 +1,5 @@
 "use client";
-
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
-import defaultUserImage from "../../public/defaultUser.png";
 
 import {
   Sidebar,
@@ -14,6 +10,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { Button } from "./ui/button";
 
 type UserData = {
   _id?: string;
@@ -30,9 +28,10 @@ type UserData = {
 
 type Props = {
   data?: UserData;
+  sessionStatus?: string;
 } & React.ComponentProps<typeof Sidebar>;
 
-export function AppSidebar({ data, ...props }: Props) {
+export function AppSidebar({ data, sessionStatus, ...props }: Props) {
   const { state } = useSidebar();
 
   const fullName = data
@@ -61,15 +60,21 @@ export function AppSidebar({ data, ...props }: Props) {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-2">
-        <NavUser
-          user={{
-            name: fullName,
-            email: data?.email || "guest@example.com",
+        {sessionStatus === "authenticated" ? (
+          <NavUser
+            user={{
+              name: fullName,
+              email: data?.email || "guest@example.com",
 
-            image: data?.image || "../../public/defaultUser.png",
-            isVerified: data?.isVerified || false,
-          }}
-        />
+              image: data?.image || "../../public/defaultUser.png",
+              isVerified: data?.isVerified || false,
+            }}
+          />
+        ) : (
+          <Link href="/sign-in">
+            <Button>Login</Button>
+          </Link>
+        )}
       </SidebarFooter>
 
       <SidebarRail />

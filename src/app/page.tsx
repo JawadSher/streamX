@@ -25,7 +25,7 @@ const Home = () => {
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
-        <AppSidebar data={data}/>
+        <AppSidebar data={data} sessionStatus={status} />
         
         <div className="flex-1 flex flex-col h-screen px-4 overflow-auto">
         <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg ">
