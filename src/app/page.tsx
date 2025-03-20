@@ -20,11 +20,12 @@ const Home = () => {
     "https://unsplash.com/photos/dramatic-mountains-under-a-cloudy-moody-sky-9DyNN_Yz2yk";
 
   const session = useSession();
-
+  const data = session?.data?.user;
+  
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar data={data}/>
         
         <div className="flex-1 flex flex-col h-screen px-4 overflow-auto">
         <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg ">
@@ -61,7 +62,7 @@ const Home = () => {
                   <VideoCard
                     key={i}
                     views="1234"
-                    url="https://images.unsplash.com/photo-1519985176271-adb1088fa94c?w=500&h=300&fit=crop"
+                    url="https://lh3.googleusercontent.com/a/ACg8ocKVAAJXmYnK9pmsqJXqcWa_uXVnheN9jIh30rvErUEU8rk7xF0=s96-c"
                     title={`New Video ${i + 1}`}
                     channelName="Sample Channel"
                   />
