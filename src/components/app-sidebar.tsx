@@ -3,7 +3,7 @@
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
-import defaultUserImage from "../../public/defaultUser.png"
+import defaultUserImage from "../../public/defaultUser.png";
 
 import {
   Sidebar,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 
-type userData = {
+type UserData = {
   _id?: string;
   firstName?: string;
   lastName?: string;
@@ -25,12 +25,21 @@ type userData = {
   phoneNumber?: string;
   country?: string;
   isVerified?: boolean;
-  image?: string | null;  
+  image?: string | null;
+};
+
+type Props = {
+  data?: UserData;
 } & React.ComponentProps<typeof Sidebar>;
 
-
-export function AppSidebar({ data, ...props}: {data?: userData}) {
+export function AppSidebar({ data, ...props }: Props) {
   const { state } = useSidebar();
+
+  const fullName = data
+    ? [data.firstName, data.lastName].filter(Boolean).join(" ") ||
+      data.userName ||
+      "Guest"
+    : "Guest";
 
   return (
     <Sidebar
@@ -40,7 +49,7 @@ export function AppSidebar({ data, ...props}: {data?: userData}) {
     >
       <SidebarHeader className="p-4 border-b">
         <h1 className="text-4xl font-mono text-center transition-all duration-200">
-          {state === "expanded" ? "streamX" : "X"}
+          {state === "expanded" ? "streamX" : "sX"}
         </h1>
       </SidebarHeader>
 
@@ -52,13 +61,15 @@ export function AppSidebar({ data, ...props}: {data?: userData}) {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-2">
-        <NavUser user={{
-          firstName: data?.firstName || "Guest",
-          lastName: data?.lastName || "Guest",
-          email: data?.email || "guest@example.com",
-          image: data?.image || "../../public/defaultUser.png",
-          isVerified: data?.isVerified || false
-        }} />
+        <NavUser
+          user={{
+            name: fullName,
+            email: data?.email || "guest@example.com",
+
+            image: data?.image || "../../public/defaultUser.png",
+            isVerified: data?.isVerified || false,
+          }}
+        />
       </SidebarFooter>
 
       <SidebarRail />

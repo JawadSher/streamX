@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Moon, Sun } from "lucide-react";
+import { Loader2, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
@@ -19,8 +19,8 @@ const Home = () => {
   const URL =
     "https://unsplash.com/photos/dramatic-mountains-under-a-cloudy-moody-sky-9DyNN_Yz2yk";
 
-  const session = useSession();
-  const data = session?.data?.user;
+  const {data: session, status} = useSession();
+  const data = session?.user;
   
   return (
     <div className="h-screen flex bg-white-100">
@@ -54,10 +54,16 @@ const Home = () => {
             </div>
           </header>
 
-          <main className="flex-1 py-4 mx-auto grow w-full">
+          {
+            status === 'loading' ? (
+              <>
+                Loading <Loader2 className="animate-spin"/>
+              </>
+            ) : (
+              <main className="flex-1 py-4 mx-auto grow w-full">
             <div className="w-full">
               {
-                session?.data?.user ? <div className="grid gap-x-2 gap-y-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                session?.user ? <div className="grid gap-x-2 gap-y-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {Array.from({ length: 25 }).map((_, i) => (
                   <VideoCard
                     key={i}
@@ -71,6 +77,8 @@ const Home = () => {
               }
             </div>
           </main>
+            )
+          }
         </div>
       </SidebarProvider>
     </div>
