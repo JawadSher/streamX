@@ -20,7 +20,7 @@ const Home = () => {
 
           <main className="flex-1 py-4 mx-auto">
             <div className="w-full ">
-              <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 xlg:grid-cols-5">
                 {Array.from({ length: 15 }).map((_, i) => (
                   <div
                     key={i}
