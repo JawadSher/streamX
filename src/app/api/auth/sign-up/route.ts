@@ -17,7 +17,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       throw new ApiError(`Validation failed: ${errorMessages}`, 400);
     }
 
-    const { firstName, lastName, userName, email, channelName, password } =
+    const { firstName, lastName, userName, email, password } =
       parsedData.data;
 
     await connectDB();
@@ -42,9 +42,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       firstName,
       lastName,
       userName: userName.toLowerCase(),
-      channelName,
       email: email.toLowerCase(),
       password,
+      channelName: userName,
       phoneNumber: null,
       country: "None",
       isVerified: false,
