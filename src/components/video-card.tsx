@@ -12,7 +12,8 @@ type CardProps = {
 
 const VideoCard = ({ title, channelName, views, url }: CardProps) => {
   return (
-    <Card className="rounded-lg overflow-hidden shadow-md min-h-[290px] min-w-[290px] bg-gray-900 text-white p-0 gap-0">
+    <Card className="rounded-lg overflow-hidden shadow-md min-h-[290px] 
+    min-w-[290px] bg-gray-900 text-white p-0 gap-0 cursor-pointer hover:shadow-slate-500">
       <div className="relative w-full h-[250px]">
         <Image
           src={url}
