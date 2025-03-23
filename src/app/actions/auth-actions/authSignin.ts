@@ -40,8 +40,6 @@ export async function authSignin(
       console.log("SignIn failed:", signInResult?.error);
       return { success: false, error: "Authentication failed" };
     }
-
-    console.log("SignIn succeeded:", signInResult);
     
     return { success: true, redirect: "/" };
   } catch (error) {

@@ -1,12 +1,17 @@
-import { createClient, RedisClientType } from "redis";
+import { createClient, RedisClientType } from 'redis';
 
-const REDIS_URI = process.env.REDIS_URI || "redis://localhost:6379";
+const REDIS_URI = process.env.REDIS_URI || 'redis://localhost:6379';
 
 if (!REDIS_URI) {
-  throw new Error("REDIS_URI is not defined");
+  throw new Error('REDIS_URI is not defined');
 }
 
-let cached = global.redis;
+interface RedisCache {
+  client: RedisClientType | null;
+  promise: Promise<RedisClientType> | null;
+}
+
+let cached: RedisCache = global.redis;
 if (!cached) {
   cached = global.redis = {
     client: null,
@@ -22,12 +27,12 @@ export async function connectRedis(): Promise<RedisClientType> {
       url: REDIS_URI,
     });
 
-    client.on("error", (error) => {
-      console.error("Redis Client Error: ", error);
+    client.on('error', (error) => {
+      console.error('Redis Client Error: ', error);
     });
 
     cached.promise = client.connect().then(() => {
-      console.log("Redis Connected");
+      console.log('Redis Connected');
       return client;
     });
   }
@@ -41,5 +46,3 @@ export async function connectRedis(): Promise<RedisClientType> {
 
   return cached.client;
 }
-
-

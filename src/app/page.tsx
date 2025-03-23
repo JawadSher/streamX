@@ -13,14 +13,16 @@ import { Loader2, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
+import { imagePaths } from "@/lib/ImagePaths";
 
 const Home = () => {
   const { setTheme } = useTheme();
-  const URL =
-    "https://unsplash.com/photos/dramatic-mountains-under-a-cloudy-moody-sky-9DyNN_Yz2yk";
+  const URL = imagePaths.videoThumbnail;
 
   const { data: session, status } = useSession();
   const data = session?.user;
+
+  console.log(session)
 
   return (
     <div className="h-screen flex bg-white-100">
@@ -66,7 +68,7 @@ const Home = () => {
                     <VideoCard
                       key={i}
                       views="1234"
-                      url="https://lh3.googleusercontent.com/a/ACg8ocKVAAJXmYnK9pmsqJXqcWa_uXVnheN9jIh30rvErUEU8rk7xF0=s96-c"
+                      url={URL}
                       title={`New Video ${i + 1}`}
                       channelName="Sample Channel"
                     />

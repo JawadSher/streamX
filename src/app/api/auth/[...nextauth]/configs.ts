@@ -7,80 +7,77 @@ import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
 import { connectRedis } from "@/lib/redis";
 
+export const runtime = "nodejs";
+
 export const authConfigs: NextAuthConfig = {
   providers: [
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
-        userName: { label: "User Name", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any, req: Request): Promise<User | null> {
-        console.log(credentials, req);
         const redis = await connectRedis();
-        
+
         const parsedData = loginSchema.safeParse(credentials);
         if (!parsedData.success) {
           const errorMessage = parsedData.error.issues
-          .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+            .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
             .join(", ");
-            throw new Error(`Validation failed: ${errorMessage}`);
-          }
+          throw new Error(`Validation failed: ${errorMessage}`);
+        }
 
-          const { email, password } = parsedData.data;
-          const identifier = email;
-          const ip = req?.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
-          
-          console.log(req.headers);
+        const { email, password } = parsedData.data;
+        const identifier = email;
+        const ip =
+          req?.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
 
-          const ipKey = `blocked_ip:${ip}`;
-          const isIpBlocked = await redis.get(ipKey);
-          if(isIpBlocked){
-            throw new Error("Your IP is temprorily block due to suspicius activity");
-          }
+        const ipKey = `blocked_ip:${ip}`;
+        const isIpBlocked = await redis.get(ipKey);
+        if (isIpBlocked) {
+          throw new Error(
+            "Your IP is temprorily block due to suspicius activity"
+          );
+        }
 
-          const lockoutKey = `login_attemps:${identifier?.toLowerCase()}`;
-          const isLocked = await redis.get(lockoutKey);
-          if(isLocked){
-            throw new Error("Account temporarily locked. Try again in 15 minutes")
-          }
+        const lockoutKey = `login_attemps:${identifier?.toLowerCase()}`;
+        const isLocked = await redis.get(lockoutKey);
+        if (isLocked) {
+          throw new Error(
+            "Account temporarily locked. Try again in 15 minutes"
+          );
+        }
 
-          const attemptKey = `login_attempt:${identifier?.toLowerCase()}`;
-          const attempts = await redis.get(attemptKey);
-          const attemptCount = attempts ? parseInt(attempts) : 0;
-          if(attemptCount >= 3){
-            await redis.set(lockoutKey, "locked", {EX: 15 * 60});
-            throw new Error("Too many login attempts. Account locked for 15 minutes")
-          }
+        const attemptKey = `login_attempt:${identifier?.toLowerCase()}`;
+        const attempts = await redis.get(attemptKey);
+        const attemptCount = attempts ? parseInt(attempts) : 0;
+        if (attemptCount >= 3) {
+          await redis.set(lockoutKey, "locked", { EX: 15 * 60 });
+          throw new Error(
+            "Too many login attempts. Account locked for 15 minutes"
+          );
+        }
 
-          const ipAttemptKey = `ip_attempts:${ip}`;
-          const ipAttempts = await redis.get(ipAttemptKey);
-          const ipAttemptCount = ipAttempts ? parseInt(ipAttempts) : 0;
-          
-          if(ipAttemptCount >= 10){
-            await redis.set(ipKey, "blocked", {EX: 60 * 60});
-            throw new Error("IP blocked due to excessive login attempts");
-          }
+        const ipAttemptKey = `ip_attempts:${ip}`;
+        const ipAttempts = await redis.get(ipAttemptKey);
+        const ipAttemptCount = ipAttempts ? parseInt(ipAttempts) : 0;
+
+        if (ipAttemptCount >= 10) {
+          await redis.set(ipKey, "blocked", { EX: 60 * 60 });
+          throw new Error("IP blocked due to excessive login attempts");
+        }
         try {
-          connectDB();
-          const user = await UserModel.findOne({email});
-          if (!user) {
+          await connectDB();
+          const user = await UserModel.findOne({ email });
+          const isPasswdCorrect =
+            (await user) && user.isPasswordCorrect(password);
+
+          if (!user || !isPasswdCorrect) {
             await redis.incr(attemptKey);
             await redis.expire(attemptKey, 24 * 60 * 60);
             await redis.incr(ipAttemptKey);
             await redis.expire(ipAttemptKey, 24 * 60 * 60);
-
-            throw new Error("Invalid credentials or User not found");
-          }
-
-          const isPasswdCorrect = await user.isPasswordCorrect(password);
-          if (!isPasswdCorrect) {
-            await redis.incr(attemptKey);
-            await redis.expire(attemptKey, 24 * 60 * 60);
-            await redis.incr(ipAttemptKey);
-            await redis.expire(ipAttemptKey, 24 * 60 * 60);
-
-            throw new Error("Invalid credentials");
+            throw new Error("Invalid email or password");
           }
 
           await redis.del(attemptKey);
@@ -96,8 +93,8 @@ export const authConfigs: NextAuthConfig = {
             phoneNumber: user.phoneNumber || "",
             country: user.country || "None",
             isVerified: user.isVerified.toString(),
-          })
-          
+          });
+
           return {
             _id: user._id.toString(),
             email: user.email,
@@ -146,29 +143,49 @@ export const authConfigs: NextAuthConfig = {
         await redis.hSet(sessionKey, {
           user_id: user._id,
           email: user.email,
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          expires: new Date(
+            Date.now() + 30 * 24 * 60 * 60 * 1000
+          ).toISOString(),
         });
 
-        await redis.expire(sessionKey, 30 * 25 * 60 * 60)
+        await redis.expire(sessionKey, 30 * 24 * 60 * 60);
       }
-      if (account?.provider === "google" && token.email) {
-        
-        console.log("Google account detected:", account);
 
+      if (account?.provider === "google" && token.email) {
         try {
           await connectDB();
           let user = await UserModel.findOne({ email: token.email });
+
           if (!user) {
-            const nameParts = token.name?.split(" ");
-            const firstName = nameParts?.[0] || "Unknown";
-            const lastName = nameParts?.[1] || "User";
+            const emailLocalPart = token.email.split("@")[0];
+            let firstName: string;
+            let lastName: string;
+
+            if (emailLocalPart.includes(".")) {
+              const [first, last] = emailLocalPart.split(".");
+              firstName =
+                first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+              lastName =
+                last.charAt(0).toUpperCase() + last.slice(1).toLowerCase();
+            } else {
+              firstName =
+                emailLocalPart.charAt(0).toUpperCase() +
+                emailLocalPart.slice(1).toLowerCase();
+              lastName = "User";
+            }
+
+            if (!user && account?.provider === "google") {
+              firstName = account.given_name || firstName;
+              lastName = account.family_name || lastName;
+            }
+
             const date = Date.now();
-            const userName = `@${token.name
-              ?.toLowerCase()
-              .replace(/[.\s]/g, "")}${date}`;
-            const channelName = token.name
-              ? `${firstName}-Channel`
-              : "Unknown Channel";
+            const userNameBase = firstName
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, "");
+            const userName = `@${userNameBase}${date}`;
+
+            const channelName = `${firstName}-Channel`;
             const password = `streamX@${date}`;
 
             const newUserData: any = {
@@ -177,7 +194,7 @@ export const authConfigs: NextAuthConfig = {
               firstName,
               lastName,
               channelName,
-              isVerified: false,
+              isVerified: true,
               password,
               country: "None",
             };
@@ -200,9 +217,10 @@ export const authConfigs: NextAuthConfig = {
       }
       return token;
     },
+
     async session({ session, token }: { session: Session; token: JWT }) {
       const redis = await connectRedis();
-      const sessionKey = `session: ${token.jti || token.sub}`;
+      const sessionKey = `session:${token.jti || token.sub}`;
       const redisSession = await redis.hGetAll(sessionKey);
 
       if (token?._id && redisSession.user_id) {
@@ -218,7 +236,7 @@ export const authConfigs: NextAuthConfig = {
           country: token.country,
           isVerified: token.isVerified,
         };
-      }else {
+      } else {
         session.expires = new Date(0).toISOString();
       }
       return session;
@@ -230,6 +248,7 @@ export const authConfigs: NextAuthConfig = {
       return url.startsWith(baseUrl) ? url : baseUrl;
     },
   },
+
   pages: {
     signIn: "/sign-in",
     error: "/sign-in",
