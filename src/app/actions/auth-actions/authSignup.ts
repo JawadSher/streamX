@@ -1,4 +1,4 @@
-"use server";
+"use server"
 
 import { signupSchema } from "@/schemas/signupSchema";
 import axiosInstance from "@/lib/axios";
@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { ApiError } from "@/lib/api/ApiError";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 
-type AuthSigninResult = {
+type AuthSignupResult = {
   success: boolean;
   errors?: {
     firstName?: string[];
@@ -16,15 +16,13 @@ type AuthSigninResult = {
     userName?: string[];
     email?: string[];
     password?: string[];
-    confirmPasswd?: string[];
   };
   error?: string;
 };
 
 export async function authSignUp(
-  state: AuthSigninResult | null,
   formData: FormData
-): Promise<AuthSigninResult> {
+): Promise<AuthSignupResult> {
   const data = {
     firstName: formData.get("firstName") as string,
     lastName: formData.get("lastName") as string,
@@ -36,17 +34,12 @@ export async function authSignUp(
   const result = signupSchema.safeParse(data);
   if (!result.success) {
     const fieldErrors = result.error.flatten().fieldErrors;
-    return {
-      success: false,
-      errors: fieldErrors,
-    };
+    return { success: false, errors: fieldErrors };
   }
 
   try {
     const response = await axiosInstance.post(API_ROUTES.SIGN_UP, result.data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
 
     if (response.status === 201) {
@@ -55,27 +48,26 @@ export async function authSignUp(
         password: result.data.password,
         redirect: false,
       });
-      
+
       if (signInResult?.ok) {
-        redirect("/");
+        redirect(API_ROUTES.HOME);
       } else {
-        redirect("/sign-in");
+        return { success: false, error: "Failed to sign in after signup" };
       }
     } else {
       throw new ApiError("Signup failed", response.status);
     }
   } catch (error) {
-    console.error("Signup error:", error);
     if (isAxiosError(error) && error.response) {
-      return {
-        success: false,
-        error: error.response.data.message || "Signup failed",
-      };
+      const status = error.response.status;
+      if (status === 400) {
+        return { success: false, error: "Invalid input data" };
+      } else if (status === 409) {
+        return { success: false, error: "Email or username already taken" };
+      } else {
+        return { success: false, error: error.response.data.message || "Signup failed" };
+      }
     }
-
-    return {
-      success: false,
-      error: "An unexpected error occurred",
-    };
+    return { success: false, error: "An unexpected error occurred" };
   }
 }

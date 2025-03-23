@@ -1,10 +1,12 @@
-"use server";
+"use server"
+
 import { loginSchema } from "@/schemas/loginSchema";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
 
 type AuthSigninResult = {
   success: boolean;
-  errors?: { email?: string[]; userName?: string[]; password?: string[] };
+  errors?: { email?: string[]; password?: string[] };
   error?: string;
   redirect?: string;
 };
@@ -32,16 +34,16 @@ export async function authSignin(
   try {
     const signInResult = await signIn("credentials", {
       redirect: false,
-      email: data.email,
-      password: data.password
+      email: result?.data?.email,
+      password: result?.data?.password
     });
 
     if(!signInResult.ok){
       console.log("SignIn failed:", signInResult?.error);
-      return { success: false, error: "Authentication failed" };
+      return { success: false, error: "Invalid Credentials" };
     }
     
-    return { success: true, redirect: "/" };
+    return { success: true, redirect: `${API_ROUTES.HOME}` };
   } catch (error) {
     console.error("Signin error:", error);
     return { success: false, error: "Authentication failed" };
@@ -49,5 +51,5 @@ export async function authSignin(
 }
 
 export async function authProviderSignIn(){
-  await signIn("google", {redirectTo: "/"});
+  await signIn("google", {redirectTo: `${API_ROUTES.HOME}`});
 }
