@@ -62,6 +62,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   } catch (error) {
     if (error instanceof ApiError) {
+      console.log(error);
       return NextResponse.json(error, {
         status: error.statusCode,
       });

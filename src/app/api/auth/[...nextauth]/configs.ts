@@ -131,7 +131,6 @@ export const authConfigs: NextAuthConfig = {
       account?: any;
     }) {
       const redis = await connectRedis();
-
       if (user) {
         token._id = user._id;
         token.email = user.email;
@@ -153,7 +152,9 @@ export const authConfigs: NextAuthConfig = {
         await redis.expire(sessionKey, 30 * 25 * 60 * 60)
       }
       if (account?.provider === "google" && token.email) {
+        
         console.log("Google account detected:", account);
+
         try {
           await connectDB();
           let user = await UserModel.findOne({ email: token.email });

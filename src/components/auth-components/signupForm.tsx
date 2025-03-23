@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Form from "next/form";
-import { authSignin } from "@/app/actions/auth-actions/authSignin";
+import { authSignUp } from "@/app/actions/auth-actions/authSignup";
 import { useActionState, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signupSchema } from "@/schemas/signupSchema";
 import confPassSchema from "@/schemas/confirmPasswdSchema";
 import Link from "next/link";
+import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
 
 type AuthSigninResult = {
   success: boolean;
@@ -40,7 +41,7 @@ export function SignupForm({
   const [state, formAction, isPending] = useActionState<
     AuthSigninResult | null,
     FormData
-  >(authSignin, null);
+  >(authSignUp, null);
 
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
@@ -55,11 +56,11 @@ export function SignupForm({
     const { name, value } = event.target;
 
     const firstNameValue =
-      name === "email" ? value : firstNameRef.current?.value || "";
+      name === "firstName" ? value : firstNameRef.current?.value || "";
     const lastNameValue =
-      name === "email" ? value : lastNameRef.current?.value || "";
+      name === "lastName" ? value : lastNameRef.current?.value || "";
     const userNameValue =
-      name === "email" ? value : userNameRef.current?.value || "";
+      name === "userName" ? value : userNameRef.current?.value || "";
     const emailValue = name === "email" ? value : emailRef.current?.value || "";
     const passwordValue =
       name === "password" ? value : passwordRef.current?.value || "";
@@ -221,7 +222,7 @@ export function SignupForm({
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="confirmPasswd">Password</Label>
+              <Label htmlFor="confirmPasswd">Confirm Password</Label>
               <Input
                 id="confirmPasswd"
                 ref={confirmPasswdRef}
@@ -255,7 +256,7 @@ export function SignupForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <Form action="">
+        <Form action={authProviderSignIn}>
           <Button variant="outline" className="w-full cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path

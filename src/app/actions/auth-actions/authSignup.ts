@@ -1,11 +1,12 @@
 "use server";
 
-import { connectDB } from "@/lib/database";
 import { signupSchema } from "@/schemas/signupSchema";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
+import { isAxiosError } from "axios";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { redirect } from "next/navigation";
 import { ApiError } from "@/lib/api/ApiError";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
 
 type AuthSigninResult = {
   success: boolean;
@@ -20,7 +21,7 @@ type AuthSigninResult = {
   error?: string;
 };
 
-export async function authSignin(
+export async function authSignUp(
   state: AuthSigninResult | null,
   formData: FormData
 ): Promise<AuthSigninResult> {
@@ -42,34 +43,30 @@ export async function authSignin(
   }
 
   try {
-    connectDB();
-    const response = await axios.post("/api/auth/sign-up", result.data, {
+    const response = await axiosInstance.post(API_ROUTES.SIGN_UP, result.data, {
       headers: {
-        "Content-Type": "application/json"
-      }
-    })
-    
-    if(response.status === 200){
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 201) {
       const signInResult = await signIn("credentials", {
         email: result.data.email,
         password: result.data.password,
         redirect: false,
-      })
-  
+      });
+      
       if (signInResult?.ok) {
         redirect("/");
       } else {
         redirect("/sign-in");
       }
-
-    }else{
+    } else {
       throw new ApiError("Signup failed", response.status);
     }
-
   } catch (error) {
     console.error("Signup error:", error);
-
-    if (axios.isAxiosError(error) && error.response) {
+    if (isAxiosError(error) && error.response) {
       return {
         success: false,
         error: error.response.data.message || "Signup failed",
@@ -82,4 +79,3 @@ export async function authSignin(
     };
   }
 }
-
