@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { Button } from "./ui/button";
 import Image from "next/image";
-import defaultUser from "../../public/defaultUser.png";
+import { imagePaths } from "@/lib/ImagePaths";
 
 type UserData = {
   _id?: string;
@@ -67,7 +67,7 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
               name: fullName,
               email: data?.email || "",
 
-              image: data?.image || "../../public/defaultUser.png",
+              image: data?.image || imagePaths.defaultUserLogo,
               isVerified: data?.isVerified || false,
             }}
           />
@@ -75,7 +75,7 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
           <Link href="/sign-in" className="w-full flex grow">
             {state === "collapsed" ? (
               <Image
-                src={defaultUser}
+                src={imagePaths.defaultUserLogo}
                 alt="Login"
                 width={32}
                 height={32}
