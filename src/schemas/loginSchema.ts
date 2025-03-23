@@ -16,20 +16,6 @@ export const loginSchema = z
         message: "Email cannot be empty if provided",
       }),
 
-    userName: z
-      .string()
-      .trim()
-      .min(2, "Username must be at least 2 characters")
-      .max(50, "Username cannot exceed 50 characters")
-      .regex(
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores"
-      )
-      .optional()
-      .refine((val) => val !== "", {
-        message: "Username cannot be empty if provided",
-      }),
-
     password: z
       .string()
       .trim()
@@ -44,10 +30,8 @@ export const loginSchema = z
       }),
   })
   .refine(
-    (data) => !!data.email || !!data.userName,
-    {
-      message: "Either email or username must be provided",
-      path: [], // Top-level error
+    (data) => !!data.email, {
+      message: "Email must be provided",
     }
   );
 

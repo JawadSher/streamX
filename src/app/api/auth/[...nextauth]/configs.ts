@@ -12,11 +12,11 @@ export const authConfigs: NextAuthConfig = {
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
-        userName: { label: "User Name", type: "text" },
+        userName: { label: "User Name", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any, req: Request): Promise<User | null> {
-        await connectDB();
+        console.log(credentials, req);
         const redis = await connectRedis();
         
         const parsedData = loginSchema.safeParse(credentials);
@@ -27,9 +27,11 @@ export const authConfigs: NextAuthConfig = {
             throw new Error(`Validation failed: ${errorMessage}`);
           }
 
-          const { email, userName, password } = parsedData.data;
-          const identifier = email || userName;
+          const { email, password } = parsedData.data;
+          const identifier = email;
           const ip = req?.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+          
+          console.log(req.headers);
 
           const ipKey = `blocked_ip:${ip}`;
           const isIpBlocked = await redis.get(ipKey);
@@ -60,10 +62,8 @@ export const authConfigs: NextAuthConfig = {
             throw new Error("IP blocked due to excessive login attempts");
           }
         try {
-          const user = await UserModel.findOne({
-            $or: [{ email: email?.toLowerCase() }, { userName: userName?.toLowerCase() }],
-          });
-
+          connectDB();
+          const user = await UserModel.findOne({email});
           if (!user) {
             await redis.incr(attemptKey);
             await redis.expire(attemptKey, 24 * 60 * 60);
@@ -147,7 +147,6 @@ export const authConfigs: NextAuthConfig = {
         await redis.hSet(sessionKey, {
           user_id: user._id,
           email: user.email,
-          userName: user.userName,
           expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         });
 

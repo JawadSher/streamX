@@ -1,20 +1,20 @@
 "use server";
 import { loginSchema } from "@/schemas/loginSchema";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
-import { connectDB } from "@/lib/database";
 
 type AuthSigninResult = {
   success: boolean;
   errors?: { email?: string[]; userName?: string[]; password?: string[] };
   error?: string;
+  redirect?: string;
 };
 
 export async function authSignin(
   state: AuthSigninResult | null,
   formData: FormData
 ): Promise<AuthSigninResult> {
+
   const data = {
-    userName: formData.get("userName") as string,
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
@@ -28,21 +28,22 @@ export async function authSignin(
       errors: fieldErrors,
     };
   }
-
+  
   try {
-    await connectDB();
     const signInResult = await signIn("credentials", {
       redirect: false,
       email: data.email,
-      userName: data.userName,
       password: data.password
     });
 
     if(!signInResult.ok){
+      console.log("SignIn failed:", signInResult?.error);
       return { success: false, error: "Authentication failed" };
     }
 
-    return { success: true };
+    console.log("SignIn succeeded:", signInResult);
+    
+    return { success: true, redirect: "/" };
   } catch (error) {
     console.error("Signin error:", error);
     return { success: false, error: "Authentication failed" };
@@ -50,6 +51,5 @@ export async function authSignin(
 }
 
 export async function authProviderSignIn(){
-  await connectDB();
   await signIn("google", {redirectTo: "/"});
 }

@@ -6,14 +6,16 @@ import { Label } from "@/components/ui/label";
 import Form from "next/form";
 import { authSignin, authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
 import loginSchema from "@/schemas/loginSchema";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type AuthSigninResult = {
   success: boolean;
   errors?: { email?: string[]; password?: string[] };
   error?: string;
+  redirect?: string;
 };
 
 export function LoginForm({
@@ -30,8 +32,22 @@ export function LoginForm({
     FormData
   >(authSignin, null);
 
+  const router = useRouter();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    console.log("use effect called")
+    console.log(state, state?.success);
+
+    if(state?.success && state.redirect){
+      router.push(state.redirect);
+    }
+    if(state?.errors){
+      setErrors({email: state.error});
+      setErrors({password: state.error})
+    }
+  }, [state, router])
 
   const handleInputChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -94,7 +110,7 @@ export function LoginForm({
           </div>
           <div className="grid gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email/Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -104,7 +120,7 @@ export function LoginForm({
                 ref={emailRef}
                 aria-invalid={errors?.email ? "true" : "false"}
               />
-              {errors?.password && (
+              {errors?.email && (
                 <p className="text-sm text-destructive">{errors?.email}</p>
               )}
             </div>
@@ -131,7 +147,6 @@ export function LoginForm({
                 <p className="text-sm text-destructive">{errors?.password}</p>
               )}
             </div>
-            isPending ?{" "}
             <Button
               type="submit"
               className="w-full cursor-pointer"
