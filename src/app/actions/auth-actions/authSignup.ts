@@ -26,16 +26,13 @@ export async function authSignUp(
   _state: AuthSignupResult | null,
   formData: FormData
 ): Promise<AuthSignupResult> {
+  
 
-  const data = {
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    userName: formData.get("userName"),
-    email: formData.get("email"),
-    password: formData.get("password"),
+  const userData = {
+    ...formData
   };
 
-  const result = signupSchema.safeParse(data);
+  const result = signupSchema.safeParse(userData);
   if (!result.success) {
     const fieldErrors = result.error.flatten().fieldErrors;
     return { success: false, errors: fieldErrors };
@@ -46,7 +43,7 @@ export async function authSignUp(
       headers: { "Content-Type": "application/json" },
     });
 
-    if (response.status === 201) {
+    if (response.data.statusCode === 201) {
       const data = {
         email: result.data.email,
         password: result.data.password,
@@ -72,7 +69,6 @@ export async function authSignUp(
           redirect: API_ROUTES.HOME,
         };
       } catch (error) {
-        console.error("Signin error:", error);
 
         if (error instanceof AuthError) {
           if (error.type === "CredentialsSignin") {

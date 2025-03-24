@@ -13,6 +13,8 @@ import confPassSchema from "@/schemas/confirmPasswdSchema";
 import Link from "next/link";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
+import { useRouter } from "next/navigation";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
 
 type AuthSignupResult = {
   success: boolean;
@@ -45,12 +47,14 @@ export function SignupForm({
     AuthSignupResult | null,
     FormData
   >(authSignUp, null);
+  const router = useRouter();
 
   useEffect(() => {
     if(state?.success){
       toast.success("Account created successfully", {
         duration: 3000,
       })
+      router.push(API_ROUTES.HOME);
     }
   }, [state])
 
