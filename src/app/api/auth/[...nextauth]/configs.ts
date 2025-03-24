@@ -52,8 +52,6 @@ export const authConfigs: NextAuthConfig = {
           if (error instanceof ZodError) {
             return null;
           }
-
-          console.error("Authentication error:", error);
           return null;
         }
       },
@@ -88,7 +86,6 @@ export const authConfigs: NextAuthConfig = {
             return true;
           }
         } catch (error) {
-          console.error("Google sign-in error:", error);
           return false;
         }
       }
