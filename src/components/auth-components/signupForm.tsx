@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Form from "next/form";
 import { authSignUp } from "@/app/actions/auth-actions/authSignup";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signupSchema } from "@/schemas/signupSchema";
 import confPassSchema from "@/schemas/confirmPasswdSchema";
 import Link from "next/link";
-import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
+import { GoogleProviderBtn } from "./authProviderBtns";
+import { toast, Toaster } from "sonner";
 
 type AuthSignupResult = {
   success: boolean;
@@ -25,6 +26,7 @@ type AuthSignupResult = {
   };
   error?: string;
 };
+
 
 export function SignupForm({
   className,
@@ -40,71 +42,17 @@ export function SignupForm({
   } | null>(null);
 
   const [state, formAction, isPending] = useActionState<
-  AuthSignupResult | null,
-  FormData
->(authSignUp, null);
+    AuthSignupResult | null,
+    FormData
+  >(authSignUp, null);
 
-  const firstNameRef = useRef<HTMLInputElement>(null);
-  const lastNameRef = useRef<HTMLInputElement>(null);
-  const userNameRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const confirmPasswdRef = useRef<HTMLInputElement>(null);
-
-  const handleInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): Promise<any> => {
-    const { name, value } = event.target;
-
-    const firstNameValue =
-      name === "firstName" ? value : firstNameRef.current?.value || "";
-    const lastNameValue =
-      name === "lastName" ? value : lastNameRef.current?.value || "";
-    const userNameValue =
-      name === "userName" ? value : userNameRef.current?.value || "";
-    const emailValue = name === "email" ? value : emailRef.current?.value || "";
-    const passwordValue =
-      name === "password" ? value : passwordRef.current?.value || "";
-    const confirmPasswdValue =
-      name === "confirmPasswd" ? value : confirmPasswdRef.current?.value || "";
-
-    const passwdData = {
-      passwd: passwordValue,
-      confPasswd: confirmPasswdValue,
-    };
-
-    const passwdResult = confPassSchema.safeParse(passwdData);
-    if (!passwdResult.success) {
-      const fieldErrors = passwdResult.error.flatten().fieldErrors;
-      setErrors({
-        confirmPasswd: fieldErrors.confPasswd?.[0],
-      });
-    } else {
-      setErrors(null);
+  useEffect(() => {
+    if(state?.success){
+      toast.success("Account created successfully", {
+        duration: 3000,
+      })
     }
-
-    const data = {
-      firstName: firstNameValue,
-      lastName: lastNameValue,
-      userName: userNameValue,
-      email: emailValue,
-      password: passwordValue,
-    };
-
-    const result = signupSchema.safeParse(data);
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors({
-        firstName: fieldErrors.firstName?.[0],
-        lastName: fieldErrors.lastName?.[0],
-        userName: fieldErrors.userName?.[0],
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
-      });
-    } else {
-      setErrors(null);
-    }
-  };
+  }, [state])
 
   const handleSubmit = async (formData: FormData) => {
     const data = {
@@ -113,6 +61,7 @@ export function SignupForm({
       userName: formData.get("userName"),
       email: formData.get("email"),
       password: formData.get("password"),
+      confPasswd: formData.get("confirmPasswd"),
     };
 
     const result = signupSchema.safeParse(data);
@@ -128,7 +77,30 @@ export function SignupForm({
       return;
     }
 
-    formAction(formData);
+    const passwdData = {
+      password: data.password,
+      confPasswd: data.confPasswd,
+    };
+
+    const passwdResult = confPassSchema.safeParse(passwdData);
+    if (!passwdResult.success) {
+      const fieldErrors = passwdResult.error.flatten().fieldErrors;
+      setErrors({
+        confirmPasswd: fieldErrors.confPasswd?.[0],
+      });
+    } else {
+      setErrors(null);
+    }
+
+    const readyData: any = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      userName: data.userName,
+      email: data.email,
+      password: data.password,
+    }
+
+    formAction(readyData);
   };
 
   return (
@@ -139,7 +111,6 @@ export function SignupForm({
           {...props}
           action={handleSubmit}
         >
-            
           <div className="flex flex-col items-center gap-2 text-center">
             <h1 className="text-2xl font-bold">Create new account</h1>
             <p className="text-balance text-sm text-muted-foreground">
@@ -155,7 +126,6 @@ export function SignupForm({
                 name="firstName"
                 placeholder="First name"
                 required
-                ref={firstNameRef}
                 aria-invalid={errors?.firstName ? "true" : "false"}
               />
               {errors?.firstName && (
@@ -170,7 +140,6 @@ export function SignupForm({
                 name="lastName"
                 placeholder="Last name"
                 required
-                ref={lastNameRef}
                 aria-invalid={errors?.lastName ? "true" : "false"}
               />
               {errors?.lastName && (
@@ -185,7 +154,6 @@ export function SignupForm({
                 name="userName"
                 placeholder="@username"
                 required
-                ref={userNameRef}
                 aria-invalid={errors?.userName ? "true" : "false"}
               />
               {errors?.userName && (
@@ -200,7 +168,6 @@ export function SignupForm({
                 name="email"
                 placeholder="m@example.com"
                 required
-                ref={emailRef}
                 aria-invalid={errors?.email ? "true" : "false"}
               />
               {errors?.password && (
@@ -211,8 +178,6 @@ export function SignupForm({
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                ref={passwordRef}
-                onChange={handleInputChange}
                 type="password"
                 name="password"
                 required
@@ -226,8 +191,6 @@ export function SignupForm({
               <Label htmlFor="confirmPasswd">Confirm Password</Label>
               <Input
                 id="confirmPasswd"
-                ref={confirmPasswdRef}
-                onChange={handleInputChange}
                 type="password"
                 name="confirmPasswd"
                 required
@@ -257,17 +220,7 @@ export function SignupForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <Form action={authProviderSignIn}>
-          <Button variant="outline" className="w-full cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path
-                d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                fill="currentColor"
-              />
-            </svg>
-            Login with Google
-          </Button>
-        </Form>
+        <GoogleProviderBtn />
         <div className="text-center text-sm">
           Already have an account?{" "}
           <Link href="/sign-in" className="underline underline-offset-4">
@@ -275,6 +228,7 @@ export function SignupForm({
           </Link>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }

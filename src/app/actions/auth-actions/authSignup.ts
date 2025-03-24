@@ -1,12 +1,12 @@
-"use server"
+"use server";
 
 import { signupSchema } from "@/schemas/signupSchema";
 import axiosInstance from "@/lib/axios";
 import { isAxiosError } from "axios";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
-import { redirect } from "next/navigation";
 import { ApiError } from "@/lib/api/ApiError";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { AuthError } from "next-auth";
 
 type AuthSignupResult = {
   success: boolean;
@@ -17,6 +17,8 @@ type AuthSignupResult = {
     email?: string[];
     password?: string[];
   };
+  message?: string;
+  redirect?: string;
   error?: string;
 };
 
@@ -44,16 +46,50 @@ export async function authSignUp(
     });
 
     if (response.status === 201) {
-      const signInResult = await signIn("credentials", {
+      const data = {
         email: result.data.email,
         password: result.data.password,
-        redirect: false,
-      });
+      };
 
-      if (signInResult?.ok) {
-        redirect(API_ROUTES.HOME);
-      } else {
-        return { success: false, error: "Failed to sign in after signup" };
+      try {
+        const signinResult = await signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        });
+
+        if (signinResult?.error) {
+          return {
+            success: false,
+            error: signinResult.error,
+          };
+        }
+
+        return {
+          success: true,
+          message: "User logged in successfully",
+          redirect: API_ROUTES.HOME,
+        };
+      } catch (error) {
+        console.error("Signin error:", error);
+
+        if (error instanceof AuthError) {
+          if (error.type === "CredentialsSignin") {
+            return {
+              success: false,
+              error: "Invalid email or password",
+            };
+          }
+          return {
+            success: false,
+            error: error.message || "Authentication failed",
+          };
+        }
+
+        return {
+          success: false,
+          error: "An unexpected error occurred during authentication",
+        };
       }
     } else {
       throw new ApiError("Signup failed", response.status);
@@ -66,7 +102,10 @@ export async function authSignUp(
       } else if (status === 409) {
         return { success: false, error: "Email or username already taken" };
       } else {
-        return { success: false, error: error.response.data.message || "Signup failed" };
+        return {
+          success: false,
+          error: error.response.data.message || "Signup failed",
+        };
       }
     }
     return { success: false, error: "An unexpected error occurred" };
