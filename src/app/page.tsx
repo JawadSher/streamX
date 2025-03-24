@@ -14,7 +14,6 @@ import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession, signOut } from "next-auth/react";
 import { imagePaths } from "@/lib/ImagePaths";
-import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -105,7 +104,6 @@ const Home = () => {
           </main>
         </div>
       </SidebarProvider>
-      <Toaster />
     </div>
   );
 };
