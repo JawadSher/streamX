@@ -1,8 +1,36 @@
+'use client'
+
 import { LoginForm } from "@/components/auth-components/loginForm";
-import { Home } from "lucide-react";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { Home, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toast, Toaster } from "sonner";
+
 
 export default function LoginPage() {
+  const {data: session, status} = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if(status === 'authenticated' && session?.user){
+      toast.success(`Already signed in with ${session?.user?.email}`, {
+        duration: 2000,
+      });
+
+      setTimeout(() => {
+        router.push(API_ROUTES.HOME);
+      }, 1000);
+    }
+  }, [status, session, router])
+
+  if(status === 'loading'){
+    return <div className="w-full h-screen blur-2xl bg-white">
+      <Loader2 className="animate-spin" />
+    </div>
+  }
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="relative hidden bg-muted lg:flex items-center justify-center">
@@ -23,6 +51,7 @@ export default function LoginPage() {
             <LoginForm />
           </div>
         </div>
+      <Toaster position="bottom-right" expand={false} />
       </div>
     </div>
   );

@@ -14,25 +14,31 @@ import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
 import { imagePaths } from "@/lib/ImagePaths";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast, Toaster } from "sonner";
 
 const Home = () => {
   const { setTheme } = useTheme();
   const URL = imagePaths.videoThumbnail;
-
-  useEffect(() => {
-
-  })
-
+  
   const { data: session, status } = useSession();
-  const data = session?.user;
+  useEffect(() => {
+      if (status === 'authenticated') {
+        toast.success('User Authenticated', {
+          duration: 1000
+        });
+      }else if(status === 'unauthenticated'){
+        toast.warning('UnAuthenticated please login', {
+          duration: 1000
+        });
+      }
 
-  console.log(session)
-
+  }, [])
+      
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
-        <AppSidebar data={data} sessionStatus={status} />
+        <AppSidebar data={session?.user} sessionStatus={status} />
 
         <div className="flex-1 flex flex-col h-screen px-4 overflow-auto">
           <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg ">
@@ -67,7 +73,7 @@ const Home = () => {
             </div>
           ) : (
             <main className="flex-1 py-4 mx-auto w-full max-w-screen-2xl">
-              {session?.user ? (
+              {status === 'authenticated' ? (
                 <div className="grid gap-x-2 gap-y-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                   {Array.from({ length: 25 }).map((_, i) => (
                     <VideoCard
@@ -88,6 +94,7 @@ const Home = () => {
           )}
         </div>
       </SidebarProvider>
+      <Toaster />
     </div>
   );
 };

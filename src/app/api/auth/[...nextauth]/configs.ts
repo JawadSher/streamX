@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
+import { ZodError } from "zod";
 
 export const authConfigs: NextAuthConfig = {
   providers: [
@@ -14,35 +15,27 @@ export const authConfigs: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
 
-      async authorize(credentials: any): Promise<User | null> {
+      authorize: async(credentials) => {
+        let user = null;
+
         const userData = {
           email: credentials.email,
           password: credentials.password
         }
-        const parsedData = loginSchema.safeParse(userData);
-
-        if (!parsedData.success) {
-          const errorMessage = parsedData.error.issues
-            .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-            .join(", ");
-          throw new Error(`Validation failed: ${errorMessage}`);
-        }
-
-        const { email, password } = parsedData.data;
-        const identifier = email;
+        const {email, password} = await loginSchema.parseAsync(userData);
 
         try {
           await connectDB();
-          const user = await UserModel.findOne({ email: identifier });
-          console.log(user);
 
+          user = await UserModel.findOne({ email });
           if (!user) {
-            throw new Error("Invalid email or password");
+            throw new Error("Invalid email or password - Email");
           }
 
           const isPasswdCorrect = await user.isPasswordCorrect(password);
           if (!isPasswdCorrect) {
-            throw new Error("Invalid email or password");
+            
+            throw new Error("Invalid email or password - Password");
           }
 
           return {
@@ -58,7 +51,12 @@ export const authConfigs: NextAuthConfig = {
           };
 
         } catch (error: any) {
-          throw new Error(error.message);
+          if(error instanceof ZodError){
+            return null;
+          }
+
+          console.error("Authentication error:", error);
+          return null;
         }
       },
     }),

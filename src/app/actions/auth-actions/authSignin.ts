@@ -1,21 +1,22 @@
-"use server"
+"use server";
 
 import { loginSchema } from "@/schemas/loginSchema";
-import { signIn, signOut } from "@/app/api/auth/[...nextauth]/configs";
+import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { AuthError } from "next-auth";
 
 type AuthSigninResult = {
   success: boolean;
   errors?: { email?: string[]; password?: string[] };
   error?: string;
   redirect?: string;
+  message?: string;
 };
 
 export async function authSignin(
   state: AuthSigninResult | null,
   formData: FormData
 ): Promise<AuthSigninResult> {
-
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -29,31 +30,51 @@ export async function authSignin(
       success: false,
       errors: {
         email: fieldErrors?.email,
-        password: fieldErrors?.password
+        password: fieldErrors?.password,
       },
     };
   }
 
   try {
-    const signInResult = await signIn("credentials", {
+    await signIn("credentials", {
       email: result.data.email,
       password: result.data.password,
-      redirect: false,
+      redirect: false, 
     });
 
-    if (signInResult?.ok) {
-      return { 
-        success: true, 
-        redirect: API_ROUTES.HOME 
-      };
-    }
-    return { 
-      success: false, 
-      error: signInResult?.error || "Invalid email or password", 
-    }
+    // if (!signInResult?.ok) {
+    //   return {
+    //     success: false,
+    //     error:
+    //       signInResult?.error || "Invalid email or password - HERE PROBLEM",
+    //   };
+    // }
+
+    return {
+      success: true,
+      message: "User logged in successfully",
+      redirect: API_ROUTES.HOME, 
+    };
   } catch (error) {
     console.error("Signin error:", error);
-    return { success: false, error: "Authentication failed" };
+
+    if (error instanceof AuthError) {
+      if (error.type === "CredentialsSignin") {
+        return {
+          success: false,
+          error: "Invalid email or password",
+        };
+      }
+      return {
+        success: false,
+        error: error.message || "Authentication failed",
+      };
+    }
+
+    return {
+      success: false,
+      error: "An unexpected error occurred during authentication",
+    };
   }
 }
 
