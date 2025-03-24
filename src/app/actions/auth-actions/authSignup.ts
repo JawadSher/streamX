@@ -26,12 +26,13 @@ export async function authSignUp(
   _state: AuthSignupResult | null,
   formData: FormData
 ): Promise<AuthSignupResult> {
+
   const data = {
-    firstName: formData.get("firstName") as string,
-    lastName: formData.get("lastName") as string,
-    userName: formData.get("userName") as string,
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+    userName: formData.get("userName"),
+    email: formData.get("email"),
+    password: formData.get("password"),
   };
 
   const result = signupSchema.safeParse(data);
