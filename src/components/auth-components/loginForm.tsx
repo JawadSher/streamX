@@ -75,12 +75,12 @@ export function LoginForm({
       toast.error(state.error);
     }
 
-    if (state.success) {
+    if (state.success && state.redirect) {
       toast.success(state.message || "Login successful", {
-        duration: 1000,
+        duration: 3000,
       });
 
-      redirect(API_ROUTES.HOME);
+      router.push(state.redirect);
     }
   }, [state, router]);
 

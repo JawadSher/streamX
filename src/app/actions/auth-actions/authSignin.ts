@@ -10,6 +10,7 @@ type AuthSigninResult = {
   errors?: { email?: string[]; password?: string[] };
   error?: string;
   message?: string;
+  redirect?: string;
 };
 
 export async function authSignin(
@@ -51,6 +52,7 @@ export async function authSignin(
     return {
       success: true,
       message: "User logged in successfully",
+      redirect: API_ROUTES.HOME,
     };
   } catch (error) {
     console.error("Signin error:", error);
