@@ -13,7 +13,7 @@ import loginSchema from "@/schemas/loginSchema";
 import { useActionState, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
@@ -80,11 +80,7 @@ export function LoginForm({
         duration: 1000,
       });
 
-      const timer = setTimeout(() => {
-        router.push(state.redirect || API_ROUTES.HOME);
-      }, 1000);
-
-      return () => clearTimeout(timer);
+      redirect(API_ROUTES.HOME);
     }
   }, [state, router]);
 
@@ -167,7 +163,6 @@ export function LoginForm({
       <div className="flex flex-col gap-3">
         <Form action={authProviderSignIn}>
           <input type="hidden" name="provider" value="google" />{" "}
-          {/* Specify provider */}
           <Button
             variant="outline"
             className="w-full cursor-pointer"

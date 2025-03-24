@@ -14,26 +14,12 @@ import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
 import { imagePaths } from "@/lib/ImagePaths";
-import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 
 const Home = () => {
   const { setTheme } = useTheme();
   const URL = imagePaths.videoThumbnail;
-  
   const { data: session, status } = useSession();
-  useEffect(() => {
-      if (status === 'authenticated') {
-        toast.success('User Authenticated', {
-          duration: 1000
-        });
-      }else if(status === 'unauthenticated'){
-        toast.warning('UnAuthenticated please login', {
-          duration: 1000
-        });
-      }
-
-  }, [])
       
   return (
     <div className="h-screen flex bg-white-100">

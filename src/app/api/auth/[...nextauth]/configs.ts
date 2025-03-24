@@ -29,12 +29,12 @@ export const authConfigs: NextAuthConfig = {
 
           user = await UserModel.findOne({ email });
           if (!user) {
-            throw new Error("Invalid email or password - Email");
+            throw new Error("Invalid email or password");
           }
 
           const isPasswdCorrect = await user.isPasswordCorrect(password);
           if (!isPasswdCorrect) {
-            throw new Error("Invalid email or password - Password");
+            throw new Error("Invalid email or password");
           }
 
           return {
@@ -78,8 +78,6 @@ export const authConfigs: NextAuthConfig = {
               userName: user.email?.split("@")[0],
               email: user.email,
               channelName: user.email?.split("@")[0] + "-Channel",
-              phoneNumber: "",
-              country: "",
               isVerified: true,
               password: `streamX@${Date.now()}`,
               bio: "Hay guys im new in the streamX community",
@@ -138,6 +136,11 @@ export const authConfigs: NextAuthConfig = {
       }
 
       return session;
+    },
+
+    async redirect({url, baseUrl}) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      return baseUrl;
     },
   },
 

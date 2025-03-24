@@ -4,7 +4,6 @@ import { loginSchema } from "@/schemas/loginSchema";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
 
 type AuthSigninResult = {
   success: boolean;
@@ -49,7 +48,6 @@ export async function authSignin(
       };
     }
 
-    redirect(API_ROUTES.HOME);
     return {
       success: true,
       message: "User logged in successfully",
