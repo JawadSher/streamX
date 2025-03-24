@@ -15,14 +15,14 @@ export const authConfigs: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
 
-      authorize: async(credentials) => {
+      authorize: async (credentials) => {
         let user = null;
 
         const userData = {
           email: credentials.email,
-          password: credentials.password
-        }
-        const {email, password} = await loginSchema.parseAsync(userData);
+          password: credentials.password,
+        };
+        const { email, password } = await loginSchema.parseAsync(userData);
 
         try {
           await connectDB();
@@ -34,7 +34,6 @@ export const authConfigs: NextAuthConfig = {
 
           const isPasswdCorrect = await user.isPasswordCorrect(password);
           if (!isPasswdCorrect) {
-            
             throw new Error("Invalid email or password - Password");
           }
 
@@ -49,9 +48,8 @@ export const authConfigs: NextAuthConfig = {
             country: user.country,
             isVerified: user.isVerified,
           };
-
         } catch (error: any) {
-          if(error instanceof ZodError){
+          if (error instanceof ZodError) {
             return null;
           }
 
@@ -66,6 +64,39 @@ export const authConfigs: NextAuthConfig = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          await connectDB();
+
+          let existingUser = await UserModel.findOne({ email: user.email });
+          if (existingUser) return true;
+          else {
+            const newUser = new UserModel({
+              firstName: profile?.given_name || "John",
+              lastName: profile?.family_name || "Doe",
+              userName: user.email?.split("@")[0],
+              email: user.email,
+              channelName: user.email?.split("@")[0] + "-Channel",
+              phoneNumber: "",
+              country: "",
+              isVerified: true,
+              password: `streamX@${Date.now()}`,
+              bio: "Hay guys im new in the streamX community",
+            });
+
+            await newUser.save();
+            user._id = newUser._id.toString();
+            return true;
+          }
+        } catch (error) {
+          console.error("Google sign-in error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+
     async jwt({
       token,
       user,
@@ -76,7 +107,7 @@ export const authConfigs: NextAuthConfig = {
       account?: any;
     }) {
       if (user) {
-        token._id = user._id.toString();
+        token._id = user._id;
         token.email = user.email;
         token.userName = user.userName;
         token.firstName = user.firstName;
@@ -105,19 +136,8 @@ export const authConfigs: NextAuthConfig = {
           isVerified: token.isVerified,
         };
       }
-      
+
       return session;
-    },
-
-    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-      if (url.includes("/api/auth") && !url.includes("/callback")) {
-        return url;
-      }
-
-      if (url.includes("/api/auth/callback")) {
-        return `${baseUrl}/`;
-      }
-      return url.startsWith(baseUrl) ? url : baseUrl;
     },
   },
 

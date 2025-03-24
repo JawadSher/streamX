@@ -4,12 +4,12 @@ import { loginSchema } from "@/schemas/loginSchema";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 
 type AuthSigninResult = {
   success: boolean;
   errors?: { email?: string[]; password?: string[] };
   error?: string;
-  redirect?: string;
   message?: string;
 };
 
@@ -36,16 +36,23 @@ export async function authSignin(
   }
 
   try {
-    await signIn("credentials", {
+    const signinResult = await signIn("credentials", {
       email: result.data.email,
       password: result.data.password,
-      redirect: false, 
+      redirect: false,
     });
 
+    if (signinResult?.error) {
+      return {
+        success: false,
+        error: signinResult.error,
+      };
+    }
+
+    redirect(API_ROUTES.HOME);
     return {
       success: true,
       message: "User logged in successfully",
-      redirect: API_ROUTES.HOME, 
     };
   } catch (error) {
     console.error("Signin error:", error);
