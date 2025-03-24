@@ -1,4 +1,4 @@
-"use server";
+"use server"
 
 import { loginSchema } from "@/schemas/loginSchema";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
@@ -41,14 +41,6 @@ export async function authSignin(
       password: result.data.password,
       redirect: false, 
     });
-
-    // if (!signInResult?.ok) {
-    //   return {
-    //     success: false,
-    //     error:
-    //       signInResult?.error || "Invalid email or password - HERE PROBLEM",
-    //   };
-    // }
 
     return {
       success: true,
