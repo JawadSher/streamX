@@ -1,4 +1,5 @@
 import { createClient, RedisClientType } from 'redis';
+import { URL } from 'url'; 
 
 const REDIS_URI = process.env.REDIS_URI || 'redis://localhost:6379';
 
@@ -20,11 +21,14 @@ if (!cached) {
 }
 
 export async function connectRedis(): Promise<RedisClientType> {
-  if (cached.client) return cached.client;
+  if (cached.client) {
+    console.log('Using cached Redis client');
+    return cached.client;
+  }
 
   if (!cached.promise) {
     const client: RedisClientType = createClient({
-      url: REDIS_URI,
+      url: new URL(REDIS_URI).toString(),
     });
 
     client.on('error', (error) => {
@@ -39,8 +43,10 @@ export async function connectRedis(): Promise<RedisClientType> {
 
   try {
     cached.client = await cached.promise;
+    console.log('Redis client connected successfully');
   } catch (error) {
     cached.promise = null;
+    console.error('Failed to connect to Redis:', error);
     throw error;
   }
 

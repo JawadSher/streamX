@@ -1,4 +1,5 @@
-"use client";
+"use client"
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import confPassSchema from "@/schemas/confirmPasswdSchema";
 import Link from "next/link";
 import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
 
-type AuthSigninResult = {
+type AuthSignupResult = {
   success: boolean;
   errors?: {
     firstName?: string[];
@@ -39,9 +40,9 @@ export function SignupForm({
   } | null>(null);
 
   const [state, formAction, isPending] = useActionState<
-    AuthSigninResult | null,
-    FormData
-  >(authSignUp, null);
+  AuthSignupResult | null,
+  FormData
+>(authSignUp, null);
 
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);

@@ -21,6 +21,7 @@ type AuthSignupResult = {
 };
 
 export async function authSignUp(
+  _state: AuthSignupResult | null,
   formData: FormData
 ): Promise<AuthSignupResult> {
   const data = {

@@ -5,9 +5,6 @@ import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
-import { connectRedis } from "@/lib/redis";
-
-export const runtime = "nodejs";
 
 export const authConfigs: NextAuthConfig = {
   providers: [
@@ -16,10 +13,14 @@ export const authConfigs: NextAuthConfig = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: any, req: Request): Promise<User | null> {
-        const redis = await connectRedis();
 
-        const parsedData = loginSchema.safeParse(credentials);
+      async authorize(credentials: any): Promise<User | null> {
+        const userData = {
+          email: credentials.email,
+          password: credentials.password
+        }
+        const parsedData = loginSchema.safeParse(userData);
+
         if (!parsedData.success) {
           const errorMessage = parsedData.error.issues
             .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
@@ -29,71 +30,20 @@ export const authConfigs: NextAuthConfig = {
 
         const { email, password } = parsedData.data;
         const identifier = email;
-        const ip =
-          req?.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
 
-        const ipKey = `blocked_ip:${ip}`;
-        const isIpBlocked = await redis.get(ipKey);
-        if (isIpBlocked) {
-          throw new Error(
-            "Your IP is temprorily block due to suspicius activity"
-          );
-        }
-
-        const lockoutKey = `login_attemps:${identifier?.toLowerCase()}`;
-        const isLocked = await redis.get(lockoutKey);
-        if (isLocked) {
-          throw new Error(
-            "Account temporarily locked. Try again in 15 minutes"
-          );
-        }
-
-        const attemptKey = `login_attempt:${identifier?.toLowerCase()}`;
-        const attempts = await redis.get(attemptKey);
-        const attemptCount = attempts ? parseInt(attempts) : 0;
-        if (attemptCount >= 3) {
-          await redis.set(lockoutKey, "locked", { EX: 15 * 60 });
-          throw new Error(
-            "Too many login attempts. Account locked for 15 minutes"
-          );
-        }
-
-        const ipAttemptKey = `ip_attempts:${ip}`;
-        const ipAttempts = await redis.get(ipAttemptKey);
-        const ipAttemptCount = ipAttempts ? parseInt(ipAttempts) : 0;
-
-        if (ipAttemptCount >= 10) {
-          await redis.set(ipKey, "blocked", { EX: 60 * 60 });
-          throw new Error("IP blocked due to excessive login attempts");
-        }
         try {
           await connectDB();
-          const user = await UserModel.findOne({ email });
-          const isPasswdCorrect =
-            (await user) && user.isPasswordCorrect(password);
+          const user = await UserModel.findOne({ email: identifier });
+          console.log(user);
 
-          if (!user || !isPasswdCorrect) {
-            await redis.incr(attemptKey);
-            await redis.expire(attemptKey, 24 * 60 * 60);
-            await redis.incr(ipAttemptKey);
-            await redis.expire(ipAttemptKey, 24 * 60 * 60);
+          if (!user) {
             throw new Error("Invalid email or password");
           }
 
-          await redis.del(attemptKey);
-          await redis.del(ipAttemptKey);
-
-          const profileKey = `profile:${user._id}`;
-          await redis.hSet(profileKey, {
-            email: user.email,
-            userName: user.userName,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            channelName: user.channelName,
-            phoneNumber: user.phoneNumber || "",
-            country: user.country || "None",
-            isVerified: user.isVerified.toString(),
-          });
+          const isPasswdCorrect = await user.isPasswordCorrect(password);
+          if (!isPasswdCorrect) {
+            throw new Error("Invalid email or password");
+          }
 
           return {
             _id: user._id.toString(),
@@ -106,8 +56,8 @@ export const authConfigs: NextAuthConfig = {
             country: user.country,
             isVerified: user.isVerified,
           };
+
         } catch (error: any) {
-          console.error("Authorize error (Credentials):", error.message);
           throw new Error(error.message);
         }
       },
@@ -127,9 +77,8 @@ export const authConfigs: NextAuthConfig = {
       user?: any;
       account?: any;
     }) {
-      const redis = await connectRedis();
       if (user) {
-        token._id = user._id;
+        token._id = user._id.toString();
         token.email = user.email;
         token.userName = user.userName;
         token.firstName = user.firstName;
@@ -138,92 +87,13 @@ export const authConfigs: NextAuthConfig = {
         token.phoneNumber = user.phoneNumber;
         token.country = user.country;
         token.isVerified = user.isVerified;
-
-        const sessionKey = `session:${token.jti || token.sub}`;
-        await redis.hSet(sessionKey, {
-          user_id: user._id,
-          email: user.email,
-          expires: new Date(
-            Date.now() + 30 * 24 * 60 * 60 * 1000
-          ).toISOString(),
-        });
-
-        await redis.expire(sessionKey, 30 * 24 * 60 * 60);
       }
 
-      if (account?.provider === "google" && token.email) {
-        try {
-          await connectDB();
-          let user = await UserModel.findOne({ email: token.email });
-
-          if (!user) {
-            const emailLocalPart = token.email.split("@")[0];
-            let firstName: string;
-            let lastName: string;
-
-            if (emailLocalPart.includes(".")) {
-              const [first, last] = emailLocalPart.split(".");
-              firstName =
-                first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
-              lastName =
-                last.charAt(0).toUpperCase() + last.slice(1).toLowerCase();
-            } else {
-              firstName =
-                emailLocalPart.charAt(0).toUpperCase() +
-                emailLocalPart.slice(1).toLowerCase();
-              lastName = "User";
-            }
-
-            if (!user && account?.provider === "google") {
-              firstName = account.given_name || firstName;
-              lastName = account.family_name || lastName;
-            }
-
-            const date = Date.now();
-            const userNameBase = firstName
-              .toLowerCase()
-              .replace(/[^a-z0-9]/g, "");
-            const userName = `@${userNameBase}${date}`;
-
-            const channelName = `${firstName}-Channel`;
-            const password = `streamX@${date}`;
-
-            const newUserData: any = {
-              email: token.email,
-              userName,
-              firstName,
-              lastName,
-              channelName,
-              isVerified: true,
-              password,
-              country: "None",
-            };
-
-            user = await UserModel.create(newUserData);
-          }
-
-          token._id = user._id.toString();
-          token.userName = user.userName;
-          token.firstName = user.firstName;
-          token.lastName = user.lastName;
-          token.channelName = user.channelName;
-          token.phoneNumber = user.phoneNumber;
-          token.country = user.country;
-          token.isVerified = user.isVerified;
-        } catch (error: any) {
-          console.error("Error in JWT callback:", error.message);
-          throw new Error(error.message);
-        }
-      }
       return token;
     },
 
     async session({ session, token }: { session: Session; token: JWT }) {
-      const redis = await connectRedis();
-      const sessionKey = `session:${token.jti || token.sub}`;
-      const redisSession = await redis.hGetAll(sessionKey);
-
-      if (token?._id && redisSession.user_id) {
+      if (token) {
         session.user = {
           ...session.user,
           _id: token._id,
@@ -236,12 +106,16 @@ export const authConfigs: NextAuthConfig = {
           country: token.country,
           isVerified: token.isVerified,
         };
-      } else {
-        session.expires = new Date(0).toISOString();
       }
+      
       return session;
     },
+
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      if (url.includes("/api/auth") && !url.includes("/callback")) {
+        return url;
+      }
+
       if (url.includes("/api/auth/callback")) {
         return `${baseUrl}/`;
       }

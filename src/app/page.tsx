@@ -14,10 +14,15 @@ import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
 import { imagePaths } from "@/lib/ImagePaths";
+import { useEffect } from "react";
 
 const Home = () => {
   const { setTheme } = useTheme();
   const URL = imagePaths.videoThumbnail;
+
+  useEffect(() => {
+
+  })
 
   const { data: session, status } = useSession();
   const data = session?.user;

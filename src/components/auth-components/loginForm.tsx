@@ -1,15 +1,18 @@
 "use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Form from "next/form";
-import { authSignin, authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
+import {
+  authSignin,
+  authProviderSignIn,
+} from "@/app/actions/auth-actions/authSignin";
 import loginSchema from "@/schemas/loginSchema";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 type AuthSigninResult = {
   success: boolean;
@@ -32,38 +35,14 @@ export function LoginForm({
     FormData
   >(authSignin, null);
 
-  const router = useRouter();
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    console.log("use effect called")
-    console.log(state, state?.success);
-
-    if(state?.success && state.redirect){
-      router.push(state.redirect);
-    }
-    if(state?.errors){
-      setErrors({email: state.error});
-      setErrors({password: state.error})
-    }
-  }, [state, router])
-
-  const handleInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): Promise<any> => {
-    const { name, value } = event.target;
-
-    const emailValue = name === "email" ? value : emailRef.current?.value || "";
-    const passwordValue =
-      name === "password" ? value : passwordRef.current?.value || "";
-
+  const handleSubmit = async (formData: FormData) => {
     const data = {
-      email: emailValue,
-      password: passwordValue,
+      email: formData.get("email"),
+      password: formData.get("password"),
     };
 
     const result = loginSchema.safeParse(data);
+
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
       setErrors({
@@ -72,23 +51,6 @@ export function LoginForm({
       });
     } else {
       setErrors(null);
-    }
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    const data = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-    };
-
-    const result = loginSchema.safeParse(data);
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors({
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
-      });
-      return;
     }
 
     formAction(formData);
@@ -117,7 +79,6 @@ export function LoginForm({
                 name="email"
                 placeholder="m@example.com"
                 required
-                ref={emailRef}
                 aria-invalid={errors?.email ? "true" : "false"}
               />
               {errors?.email && (
@@ -136,8 +97,6 @@ export function LoginForm({
               </div>
               <Input
                 id="password"
-                ref={passwordRef}
-                onChange={handleInputChange}
                 type="password"
                 name="password"
                 required
@@ -184,7 +143,6 @@ export function LoginForm({
           </Link>
         </div>
       </div>
-
     </div>
   );
 }
