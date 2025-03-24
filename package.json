@@ -1,6 +1,6 @@
 {
   "name": "streamx",
-  "version": "0.1.0",
+  "version": "1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -27,7 +27,7 @@
     "lucide-react": "^0.483.0",
     "mongoose": "^8.12.1",
     "net": "^1.0.2",
-    "next": "15.2.2",
+    "next": "^15.2.3",
     "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.4.6",
     "react": "^19.0.0",
