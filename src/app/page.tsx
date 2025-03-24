@@ -81,15 +81,6 @@ const Home = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {session && (
-                <Button
-                  variant="outline"
-                  onClick={() => signOut({ callbackUrl: "/sign-in" })}
-                  className="ml-auto"
-                >
-                  Sign Out
-                </Button>
-              )}
             </div>
           </header>
 
