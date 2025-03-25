@@ -9,20 +9,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Moon, Sun } from "lucide-react";
+import { Loader2, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
 import { imagePaths } from "@/lib/ImagePaths";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 
 const Home = () => {
   const { setTheme } = useTheme();
   const URL = imagePaths.videoThumbnail;
-  const { data: session, status, update } = useSession({
+  const {
+    data: session,
+    status,
+    update,
+  } = useSession({
     required: false,
-    onUnauthenticated: () => {}, 
+    onUnauthenticated: () => {},
   });
 
   const router = useRouter();
@@ -34,9 +39,8 @@ const Home = () => {
     if (status === "unauthenticated" && !session) {
       update().then(() => setHasUpdated(true));
     }
-
   }, [status, session, update, hasUpdated]);
-  
+
   useEffect(() => {
     if (status === "unauthenticated" && hasUpdated) {
       router.push("/sign-in");
@@ -58,7 +62,7 @@ const Home = () => {
 
         <div className="flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 overflow-auto">
           <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">
-            <div className="flex items-center gap-3 w-full">
+            <div className="flex items-center gap-3">
               <SidebarTrigger className="-ml-1" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -80,6 +84,12 @@ const Home = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+            <div className="flex grow mx-2 items-center  justify-center">
+              <div className="relative md:max-w-[800px] grow ">
+                <Input className="rounded-3xl w-full pr-10 text-gray-200" />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2" color="gray"/>
+              </div>
             </div>
           </header>
 
