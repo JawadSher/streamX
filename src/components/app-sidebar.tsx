@@ -116,7 +116,6 @@ const navItems = {
 
 export function AppSidebar({ data, sessionStatus, ...props }: Props) {
   const { state } = useSidebar();
-  
 
   const fullName = data
     ? [data.firstName, data.lastName].filter(Boolean).join(" ") ||
@@ -138,9 +137,9 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
 
       <SidebarContent className="overflow-y-auto">
         <NavMain items={navItems.mediaItems} />
-        <Separator className="max-w-[230px] mx-auto" />
+        {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
         <NavMain items={navItems.profileItems} />
-        <Separator className="max-w-[230px] mx-auto" />
+        {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
         <NavMainSubscriptions items={navItems.subscriptionItems}  />
       </SidebarContent>
 

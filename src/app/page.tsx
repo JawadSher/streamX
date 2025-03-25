@@ -56,7 +56,7 @@ const Home = () => {
       <SidebarProvider>
         <AppSidebar data={session?.user} sessionStatus={status} />
 
-        <div className="flex-1 flex flex-col h-screen px-4 overflow-auto">
+        <div className="flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 overflow-auto">
           <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">
             <div className="flex items-center gap-3 w-full">
               <SidebarTrigger className="-ml-1" />
@@ -83,9 +83,9 @@ const Home = () => {
             </div>
           </header>
 
-          <main className="flex-1 py-4 mx-auto w-full max-w-screen-2xl">
+          <main className="flex-1 py-4 mx-auto w-full">
             {status === "authenticated" ? (
-              <div className="grid gap-x-2 gap-y-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              <div className="grid gap-x-2 gap-y-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 ">
                 {Array.from({ length: 25 }).map((_, i) => (
                   <VideoCard
                     key={i}
