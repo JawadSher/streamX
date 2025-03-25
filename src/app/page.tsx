@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Moon, Search, Sun } from "lucide-react";
+import { Loader2, Mic, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
@@ -87,9 +87,16 @@ const Home = () => {
             </div>
             <div className="flex grow mx-2 items-center  justify-center">
               <div className="relative md:max-w-[800px] grow ">
-                <Input className="rounded-3xl w-full pr-10 text-gray-200" />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2" color="gray"/>
+                <Input
+                  className="rounded-3xl w-full pr-10 text-gray-200"
+                  placeholder="Search"
+                />
+                <Search
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  color="gray"
+                />
               </div>
+              <Mic className="ml-1 cursor-pointer" color="gray"/>
             </div>
           </header>
 
