@@ -6,10 +6,24 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Mic, Moon, Search, Sun } from "lucide-react";
+import {
+  Loader2,
+  Mic,
+  Moon,
+  Search,
+  Sun,
+  Bell,
+  Plus,
+  Upload,
+  Video,
+  StickyNote,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
 import { useSession } from "next-auth/react";
@@ -88,7 +102,7 @@ const Home = () => {
             <div className="flex grow mx-2 items-center  justify-center">
               <div className="relative md:max-w-[800px] grow ">
                 <Input
-                  className="rounded-3xl w-full pr-10 text-gray-200"
+                  className="rounded-3xl w-full pr-10 "
                   placeholder="Search"
                 />
                 <Search
@@ -96,7 +110,41 @@ const Home = () => {
                   color="gray"
                 />
               </div>
-              <Mic className="ml-1 cursor-pointer" color="gray"/>
+              <Mic className="ml-1 cursor-pointer" color="gray" />
+            </div>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="rounded-3xl cursor-pointer"
+                  >
+                    Create <Plus size={26} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>Create content</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem className="gap-6 cursor-pointer">
+                      <Upload />
+                      <span>Upload video</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="gap-6 cursor-pointer">
+                      <Video />
+                      <span>Upload shorts</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="gap-6 cursor-pointer">
+                      <StickyNote />
+                      <span>Create community post</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div>
+                <Bell className="cursor-pointer" />
+              </div>
             </div>
           </header>
 
