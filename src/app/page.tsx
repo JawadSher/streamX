@@ -12,7 +12,7 @@ import {
 import { Loader2, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import VideoCard from "@/components/video-card";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { imagePaths } from "@/lib/ImagePaths";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
