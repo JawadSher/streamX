@@ -111,6 +111,76 @@ const navItems = {
       url: `${API_ROUTES.CHANNEL}`,
       avatar: "",
     },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
+    {
+      title: "XYZ",
+      url: `${API_ROUTES.CHANNEL}`,
+      avatar: "",
+    },
   ],
 };
 
@@ -127,7 +197,7 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
     <Sidebar
       collapsible="icon"
       {...props}
-      className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
+      className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)] "
     >
       <SidebarHeader className="p-4 border-b">
         <h1 className="text-4xl font-mono text-center transition-all duration-200">
@@ -135,13 +205,13 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
         </h1>
       </SidebarHeader>
 
-      <SidebarContent className="overflow-y-auto">
-        <NavMain items={navItems.mediaItems} />
-        {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
-        <NavMain items={navItems.profileItems} />
-        {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
-        <NavMainSubscriptions items={navItems.subscriptionItems}  />
-      </SidebarContent>
+      <SidebarContent className="overflow-y-auto custom-scroll-bar">
+  <NavMain items={navItems.mediaItems} />
+  {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
+  <NavMain items={navItems.profileItems} />
+  {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
+  <NavMainSubscriptions items={navItems.subscriptionItems} />
+</SidebarContent>
 
       <SidebarFooter className="border-t p-2">
         {sessionStatus === "authenticated" ? (

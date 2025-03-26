@@ -120,3 +120,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+.custom-scroll-bar::-webkit-scrollbar {
+  width: 6px; 
+}
+
+.custom-scroll-bar::-webkit-scrollbar-track {
+  background: #1a1a1a; 
+  border-radius: 10px;
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb {
+  background: #555; 
+  border-radius: 10px;
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb:hover {
+  background: #888; 
+}
