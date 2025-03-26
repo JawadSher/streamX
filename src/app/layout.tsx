@@ -30,7 +30,9 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <ClientRootLayout>{children}</ClientRootLayout>
+          <ClientRootLayout>
+            {children}
+          </ClientRootLayout>
           <Toaster />
         </body>
       </AuthProvider>

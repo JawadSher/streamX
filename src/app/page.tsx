@@ -70,6 +70,7 @@ const Home = () => {
         <AppSidebar data={session?.user} sessionStatus={status} />
 
         <div className="flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 overflow-auto custom-scroll-bar">
+
           <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">
             <div className="flex items-center gap-3">
               <SidebarTrigger className="-ml-1 cursor-pointer" />
@@ -174,6 +175,7 @@ const Home = () => {
               ))}
             </div>
           </main>
+          
         </div>
       </SidebarProvider>
     </div>
