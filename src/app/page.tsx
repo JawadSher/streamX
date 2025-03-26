@@ -31,6 +31,7 @@ import { imagePaths } from "@/lib/ImagePaths";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 const Home = () => {
   const { setTheme } = useTheme();
@@ -115,7 +116,7 @@ const Home = () => {
               </div>
               <Mic className="ml-1 cursor-pointer" color="gray" />
             </div>
-            {status === "authenticated" && (
+            {status === "authenticated" ? (
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -151,6 +152,12 @@ const Home = () => {
                   <Bell className="cursor-pointer" />
                 </div>
               </div>
+            ) : (
+              <Link href="/sign-in">
+                <Button className="w-full flex grow cursor-pointer rounded-2xl h-8 bg-transparent border-[1px] border-blue-400 text-blue-400 hover:bg-transparent hover:shadow-blue-600">
+                  Sign in
+                </Button>
+              </Link>
             )}
           </header>
 

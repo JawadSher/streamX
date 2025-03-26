@@ -24,7 +24,6 @@ import {
   ThumbsUp,
   ThumbsDown,
   SquarePlay,
-
 } from "lucide-react";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { Separator } from "./ui/separator";
@@ -206,12 +205,24 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
       </SidebarHeader>
 
       <SidebarContent className="overflow-y-auto custom-scroll-bar">
-  <NavMain items={navItems.mediaItems} />
-  {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
-  <NavMain items={navItems.profileItems} />
-  {state === "expanded" && <Separator className="max-w-[230px] mx-auto" />}
-  <NavMainSubscriptions items={navItems.subscriptionItems} />
-</SidebarContent>
+        <NavMain items={navItems.mediaItems} />
+
+        {sessionStatus === "authenticated" && (
+          <>
+            {state === "expanded" && (
+              <Separator className="max-w-[230px] mx-auto" />
+            )}
+            <NavMain items={navItems.profileItems} />
+            {state === "expanded" && (
+              <Separator className="max-w-[230px] mx-auto" />
+            )}
+          </>
+        )}
+
+        {sessionStatus === "authenticated" && (
+          <NavMainSubscriptions items={navItems.subscriptionItems} />
+        )}
+      </SidebarContent>
 
       <SidebarFooter className="border-t p-2">
         {sessionStatus === "authenticated" ? (
@@ -234,7 +245,7 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
                 height={32}
               />
             ) : (
-              <Button className="w-full flex grow cursor-pointer">Login</Button>
+              <Button className="w-full flex grow cursor-pointer rounded-2xl h-8">Sign in</Button>
             )}
           </Link>
         )}
