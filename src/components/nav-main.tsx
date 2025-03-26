@@ -1,3 +1,4 @@
+// src/components/nav-main.tsx
 "use client";
 
 import { type LucideIcon } from "lucide-react";
@@ -21,24 +22,45 @@ export function NavMain({
 }) {
   const pathname = usePathname();
 
+  const handleNavigation = (url: string) => {
+
+    if (url === "/") {
+      window.location.href = url;
+    }
+  };
+
   return (
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
-              <Link
-                href={item.url}
-                title={item.title}
-                className={`flex items-center gap-6 ${
-                  pathname === item.url
-                    ? "bg-accent text-accent-foreground font-semibold"
-                    : "hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                {item.icon && <item.icon size={16} />}
-                <span className="text-[15px]">{item.title}</span>
-              </Link>
+              {item.url === "/" ? (
+                <div
+                  onClick={() => handleNavigation(item.url)}
+                  className={`flex items-center gap-6 cursor-pointer ${
+                    pathname === item.url
+                      ? "bg-accent text-accent-foreground font-semibold"
+                      : "hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  {item.icon && <item.icon size={16} />}
+                  <span className="text-[15px]">{item.title}</span>
+                </div>
+              ) : (
+                <Link
+                  href={item.url}
+                  title={item.title}
+                  className={`flex items-center gap-6 ${
+                    pathname === item.url
+                      ? "bg-accent text-accent-foreground font-semibold"
+                      : "hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                >
+                  {item.icon && <item.icon size={16} />}
+                  <span className="text-[15px]">{item.title}</span>
+                </Link>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

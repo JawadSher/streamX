@@ -1,4 +1,7 @@
 
+"use client"
+
+export const revalidate = 60;
 const Shorts = ({params}: {params: {id: string}}) => {
     const { id } = params;
 
