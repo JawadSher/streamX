@@ -11,7 +11,7 @@ export default function VideoGrid({
 }) {
   return (
     <div className="grid gap-x-2 gap-y-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-      {videos.map((video: any, i: number) => (
+      {/* {videos.map((video: any, i: number) => (
         <VideoCard
           key={i}
           views={video.views || "1234"}
@@ -19,7 +19,7 @@ export default function VideoGrid({
           title={video.title || `New Video ${i + 1}`}
           channelName={video.channelName || "Sample Channel"}
         />
-      ))}
+      ))} */}
     </div>
   );
 }

@@ -6,6 +6,13 @@ import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
 import { ZodError } from "zod";
+import { Kafka } from "kafkajs";
+import * as bcrypt from "bcryptjs";
+
+export const kafka = new Kafka({
+  clientId: "streamX",
+  brokers: ["192.168.10.2:9092"],
+})
 
 export const authConfigs: NextAuthConfig = {
   providers: [
@@ -69,23 +76,36 @@ export const authConfigs: NextAuthConfig = {
 
           let existingUser = await UserModel.findOne({ email: user.email });
           if (existingUser) return true;
-          else {
-            const newUser = new UserModel({
+
+            const hashPasswd = await bcrypt.hash(`streamX@${Date.now()}`, 10);
+            const newUserData = new UserModel({
               firstName: profile?.given_name || "John",
               lastName: profile?.family_name || "Doe",
               userName: user.email?.split("@")[0],
               email: user.email,
               channelName: user.email?.split("@")[0] + "-Channel",
               isVerified: true,
-              password: `streamX@${Date.now()}`,
+              password: hashPasswd,
               bio: "Hay guys im new in the streamX community",
             });
 
-            await newUser.save();
-            user._id = newUser._id.toString();
+            console.log("Sending to Kafka:", newUserData);
+
+            const producer = kafka.producer();
+            await producer.connect();
+            await producer.send({
+              topic: "sign-up",
+              messages: [{ key: "sign-up", value: JSON.stringify(newUserData) }],
+            })
+            
+            await producer.disconnect();
+
+            // await newUser.save();
+            user._id = newUserData._id.toString();
             return true;
-          }
+          
         } catch (error) {
+          console.error("Error sending to Kafka:", error);
           return false;
         }
       }
@@ -95,7 +115,6 @@ export const authConfigs: NextAuthConfig = {
     async jwt({
       token,
       user,
-      account,
     }: {
       token: JWT;
       user?: any;

@@ -1,8 +1,6 @@
 import VideoGrid from "@/components/video-grid";
 import { imagePaths } from "@/lib/ImagePaths";
 
-
-
 export const revalidate = 60;
 const Home = async () => {
   const videos = imagePaths.videoThumbnail;
