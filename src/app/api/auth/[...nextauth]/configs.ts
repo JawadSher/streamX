@@ -6,76 +6,119 @@ import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
 import { ZodError } from "zod";
-import { Kafka } from "kafkajs";
 import * as bcrypt from "bcryptjs";
+import { Kafka } from "kafkajs";
+import { connectRedis } from "@/lib/redis";
+import { RedisAdapter } from "@/lib/redisAdapter";
 
 export const kafka = new Kafka({
-  clientId: "streamX",
-  brokers: ["192.168.10.2:9092"],
-})
+  clientId: process.env.KAFKA_CLIENT_ID,
+  brokers: [`${process.env.KAFKA_BROKER_IP}:${process.env.KAFKA_BROKER_PORT}`],
+});
 
-export const authConfigs: NextAuthConfig = {
-  providers: [
-    Credentials({
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
+export async function cachedUserData(userId: string) {
+  const user = await UserModel.findById(userId);
+  if (user) {
+    const userData = {
+      id: user._id.toString(), 
+      email: user.email,
+      userName: user.userName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      channelName: user.channelName,
+      bio: user.bio,
+      watchHistory: user.watchHistory,
+    };
+    const redis = await connectRedis();
+    await redis.hset(`user:${userId}`, userData); 
+    await redis.expire(`user:${userId}`, 86400); 
+  }
+}
 
-      authorize: async (credentials) => {
-        let user = null;
+export async function initAuthConfigs() {
+  const redisClient = await connectRedis();
 
-        const userData = {
-          email: credentials.email,
-          password: credentials.password,
-        };
-        const { email, password } = await loginSchema.parseAsync(userData);
+  const authConfigs: NextAuthConfig = {
+    adapter: RedisAdapter(redisClient),
+    providers: [
+      Credentials({
+        credentials: {
+          email: { label: "Email", type: "email" },
+          password: { label: "Password", type: "password" },
+        },
 
-        try {
-          await connectDB();
+        authorize: async (credentials) => {
+          let user = null;
 
-          user = await UserModel.findOne({ email });
-          if (!user) {
-            throw new Error("Invalid email or password");
-          }
-
-          const isPasswdCorrect = await user.isPasswordCorrect(password);
-          if (!isPasswdCorrect) {
-            throw new Error("Invalid email or password");
-          }
-
-          return {
-            _id: user._id.toString(),
-            email: user.email,
-            userName: user.userName,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            channelName: user.channelName,
-            phoneNumber: user.phoneNumber,
-            country: user.country,
-            isVerified: user.isVerified,
+          const userData = {
+            email: credentials.email,
+            password: credentials.password,
           };
-        } catch (error: any) {
-          if (error instanceof ZodError) {
+          const { email, password } = await loginSchema.parseAsync(userData);
+
+          try {
+            await connectDB();
+
+            user = await UserModel.findOne({ email });
+            if (!user) {
+              throw new Error("Invalid email or password");
+            }
+
+            const isPasswdCorrect = await user.isPasswordCorrect(password);
+            if (!isPasswdCorrect) {
+              throw new Error("Invalid email or password");
+            }
+
+            await cachedUserData(user._id.toString());
+
+            return {
+              _id: user._id.toString(),
+              email: user.email,
+              userName: user.userName,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              channelName: user.channelName,
+              phoneNumber: user.phoneNumber,
+              country: user.country,
+              isVerified: user.isVerified,
+            };
+          } catch (error: any) {
+            if (error instanceof ZodError) {
+              return null;
+            }
             return null;
           }
-          return null;
-        }
-      },
-    }),
-    GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_CLIENT_ID,
-      clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET,
-    }),
-  ],
-  callbacks: {
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
-        try {
-          await connectDB();
+        },
+      }),
+      GoogleProvider({
+        clientId: process.env.AUTH_GOOGLE_CLIENT_ID,
+        clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET,
+      }),
+    ],
+    callbacks: {
+      async signIn({ user, account, profile }) {
+        if (account?.provider === "google") {
+          try {
+            await connectDB();
 
-          let existingUser = await UserModel.findOne({ email: user.email });
-          if (existingUser) return true;
+            let existingUser = await UserModel.findOne({ email: user.email });
+            if (existingUser) {
+              const redis = await connectRedis();
+
+              await redis.hset(`user:${existingUser._id}`, {
+                id: existingUser._id.toString(),
+                email: existingUser.email,
+                userName: existingUser.userName,
+                firstName: existingUser.firstName,
+                lastName: existingUser.lastName,
+                channelName: existingUser.channelName,
+                isVerified: existingUser.isVerified,
+                bio: existingUser.bio,
+              });
+
+              await redis.expire(`user:${existingUser._id}`, 86400);
+              return true;
+            }
 
             const hashPasswd = await bcrypt.hash(`streamX@${Date.now()}`, 10);
             const newUserData = new UserModel({
@@ -95,80 +138,105 @@ export const authConfigs: NextAuthConfig = {
             await producer.connect();
             await producer.send({
               topic: "sign-up",
-              messages: [{ key: "sign-up", value: JSON.stringify(newUserData) }],
-            })
-            
+              messages: [
+                { key: "sign-up", value: JSON.stringify(newUserData) },
+              ],
+            });
+
             await producer.disconnect();
 
             // await newUser.save();
             user._id = newUserData._id.toString();
             return true;
-          
-        } catch (error) {
-          console.error("Error sending to Kafka:", error);
-          return false;
+          } catch (error) {
+            console.error("Error sending to Kafka:", error);
+            return false;
+          }
+        } else if(user){
+          const redis = await connectRedis();
+          await redis.hset(`user:${user._id}`, {
+            id: user._id,
+            email: user.email,
+            userName: user.userName,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            channelName: user.channelName,
+            phoneNumber: user.phoneNumber,
+            country: user.country,
+            isVerified: user.isVerified,
+          });
+          await redis.expire(`user:${user._id}`, 86400);
         }
-      }
-      return true;
+        return true;
+      },
+
+      async jwt({ token, user }: { token: JWT; user?: any }) {
+        if (user) {
+          token._id = user._id;
+          token.email = user.email;
+          token.userName = user.userName;
+          token.firstName = user.firstName;
+          token.lastName = user.lastName;
+          token.channelName = user.channelName;
+          token.phoneNumber = user.phoneNumber;
+          token.country = user.country;
+          token.isVerified = user.isVerified;
+        }
+
+        return token;
+      },
+
+      async session({ session, user, token }) {
+        if (user) {
+          session.user = {
+            ...session.user,
+            _id: user.id || user._id,
+            email: user.email || "",
+            userName: user.userName || "",
+            firstName: user.firstName || "",
+            lastName: user.lastName || "",
+            channelName: user.channelName || "",
+            phoneNumber: user.phoneNumber || "",
+            country: user.country || "",
+            isVerified: user.isVerified || false,
+          };
+        } else if (token) {
+          session.user = {
+            ...session.user,
+            _id: token._id,
+            email: token.email || "",
+            userName: token.userName || "",
+            firstName: token.firstName || "",
+            lastName: token.lastName || "",
+            channelName: token.channelName || "",
+            phoneNumber: token.phoneNumber || "",
+            country: token.country || "",
+            isVerified: token.isVerified || false,
+          };
+        }
+
+        return session;
+      },
+
+      async redirect({ url, baseUrl }) {
+        if (url.startsWith("/")) return `${baseUrl}${url}`;
+        return baseUrl;
+      },
     },
 
-    async jwt({
-      token,
-      user,
-    }: {
-      token: JWT;
-      user?: any;
-      account?: any;
-    }) {
-      if (user) {
-        token._id = user._id;
-        token.email = user.email;
-        token.userName = user.userName;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
-        token.channelName = user.channelName;
-        token.phoneNumber = user.phoneNumber;
-        token.country = user.country;
-        token.isVerified = user.isVerified;
-      }
-
-      return token;
+    pages: {
+      signIn: "/sign-in",
+      error: "/sign-in",
     },
-
-    async session({ session, token }: { session: Session; token: JWT }) {
-      if (token) {
-        session.user = {
-          ...session.user,
-          _id: token._id,
-          email: token.email,
-          userName: token.userName,
-          firstName: token.firstName,
-          lastName: token.lastName,
-          channelName: token.channelName,
-          phoneNumber: token.phoneNumber,
-          country: token.country,
-          isVerified: token.isVerified,
-        };
-      }
-
-      return session;
+    session: {
+      strategy: "database",
+      maxAge: 30 * 24 * 60 * 60,
     },
+    secret: process.env.NEXTAUTH_SECRET,
+  };
 
-    async redirect({url, baseUrl}) {
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      return baseUrl;
-    },
-  },
+  return authConfigs;
+}
 
-  pages: {
-    signIn: "/sign-in",
-    error: "/sign-in",
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-};
-
+const authConfigs = await initAuthConfigs();
 export const { handlers, signIn, signOut, auth } = NextAuth(authConfigs);

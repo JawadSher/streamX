@@ -1,44 +1,46 @@
-import { createClient, RedisClientType } from 'redis';
-import { URL } from 'url'; 
+import { Redis } from "@upstash/redis"
 
-const REDIS_URI = process.env.REDIS_URI || 'redis://localhost:6379';
+const REDIS_URI = process.env.UPSTASH_REDIS_URI!;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_TOKEN;
 
-if (!REDIS_URI) {
-  throw new Error('REDIS_URI is not defined');
+if (!REDIS_URI || !REDIS_TOKEN) {
+  throw new Error("UPSTASH_REDIS_URI and UPSTASH_REDIS_TOKEN must be defined");
 }
 
 interface RedisCache {
-  client: RedisClientType | null;
-  promise: Promise<RedisClientType> | null;
+  client: Redis | null;
+  promise: Promise<Redis> | null;
 }
 
-let cached: RedisCache = global.redis;
-if (!cached) {
-  cached = global.redis = {
-    client: null,
-    promise: null,
-  };
+let cached: RedisCache = (global as any).redis || { client: null, promise: null };
+if (!(global as any).redis) {
+  (global as any).redis = cached;
 }
 
-export async function connectRedis(): Promise<RedisClientType> {
+export async function connectRedis(): Promise<Redis> {
   if (cached.client) {
     console.log('Using cached Redis client');
     return cached.client;
   }
 
   if (!cached.promise) {
-    const client: RedisClientType = createClient({
-      url: new URL(REDIS_URI).toString(),
-    });
+    console.log('Initiating Redis connection');
 
-    client.on('error', (error) => {
-      console.error('Redis Client Error: ', error);
-    });
+    cached.promise = (async () => {
+      const client = new Redis({
+        url: REDIS_URI,
+        token: REDIS_TOKEN
+      });
 
-    cached.promise = client.connect().then(() => {
-      console.log('Redis Connected');
-      return client;
-    });
+      try {
+        await client.ping();
+        console.log("Redis connection successful");
+        return client;
+      } catch (error) {
+        console.error("Failed to connect to Redis: ", error);
+        throw error;
+      }
+    })();
   }
 
   try {
