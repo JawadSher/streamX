@@ -5,11 +5,9 @@ import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
-import { ZodError } from "zod";
 import * as bcrypt from "bcryptjs";
 import { Kafka } from "kafkajs";
 import { connectRedis } from "@/lib/redis";
-import { RedisAdapter } from "@/lib/redisAdapter";
 import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
 
 export const kafka = new Kafka({
@@ -139,7 +137,7 @@ export async function initAuthConfigs() {
             const newUserData = new UserModel({
               firstName: profile?.given_name || "John",
               lastName: profile?.family_name || "Doe",
-              userName: user.email?.split("@")[0],
+              userName: user.email?.split("@")[0].replace(".", ""),
               email: user.email,
               channelName: user.email?.split("@")[0] + "-Channel",
               isVerified: true,
@@ -171,7 +169,7 @@ export async function initAuthConfigs() {
               const newUser = new UserModel({
                 firstName: profile?.given_name || "John",
                 lastName: profile?.family_name || "Doe",
-                userName: user.email?.split("@")[0],
+                userName: user.email?.split("@")[0].replace(".", ""),
                 email: user.email,
                 channelName: user.email?.split("@")[0] + "-Channel",
                 isVerified: true,
