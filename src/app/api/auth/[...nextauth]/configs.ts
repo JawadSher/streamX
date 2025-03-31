@@ -17,12 +17,12 @@ export const kafka = new Kafka({
 
 export async function cachedUserData(userId: string) {
   const user = await UserModel.findById(userId);
-  if(!user) return;
+  if (!user) return;
 
   try {
     if (user) {
       const userData = {
-        id: user._id.toString(), 
+        id: user._id.toString(),
         email: user.email,
         userName: user.userName,
         firstName: user.firstName,
@@ -32,11 +32,11 @@ export async function cachedUserData(userId: string) {
         watchHistory: user.watchHistory,
       };
       const redis = await connectRedis();
-      await redis.hset(`app:user:${userId}`, userData); 
+      await redis.hset(`app:user:${userId}`, userData);
       await redis.expire(`app:user:${userId}`, 86400);
     }
   } catch (error) {
-      console.error("Failed to cache the user data: ", error);
+    console.error("Failed to cache the user data: ", error);
   }
 }
 
@@ -60,7 +60,7 @@ export async function initAuthConfigs() {
         },
 
         authorize: async (credentials) => {
-          if(!credentials?.email || !credentials?.password) return null;
+          if (!credentials?.email || !credentials?.password) return null;
 
           let user = null;
 
@@ -116,20 +116,28 @@ export async function initAuthConfigs() {
 
             let existingUser = await UserModel.findOne({ email: user.email });
             if (existingUser) {
-              const redis = await connectRedis();
+              try {
+                const redis = await connectRedis();
+                // Using app:user: prefix consistently to avoid conflicts with NextAuth
+                await redis.hset(`app:user:${existingUser._id}`, {
+                  id: existingUser._id.toString(),
+                  email: existingUser.email,
+                  userName: existingUser.userName,
+                  firstName: existingUser.firstName,
+                  lastName: existingUser.lastName,
+                  channelName: existingUser.channelName,
+                  isVerified: existingUser.isVerified,
+                  bio: existingUser.bio,
+                });
+                await redis.expire(`app:user:${existingUser._id}`, 86400);
+              } catch (redisError) {
+                console.error(
+                  "Redis caching error for existing user:",
+                  redisError
+                );
+              }
 
-              await redis.hset(`app:user:${existingUser._id}`, {
-                id: existingUser._id.toString(),
-                email: existingUser.email,
-                userName: existingUser.userName,
-                firstName: existingUser.firstName,
-                lastName: existingUser.lastName,
-                channelName: existingUser.channelName,
-                isVerified: existingUser.isVerified,
-                bio: existingUser.bio,
-              });
-
-              await redis.expire(`app:user:${existingUser._id}`, 86400);
+              user._id = existingUser._id.toString();
               return true;
             }
 
@@ -142,72 +150,136 @@ export async function initAuthConfigs() {
               channelName: user.email?.split("@")[0] + "-Channel",
               isVerified: true,
               password: hashPasswd,
-              bio: "Hay guys im new in the streamX community",
+              bio: "Hey guys I'm new in the streamX community",
             });
-
-            console.log("Sending to Kafka:", newUserData);
-
-            const producer = kafka.producer();
-            await producer.connect();
-            await producer.send({
-              topic: "sign-up",
-              messages: [
-                { key: "sign-up", value: JSON.stringify(newUserData) },
-              ],
-            });
-
-            await producer.disconnect();
-
-            // await newUser.save();
-            user._id = newUserData._id.toString();
-            return true;
-          } catch (error) {
-            console.error("Error sending to Kafka:", error);
 
             try {
-              const hashPasswd = await bcrypt.hash(`streamX@${Date.now()}`, 10);
-              const newUser = new UserModel({
-                firstName: profile?.given_name || "John",
-                lastName: profile?.family_name || "Doe",
-                userName: user.email?.split("@")[0].replace(".", ""),
-                email: user.email,
-                channelName: user.email?.split("@")[0] + "-Channel",
-                isVerified: true,
-                password: hashPasswd,
-                bio: "Hey guys I'm new in the streamX community",
+              console.log("Sending to Kafka:", newUserData);
+              const producer = kafka.producer();
+              await producer.connect();
+              await producer.send({
+                topic: "sign-up",
+                messages: [
+                  {
+                    key: "sign-up",
+                    value: JSON.stringify(newUserData),
+                    headers: {
+                      source: "google-auth",
+                      timestamp: Date.now().toString(),
+                    },
+                  },
+                ],
               });
+              await producer.disconnect();
 
-              await connectDB();
-              await newUser.save();
-              user._id = newUser._id.toString();
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+
+              const recentUser = await UserModel.findOne({
+                email: newUserData.email,
+              });
+              if (!recentUser) {
+                throw new Error(
+                  "User creation via Kafka appears to have failed"
+                );
+              }
+
+              try {
+                const redis = await connectRedis();
+                await redis.hset(`app:user:${recentUser._id}`, {
+                  id: recentUser._id.toString(),
+                  email: recentUser.email,
+                  userName: recentUser.userName,
+                  firstName: recentUser.firstName,
+                  lastName: recentUser.lastName,
+                  channelName: recentUser.channelName,
+                  isVerified: recentUser.isVerified,
+                  bio: recentUser.bio,
+                });
+                await redis.expire(`app:user:${recentUser._id}`, 86400);
+              } catch (redisError) {
+                console.error(
+                  "Redis caching error for Kafka-created user:",
+                  redisError
+                );
+              }
+
+              user._id = recentUser._id.toString();
               return true;
-            }catch(error){
-              console.error("Database fallback error:", error);
-              return false;
+            } catch (kafkaError) {
+              console.error(
+                "Error with Kafka flow, falling back to direct DB creation:",
+                kafkaError
+              );
+
+              try {
+                const newUser = new UserModel({
+                  firstName: profile?.given_name || "John",
+                  lastName: profile?.family_name || "Doe",
+                  userName: user.email?.split("@")[0].replace(".", ""),
+                  email: user.email,
+                  channelName: user.email?.split("@")[0] + "-Channel",
+                  isVerified: true,
+                  password: hashPasswd,
+                  bio: "Hey guys I'm new in the streamX community",
+                });
+
+                await newUser.save();
+
+                try {
+                  const redis = await connectRedis();
+                  await redis.hset(`app:user:${newUser._id}`, {
+                    id: newUser._id.toString(),
+                    email: newUser.email,
+                    userName: newUser.userName,
+                    firstName: newUser.firstName,
+                    lastName: newUser.lastName,
+                    channelName: newUser.channelName,
+                    isVerified: newUser.isVerified,
+                    bio: newUser.bio,
+                  });
+                  await redis.expire(`app:user:${newUser._id}`, 86400);
+                } catch (redisError) {
+                  console.error(
+                    "Redis caching error for directly created user:",
+                    redisError
+                  );
+                }
+
+                user._id = newUser._id.toString();
+                return true;
+              } catch (dbError) {
+                console.error("Complete failure in user creation:", dbError);
+                return false;
+              }
             }
+          } catch (overallError) {
+            console.error("Overall Google auth error:", overallError);
+            return false;
           }
-        } else if(user){
+        } else if (user) {
           try {
             const redis = await connectRedis();
-          await redis.hset(`user:${user._id}`, {
-            id: user._id,
-            email: user.email,
-            userName: user.userName,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            channelName: user.channelName,
-            phoneNumber: user.phoneNumber,
-            country: user.country,
-            isVerified: user.isVerified,
-          });
-          await redis.expire(`app:user:${user._id}`, 86400);
-          } catch (error) {
-            console.error("Redis caching error in credentials flow:", error);
+            await redis.hset(`app:user:${user._id}`, {
+              id: user._id,
+              email: user.email,
+              userName: user.userName,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              channelName: user.channelName,
+              phoneNumber: user.phoneNumber,
+              country: user.country,
+              isVerified: user.isVerified,
+            });
+            await redis.expire(`app:user:${user._id}`, 86400);
+          } catch (redisError) {
+            console.error(
+              "Redis caching error in credentials flow:",
+              redisError
+            );
           }
         }
         return true;
       },
-
       async jwt({ token, user }: { token: JWT; user?: any }) {
         if (user) {
           token._id = user._id;
