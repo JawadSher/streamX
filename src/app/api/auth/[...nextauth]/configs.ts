@@ -205,7 +205,6 @@ export async function initAuthConfigs() {
         if (user) {
           token._id = user._id;
           token.email = user.email;
-          token.isVerified = user.isVerified;
         }
         return token;
       },
@@ -214,7 +213,6 @@ export async function initAuthConfigs() {
           session.user = {
             _id: token._id,
             email: token.email,
-            isVerified: token.isVerified,
           };
 
           if (token._id) {

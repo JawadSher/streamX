@@ -12,6 +12,7 @@ declare module 'next-auth' {
         phoneNumber?: string;
         country?: string;
         isVerified?: boolean;
+        id?: string;
     }
 
     interface Session {
@@ -25,6 +26,7 @@ declare module 'next-auth' {
             phoneNumber?: string;
             country?: string;
             isVerified?: boolean;
+            id?: string;
         } & DefaultSession['user'];
     }
 }
@@ -40,5 +42,6 @@ declare module 'next-auth/jwt' {
         phoneNumber?: string;
         country?: string;
         isVerified?: boolean;
+        id?: string;
     }
 }

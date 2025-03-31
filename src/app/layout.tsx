@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
-import { auth } from "@/app/api/auth/[...nextauth]/configs";
+import { auth, getUserFromRedis } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner"
 
@@ -23,6 +23,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  
+  const userId = session?.user?._id;
+  if(userId){
+    const userData = await getUserFromRedis(userId);
+    console.log(userData);
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>
