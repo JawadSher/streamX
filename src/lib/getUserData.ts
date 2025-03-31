@@ -4,9 +4,12 @@ import UserModel from "@/models/user.model";
 
 export async function getUserData(userId: string) {
   const redis = await connectRedis();
-  const cachedUser = await redis.get(`user:${userId}`);
+  const cachedUser: string | null = await redis.get(`user:${userId}`);
 
-  if (cachedUser) return JSON.parse(cachedUser);
+  if (cachedUser){
+    console.log("Cached User --->: ", cachedUser); 
+    return JSON.parse(cachedUser)
+  };
 
   await connectDB();
   const user = await UserModel.findById(userId);

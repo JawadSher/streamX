@@ -1,10 +1,9 @@
-import { randomUUID } from "crypto";
-import { connectRedis } from "./redis";
+import { v4 as uuidv4 } from 'uuid';
 
 export function RedisAdapter(client: any): any {
   return {
     async createUser(user: Record<string, any>): Promise<Record<string, any>> {
-      const id = randomUUID();
+      const id = uuidv4();
       const newUser = { ...user, id };
 
       try {
@@ -92,7 +91,7 @@ export function RedisAdapter(client: any): any {
       const session = { sessionToken, userId, expires: expires.toISOString() };
       try {
         await client.set(`session:${sessionToken}`, JSON.stringify(session));
-        await client.expireAt(
+        await client.expireat(
           `session:${sessionToken}`,
           Math.floor(expires.getTime() / 1000)
         );

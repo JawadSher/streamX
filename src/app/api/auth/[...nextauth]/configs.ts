@@ -10,6 +10,7 @@ import * as bcrypt from "bcryptjs";
 import { Kafka } from "kafkajs";
 import { connectRedis } from "@/lib/redis";
 import { RedisAdapter } from "@/lib/redisAdapter";
+import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
 
 export const kafka = new Kafka({
   clientId: process.env.KAFKA_CLIENT_ID,
@@ -18,28 +19,41 @@ export const kafka = new Kafka({
 
 export async function cachedUserData(userId: string) {
   const user = await UserModel.findById(userId);
-  if (user) {
-    const userData = {
-      id: user._id.toString(), 
-      email: user.email,
-      userName: user.userName,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      channelName: user.channelName,
-      bio: user.bio,
-      watchHistory: user.watchHistory,
-    };
-    const redis = await connectRedis();
-    await redis.hset(`user:${userId}`, userData); 
-    await redis.expire(`user:${userId}`, 86400); 
+  if(!user) return;
+
+  try {
+    if (user) {
+      const userData = {
+        id: user._id.toString(), 
+        email: user.email,
+        userName: user.userName,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        channelName: user.channelName,
+        bio: user.bio,
+        watchHistory: user.watchHistory,
+      };
+      const redis = await connectRedis();
+      await redis.hset(`app:user:${userId}`, userData); 
+      await redis.expire(`app:user:${userId}`, 86400);
+    }
+  } catch (error) {
+      console.error("Failed to cache the user data: ", error);
   }
 }
 
 export async function initAuthConfigs() {
-  const redisClient = await connectRedis();
+  let redisClient;
+
+  try {
+    redisClient = await connectRedis();
+  } catch (error) {
+    console.error("Redis Connection failed: ", error);
+    throw new Error("Failed to initalize authentication system");
+  }
 
   const authConfigs: NextAuthConfig = {
-    adapter: RedisAdapter(redisClient),
+    adapter: UpstashRedisAdapter(redisClient),
     providers: [
       Credentials({
         credentials: {
@@ -48,6 +62,8 @@ export async function initAuthConfigs() {
         },
 
         authorize: async (credentials) => {
+          if(!credentials?.email || !credentials?.password) return null;
+
           let user = null;
 
           const userData = {
@@ -82,10 +98,8 @@ export async function initAuthConfigs() {
               country: user.country,
               isVerified: user.isVerified,
             };
-          } catch (error: any) {
-            if (error instanceof ZodError) {
-              return null;
-            }
+          } catch (error) {
+            console.error("Authorization error: ", error);
             return null;
           }
         },
@@ -93,6 +107,7 @@ export async function initAuthConfigs() {
       GoogleProvider({
         clientId: process.env.AUTH_GOOGLE_CLIENT_ID,
         clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET,
+        allowDangerousEmailAccountLinking: true,
       }),
     ],
     callbacks: {
@@ -105,7 +120,7 @@ export async function initAuthConfigs() {
             if (existingUser) {
               const redis = await connectRedis();
 
-              await redis.hset(`user:${existingUser._id}`, {
+              await redis.hset(`app:user:${existingUser._id}`, {
                 id: existingUser._id.toString(),
                 email: existingUser.email,
                 userName: existingUser.userName,
@@ -116,7 +131,7 @@ export async function initAuthConfigs() {
                 bio: existingUser.bio,
               });
 
-              await redis.expire(`user:${existingUser._id}`, 86400);
+              await redis.expire(`app:user:${existingUser._id}`, 86400);
               return true;
             }
 
@@ -150,10 +165,32 @@ export async function initAuthConfigs() {
             return true;
           } catch (error) {
             console.error("Error sending to Kafka:", error);
-            return false;
+
+            try {
+              const hashPasswd = await bcrypt.hash(`streamX@${Date.now()}`, 10);
+              const newUser = new UserModel({
+                firstName: profile?.given_name || "John",
+                lastName: profile?.family_name || "Doe",
+                userName: user.email?.split("@")[0],
+                email: user.email,
+                channelName: user.email?.split("@")[0] + "-Channel",
+                isVerified: true,
+                password: hashPasswd,
+                bio: "Hey guys I'm new in the streamX community",
+              });
+
+              await connectDB();
+              await newUser.save();
+              user._id = newUser._id.toString();
+              return true;
+            }catch(error){
+              console.error("Database fallback error:", error);
+              return false;
+            }
           }
         } else if(user){
-          const redis = await connectRedis();
+          try {
+            const redis = await connectRedis();
           await redis.hset(`user:${user._id}`, {
             id: user._id,
             email: user.email,
@@ -165,7 +202,10 @@ export async function initAuthConfigs() {
             country: user.country,
             isVerified: user.isVerified,
           });
-          await redis.expire(`user:${user._id}`, 86400);
+          await redis.expire(`app:user:${user._id}`, 86400);
+          } catch (error) {
+            console.error("Redis caching error in credentials flow:", error);
+          }
         }
         return true;
       },
@@ -220,6 +260,7 @@ export async function initAuthConfigs() {
 
       async redirect({ url, baseUrl }) {
         if (url.startsWith("/")) return `${baseUrl}${url}`;
+        if (url.startsWith(baseUrl)) return url;
         return baseUrl;
       },
     },
