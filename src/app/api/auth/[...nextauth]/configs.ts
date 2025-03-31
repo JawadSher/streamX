@@ -34,7 +34,7 @@ async function storeUserInRedis(user: any) {
     };
 
     await redis.hset(`app:user:${userId}`, userData);
-    await redis.expire(`app:user:${userId}`, 86400); // 24 hours
+    await redis.expire(`app:user:${userId}`, 86400); 
     return true;
   } catch (error) {
     console.error("Redis storage error:", error);
