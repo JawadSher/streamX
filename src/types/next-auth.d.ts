@@ -7,7 +7,7 @@ declare module 'next-auth' {
         firstName?: string;
         lastName?: string;
         userName?: string;
-        email?: string;
+        email?: string | undefined;
         channelName?: string;
         phoneNumber?: string;
         country?: string;
@@ -20,7 +20,7 @@ declare module 'next-auth' {
             firstName?: string;
             lastName?: string;
             userName?: string;
-            email?: string;
+            email?: string | undefined;
             channelName?: string;
             phoneNumber?: string;
             country?: string;
@@ -35,7 +35,7 @@ declare module 'next-auth/jwt' {
         firstName?: string;
         lastName?: string;
         userName?: string;
-        email?: string;
+        email?: string | undefined;
         channelName?: string;
         phoneNumber?: string;
         country?: string;
