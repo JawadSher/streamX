@@ -15,7 +15,7 @@ export const kafka = new Kafka({
   brokers: [`${process.env.KAFKA_BROKER_IP}:${process.env.KAFKA_BROKER_PORT}`],
 });
 
-async function storeUserInRedis(user: any) {
+export async function storeUserInRedis(user: any) {
   if (!user || !user._id) return false;
 
   try {
@@ -42,7 +42,7 @@ async function storeUserInRedis(user: any) {
   }
 }
 
-async function getUserFromRedis(userId: string) {
+export async function getUserFromRedis(userId: string) {
   if (!userId) return null;
 
   try {
