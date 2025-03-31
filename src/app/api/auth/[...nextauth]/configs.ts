@@ -163,7 +163,6 @@ export async function initAuthConfigs() {
               });
               await producer.disconnect();
 
-              // Wait for Kafka to process user creation
               await new Promise((resolve) => setTimeout(resolve, 1500));
 
               const newUser = await UserModel.findOne({ email: newUserData.email });
