@@ -15,6 +15,8 @@ import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { checkUserName } from "@/app/actions/checkUserName";
+import { debounce } from "lodash";
 
 type AuthSignupResult = {
   success: boolean;
@@ -28,7 +30,6 @@ type AuthSignupResult = {
   };
   error?: string;
 };
-
 
 export function SignupForm({
   className,
@@ -50,13 +51,13 @@ export function SignupForm({
   const router = useRouter();
 
   useEffect(() => {
-    if(state?.success){
+    if (state?.success) {
       toast.success("Account created successfully", {
         duration: 3000,
-      })
+      });
       router.push(API_ROUTES.HOME);
     }
-  }, [state])
+  }, [state]);
 
   const handleSubmit = async (formData: FormData) => {
     const data = {
@@ -102,10 +103,53 @@ export function SignupForm({
       userName: data.userName,
       email: data.email,
       password: data.password,
-    }
+    };
 
     formAction(readyData);
   };
+
+  const [userName, setUserName] = useState<string>("");
+  const [userNameAvailable, setUsernameAvailable] = useState("");
+  const getUsername = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUserName(value);
+  };
+
+  const debouncedCheck = debounce(async (value) => {
+    if(value){
+      const result = await checkUserName(value);
+      
+      if(result?.status === "available"){
+        setUsernameAvailable(result.message);
+        setErrors({
+          userName: ""
+        })
+        
+      }else if(result?.status === "error"){
+        setErrors({
+          userName: result.message
+        })
+        setUsernameAvailable("");
+      }else{
+        setErrors({
+          userName: ""
+        })
+        setUsernameAvailable("");
+      }
+    }
+  }, 1000)
+
+  useEffect(() => {
+    debouncedCheck(userName);
+
+    if(userName.length === 0){
+      setErrors({
+        userName: ""
+      })
+      setUsernameAvailable("");
+    }
+    return () => debouncedCheck.cancel();
+  }, [userName]);
 
   return (
     <div className="flex flex-col gap-4 ">
@@ -159,7 +203,12 @@ export function SignupForm({
                 placeholder="@username"
                 required
                 aria-invalid={errors?.userName ? "true" : "false"}
+                value={userName}
+                onChange={getUsername}
               />
+              {userNameAvailable && (
+                <p className="text-sm text-green-400">{userNameAvailable}</p>
+              )}
               {errors?.userName && (
                 <p className="text-sm text-destructive">{errors?.userName}</p>
               )}
