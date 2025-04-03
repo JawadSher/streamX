@@ -31,6 +31,7 @@ export async function storeUserInRedis(user: any) {
       channelName: user.channelName || "",
       isVerified: user.isVerified || false,
       bio: user.bio || "",
+      avatar: user.image || "",
     };
 
     await redis.hset(`app:user:${userId}`, userData);
@@ -142,6 +143,8 @@ export async function initAuthConfigs() {
               isVerified: true,
               password: securePassword,
               bio: "Hey guys I'm new in the streamX community",
+              avatar: user?.image,
+              storageProvider: 'google'
             };
 
             try {

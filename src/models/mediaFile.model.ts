@@ -53,7 +53,7 @@ const mediaFileSchema = new Schema<IMediaFile>(
     },
     storageProvider: {
       type: String,
-      enum: ["local", "aws", "cloudinary", "imagekit"],
+      enum: ["local", "aws", "cloudinary", "imagekit", 'google'],
       default: "local",
     },
     status: {
