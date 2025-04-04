@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
-import { auth, getUserFromRedis } from "@/app/api/auth/[...nextauth]/configs";
+import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner"
+import { getUserFromRedis } from "@/lib/getUserFromRedis";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -23,11 +24,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+
+  console.log(session?.user)
   
   const userId = session?.user?._id;
   if(userId){
     const userData = await getUserFromRedis(userId);
-    console.log(userData);
+    console.log("-----------> User Fetched From Redis: ", userData);
   }
 
   return (
