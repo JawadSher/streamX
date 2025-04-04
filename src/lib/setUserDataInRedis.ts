@@ -1,4 +1,3 @@
-import { connectDB } from "./database";
 import { fetchUserFromMongoDB } from "./fetchUserFromMongoDB";
 import { connectRedis } from "./redis";
 
