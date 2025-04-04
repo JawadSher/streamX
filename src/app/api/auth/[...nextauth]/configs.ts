@@ -9,6 +9,7 @@ import * as bcrypt from "bcryptjs";
 import { Kafka } from "kafkajs";
 import { connectRedis } from "@/lib/redis";
 import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
+import mongoose from "mongoose";
 
 export const kafka = new Kafka({
   clientId: process.env.KAFKA_CLIENT_ID,
@@ -20,7 +21,8 @@ export async function storeUserInRedis(user: any) {
 
   try {
     const redis = await connectRedis();
-    const userId = typeof user._id === "string" ? user._id : user._id.toString();
+    const userId =
+      typeof user._id === "string" ? user._id : user._id.toString();
 
     const userData = {
       id: userId,
@@ -30,12 +32,16 @@ export async function storeUserInRedis(user: any) {
       lastName: user.lastName || "",
       channelName: user.channelName || "",
       isVerified: user.isVerified || false,
+      watchHistory: user.watchHistory,
       bio: user.bio || "",
-      avatar: user.image || "",
+      phoneNumber: user.phoneNumber || "",
+      accountStatus: user.accountStatus || "active",
+      avatar: user.avatarURL || "",
+      banner: user.bannerURL || "",
     };
 
     await redis.hset(`app:user:${userId}`, userData);
-    await redis.expire(`app:user:${userId}`, 86400); 
+    await redis.expire(`app:user:${userId}`, 86400);
     return true;
   } catch (error) {
     console.error("Redis storage error:", error);
@@ -75,7 +81,10 @@ export async function initAuthConfigs() {
         },
         authorize: async (credentials) => {
           if (!credentials?.email || !credentials?.password) return null;
-          const userData = { email: credentials.email, password: credentials.password };
+          const userData = {
+            email: credentials.email,
+            password: credentials.password,
+          };
 
           try {
             const { email, password } = await loginSchema.parseAsync(userData);
@@ -105,7 +114,11 @@ export async function initAuthConfigs() {
             await connectRedis();
             await storeUserInRedis(userInfo);
 
-            return { _id: user._id.toString(), email: user.email, isVerified: user.isVerified };
+            return {
+              _id: user._id.toString(),
+              email: user.email,
+              isVerified: user.isVerified,
+            };
           } catch (error) {
             console.error("Authorization error: ", error);
             return null;
@@ -144,7 +157,7 @@ export async function initAuthConfigs() {
               password: securePassword,
               bio: "Hey guys I'm new in the streamX community",
               avatar: user?.image,
-              storageProvider: 'google'
+              storageProvider: "google",
             };
 
             try {
@@ -168,9 +181,13 @@ export async function initAuthConfigs() {
 
               await new Promise((resolve) => setTimeout(resolve, 1500));
 
-              const newUser = await UserModel.findOne({ email: newUserData.email });
+              const newUser = await UserModel.findOne({
+                email: newUserData.email,
+              });
               if (!newUser) {
-                throw new Error("User creation via Kafka appears to have failed");
+                throw new Error(
+                  "User creation via Kafka appears to have failed"
+                );
               }
 
               await connectRedis();
@@ -178,7 +195,10 @@ export async function initAuthConfigs() {
               user._id = newUser._id.toString();
               return true;
             } catch (kafkaError) {
-              console.error("Error with Kafka flow, falling back to direct DB creation:", kafkaError);
+              console.error(
+                "Error with Kafka flow, falling back to direct DB creation:",
+                kafkaError
+              );
               try {
                 const newUser = new UserModel(newUserData);
                 await newUser.save();
@@ -196,10 +216,79 @@ export async function initAuthConfigs() {
             return false;
           }
         } else if (user && user._id) {
-          const dbUser = await UserModel.findById(user._id);
+          const dbUser = await UserModel.aggregate([
+            {
+              $match: {
+                _id: new mongoose.Types.ObjectId(user._id),
+              },
+            },
+            {
+              $lookup: {
+                from: "mediafiles",
+                localField: "_id",
+                foreignField: "userId",
+                pipeline: [
+                  {
+                    $match: {
+                      fileType: {
+                        $in: ["avatar", "banner"],
+                      },
+                    },
+                  },
+                ],
+                as: "mediaFiles",
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                firstName: 1,
+                lastName: 1,
+                userName: 1,
+                channelName: 1,
+                email: 1,
+                isVerified: 1,
+                bio: 1,
+                country: 1,
+                phoneNumber: 1,
+                accountStatus: 1,
+                watchHistory: 1,
+                avatarURL: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$mediaFiles",
+                        cond: {
+                          $eq: [
+                            "$$this.fileType",
+                            "avatar"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                bannerURL: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$mediaFiles",
+                        cond: {
+                          $eq: [
+                            "$$this.fileType",
+                            "banner"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+            },
+          ]);
           if (dbUser) {
             await connectRedis();
-            await storeUserInRedis(dbUser);
+            await storeUserInRedis(dbUser[0]);
           }
         }
         return true;

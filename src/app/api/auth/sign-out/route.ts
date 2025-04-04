@@ -1,12 +1,9 @@
 import { auth, signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { connectRedis } from "@/lib/redis";
-import { getUserFromRedis } from "@/app/api/auth/[...nextauth]/configs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-
-  console.log(session);
   
   if (!session || !session.user?._id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -36,7 +36,7 @@ const mediaFileSchema = new Schema<IMediaFile>(
     },
     fileType: {
       type: String,
-      enum: ["avatar", "videoThumbnail", "bannerImage", "audio", "video"],
+      enum: ["avatar", "videoThumbnail", "banner", "audio", "video"],
       default: "avatar",
     },
     mimeType: {
