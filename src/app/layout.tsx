@@ -6,6 +6,7 @@ import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner"
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
+import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -25,12 +26,9 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
 
-  console.log(session?.user)
-  
   const userId = session?.user?._id;
   if(userId){
     const userData = await getUserFromRedis(userId);
-    console.log("-----------> User Fetched From Redis: ", userData);
   }
 
   return (

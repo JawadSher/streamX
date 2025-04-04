@@ -106,6 +106,8 @@ export async function fetchUserFromMongoDB({userId, email, userName}: Props = {}
     },
   ]);
 
+  console.log("-------\n", userInfo, "\n------")
+
   return userInfo[0] || null;
 };
 
