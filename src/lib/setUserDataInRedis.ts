@@ -1,8 +1,27 @@
 import { connectDB } from "./database";
+import { fetchUserFromMongoDB } from "./fetchUserFromMongoDB";
 import { connectRedis } from "./redis";
-import UserModel from "@/models/user.model";
+
+interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  userName: string;
+  channelName?: string;
+  email: string;
+  isVerified: boolean;
+  bio?: string;
+  country?: string;
+  phoneNumber?: string;
+  accountStatus?: string;
+  watchHistory?: string[];
+  avatarURL?: string;
+  bannerURL?: string;
+}
 
 export async function getUserData(userId: string) {
+  console.log("------> getUserData Function Caled <-------")
+
   const redis = await connectRedis();
   const cachedUser: string | null = await redis.get(`user:${userId}`);
 
@@ -11,20 +30,12 @@ export async function getUserData(userId: string) {
     return JSON.parse(cachedUser)
   };
 
-  await connectDB();
-  const user = await UserModel.findById(userId);
-
+  const user = await fetchUserFromMongoDB({ userId });
   if (!user) return null;
 
-  const userData = {
+  const userData: User = {
+    ...user,
     _id: user._id.toString(),
-    email: user.email,
-    userName: user.userName,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    channelName: user.channelName,
-    bio: user.bio,
-    watchHistory: user.watchHistory,
   };
 
   await redis.set(`user:${userId}`, JSON.stringify(userData));

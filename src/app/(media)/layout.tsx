@@ -34,7 +34,6 @@ import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 
 const layout = ({children}: {children: React.ReactNode}) => {
   const { setTheme } = useTheme();
-  
 
     const {
         data: session,

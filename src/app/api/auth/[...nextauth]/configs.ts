@@ -125,8 +125,14 @@ export async function initAuthConfigs() {
       async signIn({ user, account, profile }) {
         if (account?.provider === "google") {
           try {
-            await connectDB();
-            let existingUser = await UserModel.findOne({ email: user.email });
+
+            if (!user || !user.email) {
+              console.error("GOOGLE AUTH ERROR: User or email is missing");
+              return false;
+            }
+
+            let existingUser = await fetchUserFromMongoDB({ email: user.email });
+
             if (existingUser) {
               await storeUserInRedis(existingUser);
               user._id = existingUser._id.toString();
@@ -171,10 +177,12 @@ export async function initAuthConfigs() {
               await producer.disconnect();
 
               await new Promise((resolve) => setTimeout(resolve, 1500));
-
+              
+              await connectDB();
               const newUser = await UserModel.findOne({
                 email: newUserData.email,
               });
+
               if (!newUser) {
                 throw new Error(
                   "User creation via Kafka appears to have failed"
@@ -191,10 +199,13 @@ export async function initAuthConfigs() {
                 kafkaError
               );
               try {
+                await connectDB();
                 const newUser = new UserModel(newUserData);
                 await newUser.save();
                 await connectRedis();
-                await storeUserInRedis(newUser);
+
+                const userInfo = await fetchUserFromMongoDB({ userId: newUser._id });
+                await storeUserInRedis(userInfo);
                 user._id = newUser._id.toString();
                 return true;
               } catch (dbError) {
