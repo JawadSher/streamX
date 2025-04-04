@@ -6,7 +6,6 @@ import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner"
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
-import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
