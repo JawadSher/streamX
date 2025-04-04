@@ -9,7 +9,7 @@ import * as bcrypt from "bcryptjs";
 import { Kafka } from "kafkajs";
 import { connectRedis } from "@/lib/redis";
 import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
-import mongoose from "mongoose";
+import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 
 export const kafka = new Kafka({
   clientId: process.env.KAFKA_CLIENT_ID,
@@ -88,9 +88,10 @@ export async function initAuthConfigs() {
 
           try {
             const { email, password } = await loginSchema.parseAsync(userData);
+            
             await connectDB();
-
             const user = await UserModel.findOne({ email });
+
             if (!user) {
               throw new Error("Invalid email or password");
             }
@@ -100,17 +101,7 @@ export async function initAuthConfigs() {
               throw new Error("Invalid email or password");
             }
 
-            const userInfo = {
-              _id: user._id,
-              userName: user.userName,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              channelName: user.channelName,
-              email: user.email,
-              bio: user.bio,
-              isVerified: user.isVerified,
-            };
-
+            const userInfo = await fetchUserFromMongoDB({ email });
             await connectRedis();
             await storeUserInRedis(userInfo);
 
@@ -216,79 +207,11 @@ export async function initAuthConfigs() {
             return false;
           }
         } else if (user && user._id) {
-          const dbUser = await UserModel.aggregate([
-            {
-              $match: {
-                _id: new mongoose.Types.ObjectId(user._id),
-              },
-            },
-            {
-              $lookup: {
-                from: "mediafiles",
-                localField: "_id",
-                foreignField: "userId",
-                pipeline: [
-                  {
-                    $match: {
-                      fileType: {
-                        $in: ["avatar", "banner"],
-                      },
-                    },
-                  },
-                ],
-                as: "mediaFiles",
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                firstName: 1,
-                lastName: 1,
-                userName: 1,
-                channelName: 1,
-                email: 1,
-                isVerified: 1,
-                bio: 1,
-                country: 1,
-                phoneNumber: 1,
-                accountStatus: 1,
-                watchHistory: 1,
-                avatarURL: {
-                  $arrayElemAt: [
-                    {
-                      $filter: {
-                        input: "$mediaFiles",
-                        cond: {
-                          $eq: [
-                            "$$this.fileType",
-                            "avatar"
-                          ]
-                        }
-                      }
-                    }
-                  ]
-                },
-                bannerURL: {
-                  $arrayElemAt: [
-                    {
-                      $filter: {
-                        input: "$mediaFiles",
-                        cond: {
-                          $eq: [
-                            "$$this.fileType",
-                            "banner"
-                          ]
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-            },
-          ]);
-          if (dbUser) {
+          const userId = user._id;
+          const userInfo = await fetchUserFromMongoDB({ userId });
+          if (userInfo) {
             await connectRedis();
-            await storeUserInRedis(dbUser[0]);
+            await storeUserInRedis(userInfo);
           }
         }
         return true;
