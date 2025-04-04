@@ -134,8 +134,7 @@ export async function initAuthConfigs() {
 
               await new Promise((resolve) => setTimeout(resolve, 1500));
               
-              await connectDB();
-              const newUser = await UserModel.findOne({
+              const newUser = await fetchUserFromMongoDB({
                 email: newUserData.email,
               });
 
