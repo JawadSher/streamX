@@ -46,26 +46,26 @@ export async function initAuthConfigs() {
             const { email, password } = await loginSchema.parseAsync(userData);
             
             await connectDB();
-            const user = await UserModel.findOne({ email });
+            const existingUser = await UserModel.findOne({ email });
 
-            if (!user) {
+            if (!existingUser) {
               throw new Error("Invalid email or password");
             }
 
-            const isPasswdCorrect = await user.isPasswordCorrect(password);
+            const isPasswdCorrect = await existingUser.isPasswordCorrect(password);
             if (!isPasswdCorrect) {
               throw new Error("Invalid email or password");
             }
 
             const userInfo = await fetchUserFromMongoDB({ email });
-            await connectRedis();
             await storeUserInRedis(userInfo);
-
-            return {
-              _id: user._id.toString(),
-              email: user.email,
-              isVerified: user.isVerified,
+            
+            const user = {
+              _id: existingUser._id.toString(),
+              email: existingUser.email
             };
+
+            return user;
           } catch (error) {
             console.error("Authorization error: ", error);
             return null;
@@ -196,7 +196,6 @@ export async function initAuthConfigs() {
           };
 
           if (token._id) {
-            await connectRedis();
             const redisUser = await getUserFromRedis(token._id.toString());
             if (redisUser) {
               session.user = {
@@ -214,6 +213,7 @@ export async function initAuthConfigs() {
         return session;
       },
       async redirect({ url, baseUrl }) {
+        if(url.includes('/sign-up')) return `${baseUrl}/`;
         if (url.startsWith("/")) return `${baseUrl}${url}`;
         if (url.startsWith(baseUrl)) return url;
         return baseUrl;
