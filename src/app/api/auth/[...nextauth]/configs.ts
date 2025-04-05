@@ -114,7 +114,6 @@ export async function initAuthConfigs() {
             };
 
             try {
-              console.log("Sending to Kafka:", newUserData);
               const producer = kafka.producer();
               await producer.connect();
               await producer.send({
