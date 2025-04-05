@@ -30,7 +30,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
-import { getUserFromRedis } from "@/lib/getUserFromRedis";
+import getUserData from "../actions/getUserData";
 
 export interface IUser{
   _id: string,
@@ -74,7 +74,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       const fetchUserData = async () => {
         const userId = session?.user?._id;
         if (userId) {
-          const user = await getUserFromRedis(userId) as IUser;
+          const user = await getUserData(userId) as IUser;
           if (user) setUserData(user);
           else setUserData(null);
         }

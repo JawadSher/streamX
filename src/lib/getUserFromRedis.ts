@@ -1,6 +1,14 @@
 import { IUser } from "@/app/(media)/layout";
 import { connectRedis } from "./redis";
 
+const parseJSON = <T>(str: string | undefined, fallback: T): T => {
+  try {
+    return str ? JSON.parse(str) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export async function getUserFromRedis(userId: string): Promise<IUser | null> {
   if (!userId) return null;
 
@@ -12,7 +20,7 @@ export async function getUserFromRedis(userId: string): Promise<IUser | null> {
     const user: IUser = {
       _id: userData._id,
       userName: userData.userName,
-      watchHistory: JSON.parse(userData.watchHistory || "[]"),
+      watchHistory: parseJSON(userData.watchHistory, []),
       email: userData.email,
       firstName: userData.firstName,
       lastName: userData.lastName,

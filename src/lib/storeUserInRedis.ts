@@ -3,8 +3,6 @@ import { connectRedis } from "./redis";
 export async function storeUserInRedis(user: any) {
   if (!user || !user._id) return false;
 
-  console.log("\nStoring User in Redis: ", user)
-
   try {
     const redis = await connectRedis();
     const userId =
