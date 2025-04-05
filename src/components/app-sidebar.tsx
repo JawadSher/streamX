@@ -28,22 +28,10 @@ import {
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { Separator } from "./ui/separator";
 import { NavMainSubscriptions } from "./nav-main-subscriptions";
-
-type UserData = {
-  _id?: string;
-  firstName?: string;
-  lastName?: string;
-  userName?: string;
-  email?: string;
-  channelName?: string;
-  phoneNumber?: string;
-  country?: string;
-  isVerified?: boolean;
-  image?: string | null;
-};
+import { IUser } from "@/app/(media)/layout";
 
 type Props = {
-  data?: UserData;
+  data?: IUser | null;
   sessionStatus?: string;
 } & React.ComponentProps<typeof Sidebar>;
 
@@ -231,7 +219,7 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
               name: fullName,
               email: data?.email || "",
 
-              image: data?.image || imagePaths.defaultUserLogo,
+              image: data?.avatar || imagePaths.defaultUserLogo,
               isVerified: data?.isVerified || false,
             }}
           />

@@ -11,7 +11,7 @@ export async function storeUserInRedis(user: any) {
       typeof user._id === "string" ? user._id : user._id.toString();
 
     const userData = {
-      id: userId,
+      _id: userId,
       email: user.email || "",
       userName: user.userName || "",
       firstName: user.firstName || "",
