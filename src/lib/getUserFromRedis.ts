@@ -7,10 +7,7 @@ export async function getUserFromRedis(userId: string): Promise<IUser | null> {
   try {
     const redis = await connectRedis();
     const userData = await redis.hgetall(`app:user:${userId}`) as Record<string, string>;
-
-    if (!userData || Object.keys(userData).length === 0) {
-      return null;
-    }
+    if (!userData || Object.keys(userData).length === 0) return null;
 
     const user: IUser = {
       _id: userData._id,
@@ -23,7 +20,7 @@ export async function getUserFromRedis(userId: string): Promise<IUser | null> {
       banner: userData.banner,
       avatar: userData.avatar,
       channelName: userData.channelName,
-      isVerified: userData.isVerified === "true",
+      isVerified: userData.isVerified === "true", 
       bio: userData.bio,
     };
 
