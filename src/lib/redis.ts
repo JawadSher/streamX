@@ -3,8 +3,6 @@ import { Redis } from "@upstash/redis"
 const REDIS_URI = process.env.UPSTASH_REDIS_URI!;
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_TOKEN!;
 
-console.log(REDIS_URI, REDIS_TOKEN);
-
 if (!REDIS_URI || !REDIS_TOKEN) {
   throw new Error("UPSTASH_REDIS_URI and UPSTASH_REDIS_TOKEN must be defined");
 }

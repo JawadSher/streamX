@@ -186,7 +186,6 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
       "Guest"
     : "Guest";
   
-    console.log(data);
   return (
     <Sidebar
       collapsible="icon"
