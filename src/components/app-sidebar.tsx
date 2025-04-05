@@ -174,12 +174,19 @@ const navItems = {
 export function AppSidebar({ data, sessionStatus, ...props }: Props) {
   const { state } = useSidebar();
 
+  const capitalize = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  
   const fullName = data
-    ? [data.firstName, data.lastName].filter(Boolean).join(" ") ||
+    ? [
+        capitalize(data.firstName),
+        capitalize(data.lastName)
+      ].filter(Boolean).join(" ") ||
       data.userName ||
       "Guest"
     : "Guest";
-
+  
+    console.log(data);
   return (
     <Sidebar
       collapsible="icon"

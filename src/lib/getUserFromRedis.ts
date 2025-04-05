@@ -28,7 +28,7 @@ export async function getUserFromRedis(userId: string): Promise<IUser | null> {
       banner: userData.banner,
       avatar: userData.avatar,
       channelName: userData.channelName,
-      isVerified: userData.isVerified === "true", 
+      isVerified: ["true", "1", true].includes(userData.isVerified as any), 
       bio: userData.bio,
     };
 
