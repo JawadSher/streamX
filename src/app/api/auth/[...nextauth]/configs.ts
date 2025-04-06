@@ -12,7 +12,7 @@ import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import notifyKakfa from "@/lib/notifyKafka";
-import { randomUUID } from "crypto";
+import { v4 as randomUUID } from "uuid";
 import { encode as defaultEncode, decode as defaultDecode, JWTEncodeParams, JWTDecodeParams  } from "next-auth/jwt";
 import { setSessionCookie } from "@/lib/setSessionCookie";
 import { getSessionCookie } from "@/lib/getSessionCookie";
@@ -173,7 +173,7 @@ export async function initAuthConfigs() {
             await storeUserInRedis(userInfo);
 
             await redisClient.set(
-              `next-auth:session:${sessionToken}`,
+              `user:session:${sessionToken}`,
               JSON.stringify({
                 userId: user._id,
                 expires: sessionExpiry.toISOString(),
