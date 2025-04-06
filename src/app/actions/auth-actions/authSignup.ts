@@ -61,27 +61,11 @@ export async function authSignUp(
 
         console.log("------- Raw SignIn Result: ", signinResult);
 
-        if (typeof signinResult === "string") {
-          console.error("Unexpected signIn response: Received a string instead of an object:", signinResult);
-          return {
-            success: false,
-            error: "Sign-in failed: Unexpected response format",
-          };
-        }
-
         if (signinResult?.error) {
           console.error("Sign-in failed with error:", signinResult.error);
           return {
             success: false,
             error: signinResult.error,
-          };
-        }
-
-        if (!signinResult?.ok) {
-          console.error("Sign-in did not succeed:", signinResult);
-          return {
-            success: false,
-            error: "Sign-in failed unexpectedly",
           };
         }
 
