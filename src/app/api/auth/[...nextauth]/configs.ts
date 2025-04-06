@@ -12,11 +12,7 @@ import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
-
-export const kafka = new Kafka({
-  clientId: process.env.KAFKA_CLIENT_ID,
-  brokers: [`${process.env.KAFKA_BROKER_IP}:${process.env.KAFKA_BROKER_PORT}`],
-});
+import notifyKakfa from "@/lib/notifyKafka";
 
 export async function initAuthConfigs() {
   let redisClient;
@@ -44,7 +40,7 @@ export async function initAuthConfigs() {
 
           try {
             const { email, password } = await loginSchema.parseAsync(userData);
-            
+
             await connectDB();
             const existingUser = await UserModel.findOne({ email });
 
@@ -52,17 +48,19 @@ export async function initAuthConfigs() {
               throw new Error("Invalid email or password");
             }
 
-            const isPasswdCorrect = await existingUser.isPasswordCorrect(password);
+            const isPasswdCorrect = await existingUser.isPasswordCorrect(
+              password
+            );
             if (!isPasswdCorrect) {
               throw new Error("Invalid email or password");
             }
 
             const userInfo = await fetchUserFromMongoDB({ email });
             await storeUserInRedis(userInfo);
-            
+
             const user = {
               _id: existingUser._id.toString(),
-              email: existingUser.email
+              email: existingUser.email,
             };
 
             return user;
@@ -81,13 +79,14 @@ export async function initAuthConfigs() {
       async signIn({ user, account, profile }) {
         if (account?.provider === "google") {
           try {
-
             if (!user || !user.email) {
               console.error("GOOGLE AUTH ERROR: User or email is missing");
               return false;
             }
 
-            let existingUser = await fetchUserFromMongoDB({ email: user.email });
+            let existingUser = await fetchUserFromMongoDB({
+              email: user.email,
+            });
 
             if (existingUser) {
               await storeUserInRedis(existingUser);
@@ -114,25 +113,9 @@ export async function initAuthConfigs() {
             };
 
             try {
-              const producer = kafka.producer();
-              await producer.connect();
-              await producer.send({
-                topic: "sign-up",
-                messages: [
-                  {
-                    key: "sign-up",
-                    value: JSON.stringify(newUserData),
-                    headers: {
-                      source: "google-auth",
-                      timestamp: Date.now().toString(),
-                    },
-                  },
-                ],
-              });
-              await producer.disconnect();
-
+              await notifyKakfa(newUserData);
               await new Promise((resolve) => setTimeout(resolve, 1500));
-              
+
               const newUser = await fetchUserFromMongoDB({
                 email: newUserData.email,
               });
@@ -143,7 +126,6 @@ export async function initAuthConfigs() {
                 );
               }
 
-              await connectRedis();
               await storeUserInRedis(newUser);
               user._id = newUser._id.toString();
               return true;
@@ -156,9 +138,10 @@ export async function initAuthConfigs() {
                 await connectDB();
                 const newUser = new UserModel(newUserData);
                 await newUser.save();
-                await connectRedis();
 
-                const userInfo = await fetchUserFromMongoDB({ userId: newUser._id });
+                const userInfo = await fetchUserFromMongoDB({
+                  userId: newUser._id,
+                });
                 await storeUserInRedis(userInfo);
                 user._id = newUser._id.toString();
                 return true;
@@ -175,7 +158,6 @@ export async function initAuthConfigs() {
           const userId = user._id;
           const userInfo = await fetchUserFromMongoDB({ userId });
           if (userInfo) {
-            await connectRedis();
             await storeUserInRedis(userInfo);
           }
         }
@@ -213,7 +195,7 @@ export async function initAuthConfigs() {
         return session;
       },
       async redirect({ url, baseUrl }) {
-        if(url.includes('/sign-up')) return `${baseUrl}/`;
+        if (url.includes("/sign-up")) return `${baseUrl}/`;
         if (url.startsWith("/")) return `${baseUrl}${url}`;
         if (url.startsWith(baseUrl)) return url;
         return baseUrl;
