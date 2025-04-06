@@ -12,7 +12,16 @@ import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import notifyKakfa from "@/lib/notifyKafka";
+import { randomUUID } from "crypto";
+import { encode as defaultEncode, decode as defaultDecode, JWTEncodeParams, JWTDecodeParams  } from "next-auth/jwt";
+import { setSessionCookie } from "@/lib/setSessionCookie";
+import { getSessionCookie } from "@/lib/getSessionCookie";
 
+interface CredentialsUser {
+  _id: string;
+  email: string;
+  tokenType?: "credentials";
+}
 export async function initAuthConfigs() {
   let redisClient;
   try {
@@ -26,6 +35,7 @@ export async function initAuthConfigs() {
     adapter: UpstashRedisAdapter(redisClient),
     providers: [
       Credentials({
+        name: "Credentials",
         credentials: {
           email: { label: "Email", type: "email" },
           password: { label: "Password", type: "password" },
@@ -50,19 +60,16 @@ export async function initAuthConfigs() {
             const isPasswdCorrect = await existingUser.isPasswordCorrect(
               password
             );
+
             if (!isPasswdCorrect) {
               throw new Error("Invalid email or password");
             }
 
-            const userInfo = await fetchUserFromMongoDB({ email });
-            await storeUserInRedis(userInfo);
-
-            const user = {
+            return {
               _id: existingUser._id.toString(),
               email: existingUser.email,
+              tokenType: "credentials"
             };
-
-            return user;
           } catch (error) {
             console.error("Authorization error: ", error);
             return null;
@@ -154,19 +161,42 @@ export async function initAuthConfigs() {
             console.error("Overall Google auth error:", overallError);
             return false;
           }
-        } else if (user && user._id) {
-          const userId = user._id;
-          const userInfo = await fetchUserFromMongoDB({ userId });
-          if (userInfo) {
+        }
+
+        if(account?.provider === "credentials" &&  (user as CredentialsUser)?.tokenType === "credentials"){
+          try {
+            const sessionToken = randomUUID();
+            const sessionExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+            const userId = user._id;
+            const userInfo = await fetchUserFromMongoDB({ userId });
             await storeUserInRedis(userInfo);
+
+            await redisClient.set(
+              `next-auth:session:${sessionToken}`,
+              JSON.stringify({
+                userId: user._id,
+                expires: sessionExpiry.toISOString(),
+              })
+            );
+            await setSessionCookie(sessionToken, sessionExpiry);
+          } catch (error) {
+              console.error("Error creating credentials session: ", error);
+              return false;
           }
         }
         return true;
       },
+
       async jwt({ token, user }: { token: JWT; user?: any }) {
         if (user) {
           token._id = user._id;
           token.email = user.email;
+
+          if (user.tokenType) {
+            token.tokenType = user.tokenType;
+          }
+
         }
         return token;
       },
@@ -211,6 +241,33 @@ export async function initAuthConfigs() {
       updateAge: 24 * 60 * 60,
     },
     secret: process.env.NEXTAUTH_SECRET,
+
+    jwt: {
+      async encode(params: JWTEncodeParams): Promise<string> {
+        const { token, secret, maxAge, salt } = params;
+        if (token?.tokenType === "credentials") {
+          const sessionToken = getSessionCookie();
+          return sessionToken ?? "";
+        }
+        return await defaultEncode({
+          token,
+          secret,
+          maxAge,
+          salt: salt ?? process.env.JWT_SALT ?? "defaultSalt",
+        });
+      },
+    
+      async decode(params: JWTDecodeParams): Promise<JWT | null> {
+        const { token, secret, salt } = params;
+        if (token === "") return null;
+        const decoded = await defaultDecode({
+          token,
+          secret,
+          salt: salt ?? process.env.JWT_SALT ?? "defaultSalt",
+        });
+        return decoded;
+      },
+    },
   };
 
   return authConfigs;

@@ -43,16 +43,15 @@ export async function authSignUp(
       headers: { "Content-Type": "application/json" },
     });
 
-    console.log("Account Creation Response : ", response);
-
     if (response.data.statusCode === 201) {
-      console.log("------- ACCOUNT CREATED 201 --------")
       const data = {
         email: result.data.email,
         password: result.data.password,
       };
 
       try {
+
+
         const signinResult = await signIn("credentials", {
           email: data.email,
           password: data.password,
