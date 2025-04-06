@@ -50,11 +50,29 @@ export function SignupForm({
   >(authSignUp, null);
   const router = useRouter();
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPasswd, setConfirmPasswd] = useState("");
+  const [userName, setUserName] = useState<string>("");
+  const [userNameAvailable, setUsernameAvailable] = useState("");
+
   useEffect(() => {
     if (state?.success) {
       toast.success("Account created successfully", {
         duration: 3000,
       });
+
+      setErrors(null);
+      setFirstName("");
+      setLastName("");
+      setUserName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPasswd("");
+      setUsernameAvailable("");
+
       router.push(API_ROUTES.HOME);
     }
   }, [state]);
@@ -108,44 +126,41 @@ export function SignupForm({
     formAction(readyData);
   };
 
-  const [userName, setUserName] = useState<string>("");
-  const [userNameAvailable, setUsernameAvailable] = useState("");
   const getUsername = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setUserName(value);
   };
 
   const debouncedCheck = debounce(async (value) => {
-    if(value){
+    if (value) {
       const result = await checkUserName(value);
-      
-      if(result?.status === "available"){
+
+      if (result?.status === "available") {
         setUsernameAvailable(result.message);
         setErrors({
-          userName: ""
-        })
-        
-      }else if(result?.status === "error"){
+          userName: "",
+        });
+      } else if (result?.status === "error") {
         setErrors({
-          userName: result.message
-        })
+          userName: result.message,
+        });
         setUsernameAvailable("");
-      }else{
+      } else {
         setErrors({
-          userName: ""
-        })
+          userName: "",
+        });
         setUsernameAvailable("");
       }
     }
-  }, 1000)
+  }, 1000);
 
   useEffect(() => {
     debouncedCheck(userName);
 
-    if(userName.length === 0){
+    if (userName.length === 0) {
       setErrors({
-        userName: ""
-      })
+        userName: "",
+      });
       setUsernameAvailable("");
     }
     return () => debouncedCheck.cancel();

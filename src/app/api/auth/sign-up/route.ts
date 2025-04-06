@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { signupSchema } from "@/schemas/signupSchema";
 import notifyKakfa from "@/lib/notifyKafka";
+import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -37,12 +38,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    const encryptedPassword = await bcrypt.hash(password, 10);
     const user = {
       firstName,
       lastName,
       userName: userName.toLowerCase(),
       email: email.toLowerCase(),
-      password,
+      password: encryptedPassword,
       channelName: userName,
       isVerified: false,
     };
