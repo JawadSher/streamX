@@ -4,6 +4,7 @@ import User from "@/models/user.model";
 import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { signupSchema } from "@/schemas/signupSchema";
+import notifyKakfa from "@/lib/notifyKafka";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -17,11 +18,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       throw new ApiError(`Validation failed: ${errorMessages}`, 400);
     }
 
-    const { firstName, lastName, userName, email, password } =
-      parsedData.data;
+    const { firstName, lastName, userName, email, password } = parsedData.data;
 
     await connectDB();
-
     const userExists = await User.findOne({
       $or: [
         { email: email.toLowerCase() },
@@ -38,26 +37,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const user = await User.create({
+    const user = {
       firstName,
       lastName,
       userName: userName.toLowerCase(),
       email: email.toLowerCase(),
       password,
       channelName: userName,
-      phoneNumber: null,
-      country: "None",
       isVerified: false,
-      verificationCode: null,
-      accountStatus: "active",
-    });
+    };
 
-    const userResponse = user.toObject();
-    delete userResponse.password;
-    delete userResponse.verificationCode;
+    await notifyKakfa(user);
+
+    const userWithoutPassword = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      userName: user.userName,
+      email: user.email,
+      channelName: user.channelName,
+      isVerified: user.isVerified,
+    };
 
     return NextResponse.json(
-      new ApiResponse(201, "User account created successfully", userResponse),
+      new ApiResponse(201, "User account created successfully", userWithoutPassword),
       { status: 201 }
     );
   } catch (error) {
@@ -87,7 +89,7 @@ export const config = {
       sizeLimit: "1mb",
     },
 
-    responseLimit: '8mb',
+    responseLimit: "8mb",
     timeout: 10000,
   },
 };

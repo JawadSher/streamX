@@ -142,6 +142,7 @@ export async function initAuthConfigs() {
                 const userInfo = await fetchUserFromMongoDB({
                   userId: newUser._id,
                 });
+                
                 await storeUserInRedis(userInfo);
                 user._id = newUser._id.toString();
                 return true;

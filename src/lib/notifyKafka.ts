@@ -1,6 +1,6 @@
 import kafkaInstance from "./kafkaInstance";
 
-interface IUserData {
+export interface IUserData {
   firstName: string;
   lastName: string;
   userName: string;
@@ -8,9 +8,9 @@ interface IUserData {
   channelName: string;
   isVerified: boolean;
   password: string;
-  bio: string;
-  avatar: string | undefined | null;
-  storageProvider: string;
+  bio?: string;
+  avatar?: string | undefined | null;
+  storageProvider?: string;
 }
 
 export default async function notifyKakfa(userData: IUserData) {
