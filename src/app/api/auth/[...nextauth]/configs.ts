@@ -6,7 +6,6 @@ import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
 import * as bcrypt from "bcryptjs";
-import { Kafka } from "kafkajs";
 import { connectRedis } from "@/lib/redis";
 import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
