@@ -6,36 +6,14 @@ import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import loginSchema from "@/schemas/loginSchema";
 import * as bcrypt from "bcryptjs";
-import { connectRedis } from "@/lib/redis";
-import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
-import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import notifyKakfa from "@/lib/notifyKafka";
-import { v4 as randomUUID } from "uuid";
-import { encode as defaultEncode, decode as defaultDecode, JWTEncodeParams, JWTDecodeParams  } from "next-auth/jwt";
-import { setSessionCookie } from "@/lib/setSessionCookie";
-import { getSessionCookie } from "@/lib/getSessionCookie";
 
-interface CredentialsUser {
-  _id: string;
-  email: string;
-  tokenType?: "credentials";
-}
 export async function initAuthConfigs() {
-  let redisClient;
-  try {
-    redisClient = await connectRedis();
-  } catch (error) {
-    console.error("Redis Connection failed: ", error);
-    throw new Error("Failed to initialize authentication system");
-  }
-
   const authConfigs: NextAuthConfig = {
-    adapter: UpstashRedisAdapter(redisClient),
     providers: [
       Credentials({
-        name: "Credentials",
         credentials: {
           email: { label: "Email", type: "email" },
           password: { label: "Password", type: "password" },
@@ -64,12 +42,15 @@ export async function initAuthConfigs() {
             if (!isPasswdCorrect) {
               throw new Error("Invalid email or password");
             }
+            
+            const userInfo = await fetchUserFromMongoDB({ email });
+            await storeUserInRedis(userInfo);
 
-            return {
+            const user =  {
               _id: existingUser._id.toString(),
-              email: existingUser.email,
-              tokenType: "credentials"
             };
+
+            return user;
           } catch (error) {
             console.error("Authorization error: ", error);
             return null;
@@ -162,41 +143,12 @@ export async function initAuthConfigs() {
             return false;
           }
         }
-
-        if(account?.provider === "credentials" &&  (user as CredentialsUser)?.tokenType === "credentials"){
-          try {
-            const sessionToken = randomUUID();
-            const sessionExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-            const userId = user._id;
-            const userInfo = await fetchUserFromMongoDB({ userId });
-            await storeUserInRedis(userInfo);
-
-            await redisClient.set(
-              `user:session:${sessionToken}`,
-              JSON.stringify({
-                userId: user._id,
-                expires: sessionExpiry.toISOString(),
-              })
-            );
-            await setSessionCookie(sessionToken, sessionExpiry);
-          } catch (error) {
-              console.error("Error creating credentials session: ", error);
-              return false;
-          }
-        }
         return true;
       },
 
       async jwt({ token, user }: { token: JWT; user?: any }) {
         if (user) {
           token._id = user._id;
-          token.email = user.email;
-
-          if (user.tokenType) {
-            token.tokenType = user.tokenType;
-          }
-
         }
         return token;
       },
@@ -204,28 +156,14 @@ export async function initAuthConfigs() {
         if (token) {
           session.user = {
             _id: token._id,
-            email: token.email,
           };
-
-          if (token._id) {
-            const redisUser = await getUserFromRedis(token._id.toString());
-            if (redisUser) {
-              session.user = {
-                ...session.user,
-                userName: redisUser.userName || "",
-                firstName: redisUser.firstName || "",
-                lastName: redisUser.lastName || "",
-                channelName: redisUser.channelName || "",
-                bio: redisUser.bio || "",
-                isVerified: redisUser.isVerified,
-              };
-            }
-          }
         }
         return session;
       },
+
       async redirect({ url, baseUrl }) {
         if (url.includes("/sign-up")) return `${baseUrl}/`;
+        if (url.includes("/sign-in")) return `${baseUrl}/`;
         if (url.startsWith("/")) return `${baseUrl}${url}`;
         if (url.startsWith(baseUrl)) return url;
         return baseUrl;
@@ -236,38 +174,11 @@ export async function initAuthConfigs() {
       error: "/sign-in",
     },
     session: {
-      strategy: "database",
+      strategy: "jwt",
       maxAge: 30 * 24 * 60 * 60,
       updateAge: 24 * 60 * 60,
     },
     secret: process.env.NEXTAUTH_SECRET,
-
-    jwt: {
-      async encode(params: JWTEncodeParams): Promise<string> {
-        const { token, secret, maxAge, salt } = params;
-        if (token?.tokenType === "credentials") {
-          const sessionToken = getSessionCookie();
-          return sessionToken ?? "";
-        }
-        return await defaultEncode({
-          token,
-          secret,
-          maxAge,
-          salt: salt ?? process.env.JWT_SALT ?? "defaultSalt",
-        });
-      },
-    
-      async decode(params: JWTDecodeParams): Promise<JWT | null> {
-        const { token, secret, salt } = params;
-        if (token === "") return null;
-        const decoded = await defaultDecode({
-          token,
-          secret,
-          salt: salt ?? process.env.JWT_SALT ?? "defaultSalt",
-        });
-        return decoded;
-      },
-    },
   };
 
   return authConfigs;
