@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Badge,
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  LogOut,
-} from "lucide-react";
+import { Badge, BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -28,10 +22,10 @@ import Image from "next/image";
 import axios from "axios";
 
 interface INavUserProps {
-  fullName: string | null | undefined,
-  email: string | null | undefined,
-  avatar: string | null | undefined,
-  isVerified: boolean | null | undefined,
+  fullName: string | null | undefined;
+  email: string | null | undefined;
+  avatar: string | null | undefined;
+  isVerified: boolean | null | undefined;
 }
 
 export function NavUser({ user }: { user: INavUserProps }) {
@@ -39,12 +33,12 @@ export function NavUser({ user }: { user: INavUserProps }) {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/sign-out');
-      window.location.href = '/sign-in'
+      await axios.post("/api/auth/sign-out");
+      window.location.href = "/sign-in";
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   return (
     <SidebarMenu>
@@ -71,9 +65,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
                 )}
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {user.fullName}
-                </span>
+                <span className="truncate font-semibold">{user.fullName}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -94,7 +86,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
                       alt="Image"
                       width={32}
                       height={32}
-                      className="rounded-lg object-cover"
+                      className="rounded-2xl object-cover"
                       quality={50}
                       loading="lazy"
                     />
@@ -113,9 +105,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem className="cursor-pointer">
-                {
-                  user.isVerified ? <BadgeCheck /> : <Badge />
-                }
+                {user.isVerified ? <BadgeCheck /> : <Badge />}
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
