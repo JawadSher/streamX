@@ -184,8 +184,6 @@ export function AppSidebar({ sessionStatus, ...props }: Props) {
   const [userData, setUserData] = useState<IUser | undefined>(undefined);
   const userInfo = useSelector((state: RootState) => state.user);
 
-  console.log(userInfo);
-
   useEffect(() => {
     if(sessionStatus === 'authenticated' && userInfo){
       setUserData(userInfo as IUser);

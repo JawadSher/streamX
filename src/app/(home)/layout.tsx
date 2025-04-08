@@ -47,8 +47,6 @@ const layout = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  const userInfo = useSelector((state: RootState) => state.user);
-
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
