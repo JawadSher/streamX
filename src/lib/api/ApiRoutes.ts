@@ -10,7 +10,7 @@ export const API_ROUTES = {
     COMMUNITY_POSTS: "/community-posts",
     WATCH_LATER: "/watch-later",
     SETTINGS: "/settings",
-    PROFILE: "/account",
+    PROFILE: "/stream/profile",
     SIGN_UP: "/api/auth/sign-up",
     SIGN_IN: "/api/auth/sign-in",
     CHANNEL: "/channel",
