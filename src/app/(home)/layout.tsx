@@ -59,6 +59,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
     onUnauthenticated: () => {},
   });
 
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
   const [hasUpdated, setHasUpdated] = useState(false);
   const pathname = usePathname();
   const [userData, setUserData] = useState<IUser | null>(null);
@@ -71,12 +72,16 @@ const layout = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (session?.user?._id) {
+      setIsLoadingUserData(true);
       const fetchUserData = async () => {
         const userId = session?.user?._id;
         if (userId) {
           const user = await getUserData(userId) as IUser;
-          if (user) setUserData(user);
+          if (user) {
+            setUserData(user);
+          }
           else setUserData(null);
+          setIsLoadingUserData(false);
         }
       };
 
@@ -97,7 +102,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
-        <AppSidebar data={userData} sessionStatus={status} />
+        <AppSidebar data={userData} sessionStatus={isLoadingUserData ? "loading" : status} />
 
         <div
           className={`flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 ${

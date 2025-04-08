@@ -4,7 +4,11 @@ import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
+import { ReduxProvider } from "@/context/ReduxProvider";
+import AuthSync from "@/components/auth-components/authSync";
+import AuthUserSync from "@/components/auth-components/authUserSync";
+import { getUserFromRedis } from "@/lib/getUserFromRedis";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -24,6 +28,11 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
 
+  let userInfo = null;
+  if (session?.user?._id) {
+    userInfo = await getUserFromRedis(session?.user?._id);
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <AuthProvider session={session}>
@@ -31,7 +40,11 @@ export default async function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ClientRootLayout>
-            {children}
+            <ReduxProvider>
+              <AuthSync />
+              <AuthUserSync userInfo={userInfo} />
+              {children}
+            </ReduxProvider>
           </ClientRootLayout>
           <Toaster />
         </body>

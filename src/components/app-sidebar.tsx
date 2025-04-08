@@ -1,5 +1,6 @@
 "use client";
 import { NavUser } from "@/components/nav-user";
+import { Skeleton } from "@/components/ui/skeleton"
 
 import {
   Sidebar,
@@ -28,7 +29,11 @@ import {
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { Separator } from "./ui/separator";
 import { NavMainSubscriptions } from "./nav-main-subscriptions";
-import { IUser } from "@/app/(media)/layout";
+import { IUser } from "@/app/(home)/layout";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { stat } from "fs";
 
 type Props = {
   data?: IUser | null;
@@ -176,15 +181,29 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
 
   const capitalize = (str: string) =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+  const [userFullName, setUserFullName] = useState<string | undefined>("");
+  const [userEmail, setUserEmail] = useState<string | undefined>("");
+  const [userAvatar, setUserAvatar] = useState<string | undefined>("");
+  const [userIsVerified, setUserIsVerified] = useState<boolean | undefined>(false);
   
-  const fullName = data
-    ? [
+  const fullName = data && [
         capitalize(data.firstName),
         capitalize(data.lastName)
       ].filter(Boolean).join(" ") ||
-      data.userName ||
-      "Guest"
-    : "Guest";
+      data?.userName;
+
+  useEffect(() => {
+    if(data && sessionStatus != "loading"){
+      setUserEmail(data?.email);
+      setUserFullName(fullName);
+      setUserIsVerified(data?.isVerified);
+      setUserAvatar(data?.avatar);
+
+      console.log("uset data seted");
+    }
+
+  })
   
   return (
     <Sidebar
@@ -219,14 +238,22 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-2">
-        {sessionStatus === "authenticated" ? (
+        {sessionStatus === "loading" ? (
+          <div className="flex items-center justify-start space-x-2 p-2">
+            <Skeleton className="h-[35px] min-w-[35px] rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-2 w-[70px]" />
+              <Skeleton className="h-2 w-[130px]" />
+            </div>
+          </div>
+        ) : sessionStatus === "authenticated" ? (
           <NavUser
             user={{
-              name: fullName,
-              email: data?.email || "",
+              name: userFullName,
+              email: userEmail || "",
 
-              image: data?.avatar || imagePaths.defaultUserLogo,
-              isVerified: data?.isVerified || false,
+              image: userAvatar || imagePaths.defaultUserLogo,
+              isVerified: userIsVerified || false,
             }}
           />
         ) : (
@@ -239,7 +266,9 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
                 height={32}
               />
             ) : (
-              <Button className="w-full flex grow cursor-pointer rounded-2xl h-8">Sign in</Button>
+              <Button className="w-full flex grow cursor-pointer rounded-2xl h-8">
+                Sign in
+              </Button>
             )}
           </Link>
         )}

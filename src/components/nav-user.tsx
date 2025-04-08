@@ -31,10 +31,10 @@ export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string;
-    image: string;
-    isVerified: boolean;
+    name: string | undefined;
+    email: string | undefined;
+    image: string | undefined;
+    isVerified: boolean | undefined;
   };
 }) {
   const { isMobile } = useSidebar();
