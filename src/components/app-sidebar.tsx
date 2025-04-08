@@ -31,9 +31,6 @@ import { Separator } from "./ui/separator";
 import { NavMainSubscriptions } from "./nav-main-subscriptions";
 import { IUser } from "@/app/(home)/layout";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { stat } from "fs";
 
 type Props = {
   data?: IUser | null;
