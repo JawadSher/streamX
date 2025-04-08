@@ -3,8 +3,9 @@
 import { clearUser, setUser } from "@/features/user/userSlice";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { IUserData } from "@/lib/getUserFromRedis";
+import { RootState } from "@/store/store";
 
 const AuthUserSync = ({ userInfo }: { userInfo: IUserData | null }) => {
   const { data: session, status } = useSession();
@@ -30,6 +31,7 @@ const AuthUserSync = ({ userInfo }: { userInfo: IUserData | null }) => {
         };
         dispatch(setUser(normalizedUserInfo));
       }
+      
     } else if (
       (!session?.user?._id && status === "unauthenticated") ||
       status === "loading"

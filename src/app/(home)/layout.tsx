@@ -24,74 +24,22 @@ import {
   StickyNote,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
-import getUserData from "../actions/getUserData";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
-export interface IUser{
-  _id: string,
-  userName: string,
-  watchHistory: string[],
-  email: string,
-  firstName: string,
-  lastName: string,
-  accountStatus: string,
-  banner: string,
-  avatar: string,
-  channelName: string,
-  isVerified: boolean,
-  bio: string
-}
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   const { setTheme } = useTheme();
-
-  const {
-    data: session,
-    status,
-    update,
-  } = useSession({
-    required: false,
-    onUnauthenticated: () => {},
-  });
-
-  const [isLoadingUserData, setIsLoadingUserData] = useState(false);
-  const [hasUpdated, setHasUpdated] = useState(false);
   const pathname = usePathname();
-  const [userData, setUserData] = useState<IUser | null>(null);
-
-  useEffect(() => {
-    if (status === "loading" || hasUpdated) return;
-
-    if (status === "unauthenticated" && !session) {
-      update().then(() => setHasUpdated(true));
-    }
-
-    if (session?.user?._id) {
-      setIsLoadingUserData(true);
-      const fetchUserData = async () => {
-        const userId = session?.user?._id;
-        if (userId) {
-          const user = await getUserData(userId) as IUser;
-          if (user) {
-            setUserData(user);
-          }
-          else setUserData(null);
-          setIsLoadingUserData(false);
-        }
-      };
-
-      fetchUserData();
-    }
-  }, [status, session, update, hasUpdated]);
-
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  
   const isShortsPage = pathname.startsWith("/shorts/");
 
-  if (status === "loading") {
+  if (isAuthenticated === "loading") {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-6 w-6 animate-spin" />
@@ -99,10 +47,13 @@ const layout = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  const userInfo = useSelector((state: RootState) => state.user);
+
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
-        <AppSidebar data={userData} sessionStatus={isLoadingUserData ? "loading" : status} />
+        
+        <AppSidebar sessionStatus={isAuthenticated} />
 
         <div
           className={`flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 ${
@@ -155,7 +106,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
               </div>
               <Mic className="ml-1 cursor-pointer" color="gray" />
             </div>
-            {status === "authenticated" ? (
+            {isAuthenticated === "authenticated" ? (
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

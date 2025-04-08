@@ -29,8 +29,10 @@ import {
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { Separator } from "./ui/separator";
 import { NavMainSubscriptions } from "./nav-main-subscriptions";
-import { IUser } from "@/app/(home)/layout";
+import { IUser } from "@/features/user/userSlice";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 type Props = {
   data?: IUser | null;
@@ -173,35 +175,31 @@ const navItems = {
   ],
 };
 
-export function AppSidebar({ data, sessionStatus, ...props }: Props) {
+const capitalize = (str: string) =>
+  str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+export function AppSidebar({ sessionStatus, ...props }: Props) {
   const { state } = useSidebar();
 
-  const capitalize = (str: string) =>
-    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  const [userData, setUserData] = useState<IUser | undefined>(undefined);
+  const userInfo = useSelector((state: RootState) => state.user);
 
-  const [userFullName, setUserFullName] = useState<string | undefined>("");
-  const [userEmail, setUserEmail] = useState<string | undefined>("");
-  const [userAvatar, setUserAvatar] = useState<string | undefined>("");
-  const [userIsVerified, setUserIsVerified] = useState<boolean | undefined>(false);
-  
-  const fullName = data && [
-        capitalize(data.firstName),
-        capitalize(data.lastName)
-      ].filter(Boolean).join(" ") ||
-      data?.userName;
+  console.log(userInfo);
 
   useEffect(() => {
-    if(data && sessionStatus != "loading"){
-      setUserEmail(data?.email);
-      setUserFullName(fullName);
-      setUserIsVerified(data?.isVerified);
-      setUserAvatar(data?.avatar);
-
-      console.log("uset data seted");
+    if(sessionStatus === 'authenticated' && userInfo){
+      setUserData(userInfo as IUser);
     }
 
-  })
-  
+  }, [sessionStatus, userInfo])
+
+  const fullName =
+  userData
+    ? `${capitalize(userData.firstName || "")} ${capitalize(userData.lastName || "")}`.trim() ||
+      userData.userName ||
+      "Unknown User"
+    : "Unknown User";
+
   return (
     <Sidebar
       collapsible="icon"
@@ -246,11 +244,10 @@ export function AppSidebar({ data, sessionStatus, ...props }: Props) {
         ) : sessionStatus === "authenticated" ? (
           <NavUser
             user={{
-              name: userFullName,
-              email: userEmail || "",
-
-              image: userAvatar || imagePaths.defaultUserLogo,
-              isVerified: userIsVerified || false,
+              fullName: fullName,
+              email: userData?.email || null,
+              avatar: userData?.avatar || imagePaths.defaultUserLogo,
+              isVerified: userData?.isVerified,
             }}
           />
         ) : (

@@ -31,6 +31,7 @@ export default async function RootLayout({
   let userInfo = null;
   if (session?.user?._id) {
     userInfo = await getUserFromRedis(session?.user?._id);
+    console.log(userInfo);
   }
 
   return (
