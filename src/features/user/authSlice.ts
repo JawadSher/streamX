@@ -6,7 +6,7 @@ export interface IAuthState{
 }
 
 const initialState: IAuthState = {
-    isAuthenticated: "unauthenticated",
+    isAuthenticated: "loading",
 }
 
 export const authSlice = createSlice({
