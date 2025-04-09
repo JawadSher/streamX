@@ -1,17 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth as authFn } from "@/app/api/auth/[...nextauth]/configs";
+import { getToken } from "next-auth/jwt";
+
+const SECRET = process.env.NEXTAUTH_SECRET;
 
 export async function middleware(request: NextRequest) {
-  const session = await (authFn as any)(request);
   const { pathname } = request.nextUrl;
 
-  if (session?.user && (pathname === "/sign-in")) {
+  const token = await getToken({ req: request, secret: SECRET });
+
+  const isAuthenticated = !!token;
+
+  if (isAuthenticated && pathname === "/sign-in") {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (
+    !isAuthenticated &&
+    (pathname.startsWith("/feed") || pathname.startsWith("/profile"))
+  ) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [],
+  matcher: ["/feed/:path*", "/profile/:path*", "/sign-in"],
 };
