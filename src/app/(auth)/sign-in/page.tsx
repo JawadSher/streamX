@@ -1,25 +1,15 @@
-"use client";
-
+import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import { LoginForm } from "@/components/auth-components/loginForm";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
-import { Home, Loader2 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Home } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { toast, Toaster } from "sonner";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+export default async function LoginPage() {
+  const session = await auth();
 
-  if(status === 'authenticated' && session?.user){
-    toast.success(`Already signed in with ${session?.user?.email}`, {
-      duration: 3000,
-    });
-
-    setTimeout(() => {
-      router.push(API_ROUTES.HOME);
-    }, 1000);
+  if (session?.user || session?.user?._id) {
+    redirect(API_ROUTES.HOME);
   }
 
   return (
@@ -41,14 +31,9 @@ export default function LoginPage() {
 
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            {status === "loading" ? (
-              <Loader2 className="animate-spin w-10 h-10" />
-            ) : (
-              <LoginForm />
-            )}
+            <LoginForm />
           </div>
         </div>
-        <Toaster position="bottom-right" expand={false} />
       </div>
     </div>
   );

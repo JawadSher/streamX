@@ -28,8 +28,6 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
 
-  console.log("[Server Component] Session: ", session)
-
   let userInfo = null;
   if (session?.user?._id) {
     userInfo = await getUserFromRedis(session?.user?._id);

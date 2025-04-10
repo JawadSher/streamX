@@ -1,6 +1,5 @@
 "use client";
 import { NavUser } from "@/components/nav-user";
-import { Skeleton } from "@/components/ui/skeleton"
 
 import {
   Sidebar,
@@ -30,14 +29,10 @@ import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { Separator } from "./ui/separator";
 import { NavMainSubscriptions } from "./nav-main-subscriptions";
 import { IUser } from "@/features/user/userSlice";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-
-type Props = {
-  data?: IUser | null;
-  sessionStatus?: string;
-} & React.ComponentProps<typeof Sidebar>;
+import UserSkeleton from "./skeletons/user-skeleton";
 
 const navItems = {
   mediaItems: [
@@ -178,22 +173,26 @@ const navItems = {
 const capitalize = (str: string) =>
   str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
-export function AppSidebar({ sessionStatus, ...props }: Props) {
+
+export const experimental_ppr = true;
+
+export function AppSidebar() {
   const { state } = useSidebar();
 
   const [userData, setUserData] = useState<IUser | undefined>(undefined);
   const userInfo = useSelector((state: RootState) => state.user);
+  const sessionStatus = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   useEffect(() => {
-    if(sessionStatus === 'authenticated' && userInfo){
+    if (sessionStatus === "authenticated" && userInfo) {
       setUserData(userInfo as IUser);
     }
+  }, [sessionStatus, userInfo]);
 
-  }, [sessionStatus, userInfo])
-
-  const fullName =
-  userData
-    ? `${capitalize(userData.firstName || "")} ${capitalize(userData.lastName || "")}`.trim() ||
+  const fullName = userData
+    ? `${capitalize(userData.firstName || "")} ${capitalize(
+        userData.lastName || ""
+      )}`.trim() ||
       userData.userName ||
       "Unknown User"
     : "Unknown User";
@@ -201,7 +200,7 @@ export function AppSidebar({ sessionStatus, ...props }: Props) {
   return (
     <Sidebar
       collapsible="icon"
-      {...props}
+      
       className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)] "
     >
       <SidebarHeader className="p-4 border-b">
@@ -231,23 +230,17 @@ export function AppSidebar({ sessionStatus, ...props }: Props) {
       </SidebarContent>
 
       <SidebarFooter className="border-t p-2">
-        {sessionStatus === "loading" ? (
-          <div className="flex items-center justify-start space-x-2 p-2">
-            <Skeleton className="h-[35px] min-w-[35px] rounded-full" />
-            <div className="space-y-2">
-              <Skeleton className="h-2 w-[70px]" />
-              <Skeleton className="h-2 w-[130px]" />
-            </div>
-          </div>
-        ) : sessionStatus === "authenticated" ? (
-          <NavUser
-            user={{
-              fullName: fullName,
-              email: userData?.email || null,
-              avatar: userData?.avatar || imagePaths.defaultUserLogo,
-              isVerified: userData?.isVerified,
-            }}
-          />
+        {sessionStatus === "authenticated" ? (
+          <Suspense fallback={<UserSkeleton />}>
+            <NavUser
+              user={{
+                fullName: fullName,
+                email: userData?.email || null,
+                avatar: userData?.avatar || imagePaths.defaultUserLogo,
+                isVerified: userData?.isVerified,
+              }}
+            />
+          </Suspense>
         ) : (
           <Link href="/sign-in" className="w-full flex grow">
             {state === "collapsed" ? (

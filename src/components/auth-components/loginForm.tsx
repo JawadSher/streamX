@@ -148,6 +148,7 @@ export function LoginForm({
                 onChange={handleInputChange}
                 type="password"
                 name="password"
+                placeholder="Password"
                 required
                 aria-invalid={errors?.password ? "true" : "false"}
               />
