@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ReduxProvider } from "@/context/ReduxProvider";
 import AuthSync from "@/components/auth-components/authSync";
 import AuthUserSync from "@/components/auth-components/authUserSync";
-import { getUserFromRedis } from "@/lib/getUserFromRedis";
+import QueryProvider from "@/components/QueryProvider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -28,24 +28,21 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
 
-  let userInfo = null;
-  if (session?.user?._id) {
-    userInfo = await getUserFromRedis(session?.user?._id);
-  }
-
   return (
     <html lang="en" suppressHydrationWarning>
       <AuthProvider session={session}>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <ClientRootLayout>
-            <ReduxProvider>
-              <AuthSync />
-              <AuthUserSync userInfo={userInfo} />
-              {children}
-            </ReduxProvider>
-          </ClientRootLayout>
+          <QueryProvider>
+            <ClientRootLayout>
+              <ReduxProvider>
+                <AuthSync />
+                <AuthUserSync />
+                {children}
+              </ReduxProvider>
+            </ClientRootLayout>
+          </QueryProvider>
           <Toaster />
         </body>
       </AuthProvider>

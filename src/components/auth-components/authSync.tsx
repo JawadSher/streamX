@@ -10,6 +10,7 @@ const AuthSync = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+
     if (session?.user?._id && status === "authenticated")
       dispatch(setAuth("authenticated"));
     else if (!session?.user?._id && status === "unauthenticated")
