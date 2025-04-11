@@ -9,6 +9,7 @@ import { ReduxProvider } from "@/context/ReduxProvider";
 import AuthSync from "@/components/auth-components/authSync";
 import AuthUserSync from "@/components/auth-components/authUserSync";
 import QueryProvider from "@/components/QueryProvider";
+import { getUserData } from "./actions/getUserData";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -27,6 +28,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const user = await getUserData();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -38,7 +40,7 @@ export default async function RootLayout({
             <ClientRootLayout>
               <ReduxProvider>
                 <AuthSync />
-                <AuthUserSync />
+                {user && <AuthUserSync userInfo={user} />}
                 {children}
               </ReduxProvider>
             </ClientRootLayout>

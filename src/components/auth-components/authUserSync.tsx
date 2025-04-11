@@ -1,55 +1,31 @@
 "use client";
 
-import { clearUser, setUser } from "@/features/user/userSlice";
-import axiosInstance from "@/lib/axios";
-import { useQuery } from "@tanstack/react-query";
+import { clearUser, IUser, setUser } from "@/features/user/userSlice";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-async function getUser() {
-  const response = await axiosInstance.get("/api/get-user-data");
-  return response.data; 
-}
-
-const AuthUserSync = () => {
+const AuthUserSync = ({ userInfo }: {userInfo: IUser }) => {
   const { data: session, status } = useSession();
   const dispatch = useDispatch();
 
-  const {
-    data: userInfo,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["userData"],
-    queryFn: getUser,
-    enabled: status === "authenticated",
-    staleTime: 1000 * 60 * 5, 
-    gcTime: 1000 * 60 * 30,  
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    retry: 1,
-  });
-
   useEffect(() => {
-    if (isLoading || isError) return;
 
-    if (session?.user?._id && status === "authenticated" && userInfo && isLoading === false) {
+    if (session?.user?._id && status === "authenticated") {
       const normalizedUserInfo = {
-        _id: userInfo.data._id ?? null,
-        firstName: userInfo.data.firstName ?? null,
-        lastName: userInfo.data.lastName ?? null,
-        email: userInfo.data.email ?? null,
-        avatar: userInfo.data.avatar ?? null,
-        banner: userInfo.data.banner ?? null,
-        phoneNumber: userInfo.data.phoneNumber ?? null,
-        country: userInfo.data.country ?? null,
-        isVerified: userInfo.data.isVerified ?? null,
-        accountStatus: userInfo.data.accountStatus ?? null,
-        bio: userInfo.data.bio ?? null,
-        watchHistory: userInfo.data.watchHistory ?? [],
-        channelName: userInfo.data.channelName ?? null,
+        _id: userInfo._id ?? null,
+        firstName: userInfo.firstName ?? null,
+        lastName: userInfo.lastName ?? null,
+        email: userInfo.email ?? null,
+        avatar: userInfo.avatar ?? null,
+        banner: userInfo.banner ?? null,
+        phoneNumber: userInfo.phoneNumber ?? null,
+        country: userInfo.country ?? null,
+        isVerified: userInfo.isVerified ?? null,
+        accountStatus: userInfo.accountStatus ?? null,
+        bio: userInfo.bio ?? null,
+        watchHistory: userInfo.watchHistory ?? [],
+        channelName: userInfo.channelName ?? null,
       };
       dispatch(setUser(normalizedUserInfo));
     } else if (
@@ -58,7 +34,7 @@ const AuthUserSync = () => {
     ) {
       dispatch(clearUser());
     }
-  }, [session, status, userInfo, isLoading, isError, dispatch]);
+  }, [session, status, userInfo, dispatch]);
 
   return null;
 };

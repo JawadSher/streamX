@@ -1,11 +1,27 @@
-"use server"
 
+"use server";
+
+import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
+import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
+import { cache } from "react";
+import { storeUserInRedis } from "@/lib/storeUserInRedis";
+import { IUser } from "@/features/user/userSlice";
 
-export default async function getUserData (userId: string) {
-    const user = await getUserFromRedis(userId);
+export const getUserData = cache(async (): Promise<IUser | null> => {
+  const session = await auth();
+  const userId = session?.user?._id;
 
-    if(!user) return null;
+  if (!userId) return null;
+  let user = await getUserFromRedis(userId);
 
-    return user;
-}
+  if (!user) {
+    user = await fetchUserFromMongoDB({ userId });
+    if (user) await storeUserInRedis(user);
+  }
+
+  return {
+    ...user,
+    watchHistory: user?.watchHistory ?? [],
+  };
+});
