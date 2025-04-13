@@ -7,14 +7,11 @@ if (!REDIS_URI || !REDIS_TOKEN) {
   throw new Error("UPSTASH_REDIS_URI and UPSTASH_REDIS_TOKEN must be defined");
 }
 
-interface RedisCache {
-  client: Redis | null;
-  promise: Promise<Redis> | null;
-}
 
-let cached: RedisCache = (global as any).redis || { client: null, promise: null };
-if (!(global as any).redis) {
-  (global as any).redis = cached;
+const cached = global.redis || { client: null, promise: null };
+
+if (!global.redis) {
+  global.redis = cached;
 }
 
 export async function connectRedis(): Promise<Redis> {

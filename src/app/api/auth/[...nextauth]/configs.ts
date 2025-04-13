@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthConfig } from "next-auth";
+import NextAuth, { NextAuthConfig, Session, User } from "next-auth";
 import { connectDB } from "@/lib/database";
 import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
@@ -9,6 +9,7 @@ import * as bcrypt from "bcryptjs";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import notifyKakfa from "@/lib/notifyKafka";
+import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 
 export async function initAuthConfigs() {
   const authConfigs: NextAuthConfig = {
@@ -71,7 +72,7 @@ export async function initAuthConfigs() {
               return false;
             }
 
-            let existingUser = await fetchUserFromMongoDB({
+            const existingUser = await fetchUserFromMongoDB({
               email: user.email,
             });
 
@@ -130,7 +131,7 @@ export async function initAuthConfigs() {
                   userId: newUser._id,
                 });
                 
-                await storeUserInRedis(userInfo);
+                await storeUserInRedis(userInfo as IRedisDBUser);
                 user._id = newUser._id.toString();
                 return true;
               } catch (dbError) {
@@ -146,13 +147,14 @@ export async function initAuthConfigs() {
         return true;
       },
 
-      async jwt({ token, user }: { token: JWT; user?: any }) {
+      async jwt({ token, user }: { token: JWT; user?: User }) {
         if (user) {
           token._id = user._id;
         }
         return token;
       },
-      async session({ session, token }: { session: any; token: JWT }) {
+      
+      async session({ session, token }: { session: Session; token: JWT }) {
         if (token) {
           session.user = {
             _id: token._id,

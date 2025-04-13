@@ -1,43 +1,47 @@
 import { connectDB } from "@/lib/database";
-import { z } from "zod";
 import UserModel from "@/models/user.model";
-import { ApiError } from "next/dist/server/api-utils";
+import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
+import { NextRequest, NextResponse } from "next/server";
 
-
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userName = searchParams.get("username");
-
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const userName = searchParams.get("username");
+
+    if (!userName) {
+      return NextResponse.json(
+        new ApiResponse(400, "Username query parameter is required"),
+        { status: 400 }
+      );
+    }
+
     await connectDB();
     const user = await UserModel.findOne({ userName });
 
     if (user) {
-        return new Response(JSON.stringify({ error: "Username is already taken" }), {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-        });
+      return NextResponse.json(
+        new ApiResponse(400, "Username is already taken"),
+        { status: 400 }
+      );
     }
 
-    return new Response(
-      JSON.stringify(new ApiResponse(200, "Username is available")),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
+    return NextResponse.json(
+      new ApiResponse(200, "Username is available"),
+      { status: 200 }
     );
   } catch (error) {
     if (error instanceof ApiError) {
-      return new Response(JSON.stringify({ message: error.message }), {
-        status: error.statusCode,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json(
+        new ApiError(error.message, error.statusCode),
+        { status: error.statusCode }
+      );
     }
 
-    return new Response(JSON.stringify({ message: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Username check error:", error);
+    return NextResponse.json(
+      new ApiError("Internal server error", 500),
+      { status: 500 }
+    );
   }
 }

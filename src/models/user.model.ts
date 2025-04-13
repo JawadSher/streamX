@@ -1,6 +1,5 @@
 import { Schema, Document, models, model } from "mongoose";
 import * as bcrypt from "bcryptjs";
-import { string } from "zod";
 
 export interface IUser extends Document {
   firstName: string;

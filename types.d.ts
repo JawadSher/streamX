@@ -2,8 +2,8 @@ import { Connection } from "mongoose";
 import { RedisClientType } from "redis";
 
 interface RedisCache {
-    client: RedisClientType | null;
-    promise: Promise<RedisClientType> | null;
+    client: Redis | null;
+    promise: Promise<Redis> | null;
 }
 
 declare global{

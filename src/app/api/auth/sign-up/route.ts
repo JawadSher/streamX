@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const body = await request.json;
     const parsedData = signupSchema.safeParse(body);
 
     if (!parsedData.success) {
@@ -83,15 +83,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       status: 500,
     });
   }
-}
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "1mb",
-    },
-
-    responseLimit: "8mb",
-    timeout: 10000,
-  },
 };

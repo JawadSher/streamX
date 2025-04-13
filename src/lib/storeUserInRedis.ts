@@ -1,28 +1,29 @@
 import { connectRedis } from "./redis";
+import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 
-export async function storeUserInRedis(user: any) {
+
+export async function storeUserInRedis(user : IRedisDBUser) {
   if (!user || !user._id) return false;
 
   try {
     const redis = await connectRedis();
-    const userId =
-      typeof user._id === "string" ? user._id : user._id.toString();
+    const userId = user._id;
 
-    const userData = {
-      _id: userId,
-      email: user.email || "",
-      userName: user.userName || "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      channelName: user.channelName || "",
-      isVerified: user.isVerified || false,
-      watchHistory: user.watchHistory,
-      bio: user.bio || "",
-      phoneNumber: user.phoneNumber || "",
-      accountStatus: user.accountStatus || "active",
-      avatar: user.avatarURL || "",
-      banner: user.bannerURL || "",
-    };
+      const userData = {
+        _id: userId?.toString(),
+        email: user.email || "",
+        userName: user.userName || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        channelName: user.channelName || "",
+        isVerified: user.isVerified || false,
+        watchHistory: user.watchHistory,
+        bio: user.bio || "",
+        phoneNumber: user.phoneNumber || "",
+        accountStatus: user.accountStatus || "active",
+        avatar: user.avatarURL || "",
+        banner: user.bannerURL || "",
+      };
 
     await redis.hset(`app:user:${userId}`, userData);
     await redis.expire(`app:user:${userId}`, 86400);

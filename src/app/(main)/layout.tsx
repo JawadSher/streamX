@@ -7,6 +7,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
   const url = await getPathName();
   const isShortsPage = url.startsWith("/shorts/");
 
+  
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>

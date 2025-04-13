@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Badge, BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
 

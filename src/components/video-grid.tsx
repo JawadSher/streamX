@@ -1,14 +1,14 @@
 "use client";
 
-import VideoCard from "@/components/video-card";
-import { RootState } from "@/store/store";
-import { useSelector } from "react-redux";
+// import VideoCard from "@/components/video-card";
+// import { RootState } from "@/store/store";
+// import { useSelector } from "react-redux";
 
 export default function VideoGrid({
-  videos,
-  defaultThumbnail,
+  // videos,
+  // defaultThumbnail,
 }: {
-  videos: any;
+  videos: string;
   defaultThumbnail: string;
 }) {
 

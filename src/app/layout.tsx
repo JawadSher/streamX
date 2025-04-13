@@ -5,7 +5,7 @@ import AuthProvider from "@/context/AuthProvider";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner";
-import { ReduxProvider } from "@/context/ReduxProvider";
+import ReduxProvider from "@/context/ReduxProvider";
 import AuthSync from "@/components/auth-components/authSync";
 import AuthUserSync from "@/components/auth-components/authUserSync";
 import QueryProvider from "@/components/QueryProvider";
@@ -39,8 +39,8 @@ export default async function RootLayout({
           <QueryProvider>
             <ClientRootLayout>
               <ReduxProvider>
-                <AuthSync />
-                {user && <AuthUserSync userInfo={user} />}
+              <AuthSync />
+              {user && <AuthUserSync userInfo={user} />}
                 {children}
               </ReduxProvider>
             </ClientRootLayout>

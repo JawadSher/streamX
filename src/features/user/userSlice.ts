@@ -1,30 +1,14 @@
+import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface IUser {
-  _id?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  userName?: string | null;
-  email?: string | null;
-  avatar?: string | null;
-  banner?: string | null;
-  phoneNumber?: string | null;
-  country?: string | null;
-  isVerified?: boolean | null;
-  accountStatus?: string | null;
-  bio?: string | null;
-  watchHistory?: string[];
-  channelName?: string | null;
-}
-
-const initialState: IUser = {
+const initialState: IRedisDBUser = {
   _id: null,
   firstName: null,
   lastName: null,
   userName: null,
   email: null,
-  avatar: null,
-  banner: null,
+  avatarURL: null,
+  bannerURL: null,
   phoneNumber: null,
   country: null,
   isVerified: false,
@@ -38,7 +22,7 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<IUser>) => {
+    setUser: (state, action: PayloadAction<IRedisDBUser>) => {
       return { ...state, ...action.payload };
     },
     clearUser: () => {

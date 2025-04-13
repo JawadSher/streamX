@@ -2,7 +2,7 @@ import { auth, signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { connectRedis } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   const session = await auth();
   
   if (!session || !session.user?._id) {
@@ -19,5 +19,5 @@ export async function POST(req: NextRequest) {
   }
   
   await signOut();
-  return NextResponse.redirect(new URL("/sign-in", req.url));
+  return NextResponse.redirect(new URL("/sign-in", request.url));
 }

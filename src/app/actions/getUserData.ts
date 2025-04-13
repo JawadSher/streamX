@@ -6,9 +6,9 @@ import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { cache } from "react";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
-import { IUser } from "@/features/user/userSlice";
+import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 
-export const getUserData = cache(async (): Promise<IUser | null> => {
+export const getUserData = cache(async (): Promise<IRedisDBUser | null> => {
   const session = await auth();
   const userId = session?.user?._id;
 

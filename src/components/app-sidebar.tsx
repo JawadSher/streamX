@@ -1,4 +1,5 @@
 "use client";
+
 import { NavUser } from "@/components/nav-user";
 
 import {
@@ -28,11 +29,11 @@ import {
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { Separator } from "./ui/separator";
 import { NavMainSubscriptions } from "./nav-main-subscriptions";
-import { IUser } from "@/features/user/userSlice";
 import { Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import UserSkeleton from "./skeletons/user-skeleton";
+import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 
 const navItems = {
   mediaItems: [
@@ -173,19 +174,16 @@ const navItems = {
 const capitalize = (str: string) =>
   str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
-
-export const experimental_ppr = true;
-
 export function AppSidebar() {
   const { state } = useSidebar();
 
-  const [userData, setUserData] = useState<IUser | undefined>(undefined);
+  const [userData, setUserData] = useState<IRedisDBUser | undefined>(undefined);
   const userInfo = useSelector((state: RootState) => state.user);
   const sessionStatus = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   useEffect(() => {
     if (sessionStatus === "authenticated" && userInfo) {
-      setUserData(userInfo as IUser);
+      setUserData(userInfo as IRedisDBUser);
     }
   }, [sessionStatus, userInfo]);
 
@@ -236,7 +234,7 @@ export function AppSidebar() {
               user={{
                 fullName: fullName,
                 email: userData?.email || null,
-                avatar: userData?.avatar || imagePaths.defaultUserLogo,
+                avatar: userData?.avatarURL || imagePaths.defaultUserLogo,
                 isVerified: userData?.isVerified,
               }}
             />

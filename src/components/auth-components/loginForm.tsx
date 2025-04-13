@@ -58,7 +58,7 @@ export function LoginForm({
 
   const handleInputChange = async (
     event: React.ChangeEvent<HTMLInputElement>
-  ): Promise<any> => {
+  ) => {
     const { name, value } = event.target;
 
     const emailValue = name === "email" ? value : emailRef.current?.value || "";

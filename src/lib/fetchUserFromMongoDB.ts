@@ -14,6 +14,7 @@ export async function fetchUserFromMongoDB({userId, email, userName}: Props = {}
         try{
             matchConditions.push({ _id: new mongoose.Types.ObjectId(userId) });
         }catch (error){
+            console.log(error);
             throw new Error("Invalid userId format");
         }
     }

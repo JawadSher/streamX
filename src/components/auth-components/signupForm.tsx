@@ -75,7 +75,7 @@ export function SignupForm({
 
       router.push(API_ROUTES.HOME);
     }
-  }, [state]);
+  }, [state, router]);
 
   const handleSubmit = async (formData: FormData) => {
     const data = {
@@ -111,27 +111,13 @@ export function SignupForm({
       setErrors({
         confirmPasswd: fieldErrors.confPasswd?.[0],
       });
-    } else {
-      setErrors(null);
+      return;
     }
 
-    const readyData: any = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      userName: data.userName,
-      email: data.email,
-      password: data.password,
-    };
-
-    formAction(readyData);
+    formAction(formData);
   };
 
-  const getUsername = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setUserName(value);
-  };
-
-  const debouncedCheck = debounce(async (value) => {
+  const debouncedCheck = debounce(async (value: string) => {
     if (value) {
       const result = await checkUserName(value);
 
@@ -164,10 +150,10 @@ export function SignupForm({
       setUsernameAvailable("");
     }
     return () => debouncedCheck.cancel();
-  }, [userName]);
+  }, [userName, debouncedCheck]);
 
   return (
-    <div className="flex flex-col gap-4 ">
+    <div className="flex flex-col gap-4">
       <div>
         <Form
           className={cn("flex flex-col gap-6", className)}
@@ -189,6 +175,8 @@ export function SignupForm({
                 name="firstName"
                 placeholder="First name"
                 required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 aria-invalid={errors?.firstName ? "true" : "false"}
               />
               {errors?.firstName && (
@@ -203,6 +191,8 @@ export function SignupForm({
                 name="lastName"
                 placeholder="Last name"
                 required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 aria-invalid={errors?.lastName ? "true" : "false"}
               />
               {errors?.lastName && (
@@ -217,9 +207,9 @@ export function SignupForm({
                 name="userName"
                 placeholder="@username"
                 required
-                aria-invalid={errors?.userName ? "true" : "false"}
                 value={userName}
-                onChange={getUsername}
+                onChange={(e) => setUserName(e.target.value)}
+                aria-invalid={errors?.userName ? "true" : "false"}
               />
               {userNameAvailable && (
                 <p className="text-sm text-green-400">{userNameAvailable}</p>
@@ -236,9 +226,11 @@ export function SignupForm({
                 name="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 aria-invalid={errors?.email ? "true" : "false"}
               />
-              {errors?.password && (
+              {errors?.email && (
                 <p className="text-sm text-destructive">{errors?.email}</p>
               )}
             </div>
@@ -249,6 +241,8 @@ export function SignupForm({
                 type="password"
                 name="password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 aria-invalid={errors?.password ? "true" : "false"}
               />
               {errors?.password && (
@@ -262,6 +256,8 @@ export function SignupForm({
                 type="password"
                 name="confirmPasswd"
                 required
+                value={confirmPasswd}
+                onChange={(e) => setConfirmPasswd(e.target.value)}
                 aria-invalid={errors?.confirmPasswd ? "true" : "false"}
               />
               {errors?.confirmPasswd && (
