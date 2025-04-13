@@ -1,0 +1,12 @@
+# Allow all crawlers to access most of the site
+User-agent: *
+Allow: /
+
+# Disallow sensitive or private routes
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /api/*
+Disallow: /feed/profile
+
+# Sitemap (optional, if you have one)
+Sitemap: http://localhost:3000/
