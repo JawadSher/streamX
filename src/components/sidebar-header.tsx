@@ -7,7 +7,7 @@ import {
 
 const SideBarTop = ({state}: {state: string}) => {
   return (
-    <SidebarHeader className="p-4 border-b">
+    <SidebarHeader className="p-3 border-b">
       <h1 className="text-4xl font-mono text-center transition-all duration-200">
         {state === "expanded" ? "streamX" : "X"}
       </h1>
