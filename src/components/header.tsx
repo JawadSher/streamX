@@ -26,14 +26,14 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { useSession } from "next-auth/react";
+
 
 const Header = () => {
   const { setTheme } = useTheme();
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
-  );
+  
+  const { status } = useSession();
+  const isAuthenticated = status === 'authenticated' ? 'authenticated' : 'unauthenticated';
 
   return (
     <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">

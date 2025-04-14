@@ -1,20 +1,17 @@
 "use client";
 
-import { NavUser } from "@/components/nav-user";
-
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import { Button } from "./ui/button";
-import Image from "next/image";
-import { imagePaths } from "@/lib/ImagePaths";
 import { NavMain } from "./nav-main";
+import { NavMainSubscriptions } from "./nav-main-subscriptions";
+import SideBarTop from "./sidebar-header";
+import { Separator } from "./ui/separator";
+import { useSession } from "next-auth/react";
 import {
   Home,
   StickyNote,
@@ -27,190 +24,60 @@ import {
   SquarePlay,
 } from "lucide-react";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
-import { Separator } from "./ui/separator";
-import { NavMainSubscriptions } from "./nav-main-subscriptions";
-import { Suspense, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import UserSkeleton from "./skeletons/user-skeleton";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
+import SidebarBottom from "./sidebar-footer";
 
 const navItems = {
   mediaItems: [
-    {
-      title: "Home",
-      url: `${API_ROUTES.HOME}`,
-      icon: Home,
-    },
-    {
-      title: "Shorts",
-      url: `${API_ROUTES.SHORTS}`,
-      icon: SquarePlay,
-    },
+    { title: "Home", url: `${API_ROUTES.HOME}`, icon: Home },
+    { title: "Shorts", url: `${API_ROUTES.SHORTS}`, icon: SquarePlay },
     {
       title: "Community posts",
       url: `${API_ROUTES.COMMUNITY_POSTS}`,
       icon: StickyNote,
     },
   ],
-
   profileItems: [
-    {
-      title: "Profile",
-      url: `${API_ROUTES.PROFILE}`,
-      icon: CircleUserRound,
-    },
-    {
-      title: "History",
-      url: `${API_ROUTES.HISTORY}`,
-      icon: History,
-    },
-    {
-      title: "Playlists",
-      url: `${API_ROUTES.PLAYLISTS}`,
-      icon: ListVideo,
-    },
+    { title: "Profile", url: `${API_ROUTES.PROFILE}`, icon: CircleUserRound },
+    { title: "History", url: `${API_ROUTES.HISTORY}`, icon: History },
+    { title: "Playlists", url: `${API_ROUTES.PLAYLISTS}`, icon: ListVideo },
     {
       title: "Your videos",
       url: `${API_ROUTES.VIDEO_UPLOADS}`,
       icon: SquarePlay,
     },
-    {
-      title: "Watch later",
-      url: `${API_ROUTES.WATCH_LATER}`,
-      icon: Clock4,
-    },
-    {
-      title: "Liked videos",
-      url: `${API_ROUTES.LIKEDVIDEOS}`,
-      icon: ThumbsUp,
-    },
+    { title: "Watch later", url: `${API_ROUTES.WATCH_LATER}`, icon: Clock4 },
+    { title: "Liked videos", url: `${API_ROUTES.LIKEDVIDEOS}`, icon: ThumbsUp },
     {
       title: "Disliked videos",
       url: `${API_ROUTES.DISLIKEDVIDEOS}`,
       icon: ThumbsDown,
     },
   ],
-
   subscriptionItems: [
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
-    {
-      title: "XYZ",
-      url: `${API_ROUTES.CHANNEL}`,
-      avatar: "",
-    },
+    { title: "XYZ", url: `${API_ROUTES.CHANNEL}`, avatar: "" },
+    // ... other items
   ],
 };
 
-const capitalize = (str: string) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-
-export function AppSidebar() {
+export function AppSidebar({
+  status,
+  userData,
+}: {
+  status: string;
+  userData: IRedisDBUser | null;
+}) {
   const { state } = useSidebar();
-
-  const [userData, setUserData] = useState<IRedisDBUser | undefined>(undefined);
-  const userInfo = useSelector((state: RootState) => state.user);
-  const sessionStatus = useSelector((state: RootState) => state.auth.isAuthenticated);
-
-  useEffect(() => {
-    if (sessionStatus === "authenticated" && userInfo) {
-      setUserData(userInfo as IRedisDBUser);
-    }
-  }, [sessionStatus, userInfo]);
-
-  const fullName = userData
-    ? `${capitalize(userData.firstName || "")} ${capitalize(
-        userData.lastName || ""
-      )}`.trim() ||
-      userData.userName ||
-      "Unknown User"
-    : "Unknown User";
 
   return (
     <Sidebar
       collapsible="icon"
-      
-      className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)] "
+      className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
     >
-      <SidebarHeader className="p-4 border-b">
-        <h1 className="text-4xl font-mono text-center transition-all duration-200">
-          {state === "expanded" ? "streamX" : "X"}
-        </h1>
-      </SidebarHeader>
-
+      <SideBarTop state={state} />
       <SidebarContent className="overflow-y-auto custom-scroll-bar">
         <NavMain items={navItems.mediaItems} />
-
-        {sessionStatus === "authenticated" && (
+        {status === "authenticated" && (
           <>
             {state === "expanded" && (
               <Separator className="max-w-[230px] mx-auto" />
@@ -219,44 +86,15 @@ export function AppSidebar() {
             {state === "expanded" && (
               <Separator className="max-w-[230px] mx-auto" />
             )}
+            <NavMainSubscriptions items={navItems.subscriptionItems} />
           </>
-        )}
-
-        {sessionStatus === "authenticated" && (
-          <NavMainSubscriptions items={navItems.subscriptionItems} />
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-2">
-        {sessionStatus === "authenticated" ? (
-          <Suspense fallback={<UserSkeleton />}>
-            <NavUser
-              user={{
-                fullName: fullName,
-                email: userData?.email || null,
-                avatar: userData?.avatarURL || imagePaths.defaultUserLogo,
-                isVerified: userData?.isVerified,
-              }}
-            />
-          </Suspense>
-        ) : (
-          <Link href="/sign-in" className="w-full flex grow">
-            {state === "collapsed" ? (
-              <Image
-                src={imagePaths.defaultUserLogo}
-                alt="Login"
-                width={32}
-                height={32}
-              />
-            ) : (
-              <Button className="w-full flex grow cursor-pointer rounded-2xl h-8">
-                Sign in
-              </Button>
-            )}
-          </Link>
-        )}
+      <Separator />
+      <SidebarFooter>
+        <SidebarBottom status={status} userData={userData} state={state} />
       </SidebarFooter>
-
       <SidebarRail />
     </Sidebar>
   );
