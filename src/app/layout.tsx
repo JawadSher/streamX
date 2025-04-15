@@ -26,14 +26,22 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet"
+        />
+      </head>
       <AuthProvider session={session}>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <QueryProvider>
-            <ClientRootLayout>
-                {children}
-            </ClientRootLayout>
+            <ClientRootLayout>{children}</ClientRootLayout>
           </QueryProvider>
           <Toaster />
         </body>

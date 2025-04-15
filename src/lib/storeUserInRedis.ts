@@ -1,7 +1,6 @@
 import { connectRedis } from "./redis";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 
-
 export async function storeUserInRedis(user : IRedisDBUser) {
   if (!user || !user._id) return false;
 
@@ -26,7 +25,7 @@ export async function storeUserInRedis(user : IRedisDBUser) {
       };
 
     await redis.hset(`app:user:${userId}`, userData);
-    await redis.expire(`app:user:${userId}`, 86400);
+    await redis.expire(`app:user:${userId}`, 30 * 24 * 60 * 60);
     return true;
   } catch (error) {
     console.error("Redis storage error:", error);

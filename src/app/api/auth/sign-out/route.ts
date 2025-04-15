@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
   try {
     const redis = await connectRedis();
     const userId = session?.user?._id.toString();
-    await redis.del(`app:user:${userId}`);
+    const deleted = await redis.del(`app:user:${userId}`);
+    if (deleted === 0) {
+      await redis.expire(`app:user:${userId}`, 0);
+    }
   
   }catch(error){
     console.error("Redis deletion session operation failed: ", error);

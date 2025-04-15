@@ -33,6 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4",
     "lucide-react": "^0.483.0",
+    "material-icons": "^1.13.14",
     "mongoose": "^8.12.1",
     "net": "^1.0.2",
     "next": "^15.3.0",

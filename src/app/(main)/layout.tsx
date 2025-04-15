@@ -12,8 +12,8 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
 
   const session = await auth();
   const status = session ? "authenticated" : "unauthenticated";
-  const userData = status === "authenticated" ? await getUserData() : null;
-  
+  const userData = status === "authenticated" ? await getUserData() : null; 
+
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>

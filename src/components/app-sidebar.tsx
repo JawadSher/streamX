@@ -11,7 +11,7 @@ import { NavMain } from "./nav-main";
 import { NavMainSubscriptions } from "./nav-main-subscriptions";
 import SideBarTop from "./sidebar-header";
 import { Separator } from "./ui/separator";
-import { useSession } from "next-auth/react";
+
 import {
   Home,
   StickyNote,
@@ -73,7 +73,7 @@ export function AppSidebar({
     <Sidebar
       collapsible="icon"
       className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
-    >
+    > 
       <SideBarTop state={state} />
       <SidebarContent className="overflow-y-auto custom-scroll-bar">
         <NavMain items={navItems.mediaItems} />
