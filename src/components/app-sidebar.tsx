@@ -12,52 +12,22 @@ import { NavMainSubscriptions } from "./nav-main-subscriptions";
 import SideBarTop from "./sidebar-header";
 import { Separator } from "./ui/separator";
 
-import {
-  Home,
-  StickyNote,
-  CircleUserRound,
-  History,
-  ListVideo,
-  Clock4,
-  ThumbsUp,
-  ThumbsDown,
-  SquarePlay,
-} from "lucide-react";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import SidebarBottom from "./sidebar-footer";
+import { Suspense } from "react";
+import UserSkeleton from "./skeletons/user-skeleton";
+import { mediaSectionItems, userSectionItems } from "@/constants/navConfig";
 
 const navItems = {
-  mediaItems: [
-    { title: "Home", url: `${API_ROUTES.HOME}`, icon: Home },
-    { title: "Shorts", url: `${API_ROUTES.SHORTS}`, icon: SquarePlay },
-    {
-      title: "Community posts",
-      url: `${API_ROUTES.COMMUNITY_POSTS}`,
-      icon: StickyNote,
-    },
-  ],
-  profileItems: [
-    { title: "Profile", url: `${API_ROUTES.PROFILE}`, icon: CircleUserRound },
-    { title: "History", url: `${API_ROUTES.HISTORY}`, icon: History },
-    { title: "Playlists", url: `${API_ROUTES.PLAYLISTS}`, icon: ListVideo },
-    {
-      title: "Your videos",
-      url: `${API_ROUTES.VIDEO_UPLOADS}`,
-      icon: SquarePlay,
-    },
-    { title: "Watch later", url: `${API_ROUTES.WATCH_LATER}`, icon: Clock4 },
-    { title: "Liked videos", url: `${API_ROUTES.LIKEDVIDEOS}`, icon: ThumbsUp },
-    {
-      title: "Disliked videos",
-      url: `${API_ROUTES.DISLIKEDVIDEOS}`,
-      icon: ThumbsDown,
-    },
-  ],
+  mediaItems: mediaSectionItems,
+  profileItems: userSectionItems,
+
   subscriptionItems: [
     { title: "XYZ", url: `${API_ROUTES.CHANNEL}`, avatar: "" },
     // ... other items
   ],
+
 };
 
 export function AppSidebar({
@@ -73,7 +43,8 @@ export function AppSidebar({
     <Sidebar
       collapsible="icon"
       className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
-    > 
+    >
+
       <SideBarTop state={state} />
       <SidebarContent className="overflow-y-auto custom-scroll-bar">
         <NavMain items={navItems.mediaItems} />
@@ -93,7 +64,9 @@ export function AppSidebar({
 
       <Separator />
       <SidebarFooter>
-        <SidebarBottom status={status} userData={userData} state={state} />
+        <Suspense fallback={<UserSkeleton />}>
+          <SidebarBottom status={status} userData={userData} state={state} />
+        </Suspense>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
