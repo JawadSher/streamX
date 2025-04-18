@@ -38,6 +38,7 @@ export function AppSidebar({
   userData: IRedisDBUser | null;
 }) {
   const { state } = useSidebar();
+  
 
   return (
     <Sidebar
