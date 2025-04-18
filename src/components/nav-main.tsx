@@ -37,12 +37,14 @@ export function NavMain({
                   state === "expanded" ? "items-center gap-6" : "justify-center"
                 } ${
                   pathname === item.url
-                    ? "bg-accent text-accent-foreground font-semibold"
+                    ? "bg-accent text-accent-foreground font-semibold border-2"
                     : "hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 {item.icon && item.icon !== "" && (
-                  <div className={`${item.css} short`}>{item.icon}</div>
+                  <div className={`${item.css} ${
+                    pathname === item.url ? "navItems" : ""
+                    }`}>{item.icon}</div>
                 )}
                 {state === "expanded" && (
                   <div

@@ -55,9 +55,11 @@ export function AppSidebar({
             )}
             <NavMain items={navItems.profileItems} />
             {state === "expanded" && (
+              <>
               <Separator className="max-w-[230px] mx-auto" />
+              <NavMainSubscriptions items={navItems.subscriptionItems} />
+              </>
             )}
-            <NavMainSubscriptions items={navItems.subscriptionItems} />
           </>
         )}
       </SidebarContent>
