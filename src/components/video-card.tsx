@@ -8,14 +8,14 @@ type CardProps = {
   channelName?: string;
   views?: string;
   url: string;
+  className?: string;
 };
 
-const VideoCard = ({ title, channelName, views, url }: CardProps) => {
+const VideoCard = ({ title, channelName, views, url, className = '' }: CardProps) => {
   return (
     <div>
       <Card
-        className="rounded-lg overflow-hidden shadow-md max-h-[260px] 
-    min-w-[290px] text-white p-0 gap-0 cursor-pointer hover:shadow-slate-900 grow border-none bg-none"
+        className={`${className} rounded-lg overflow-hidden shadow-md text-white p-0 gap-0 cursor-pointer hover:shadow-slate-900 grow border-none bg-none`}
       >
         <div className="relative w-full h-[250px]">
           <Image
@@ -36,7 +36,7 @@ const VideoCard = ({ title, channelName, views, url }: CardProps) => {
           </CardTitle>
         </CardHeader>
         <CardFooter className="p-0 mt-0 flex flex-col items-start text-sm text-gray-400">
-          <span className="font-medium">{channelName}</span>
+          <span className="font-medium">{channelName || "Unknown"}</span>
           <span>{views} views</span>
         </CardFooter>
       </div>
