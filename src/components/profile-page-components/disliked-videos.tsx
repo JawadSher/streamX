@@ -7,17 +7,17 @@ interface Props {
   videoThumbnails?: string[];
 }
 
-const History = ({ videos = [], videoThumbnails = [] }: Props) => {
+const DislikedVideos = ({ videos = [], videoThumbnails = [] }: Props) => {
   // const isEmpty = videos.length === 0;
   const isEmpty = 1;
 
   return (
     <Container className="flex flex-col gap-4">
       <div>
-        <h1 className="text-xl font-semibold">History</h1>
+        <h1 className="text-xl font-semibold">Disliked videos</h1>
         <p className="text-[14px] text-zinc-400">
-          Want to revisit your previously watched content?
-          <Link href="/history" className="text-blue-500 ml-1 hover:underline">
+          Want to revisit your disliked watched content?
+          <Link href="/disliked-videos" className="text-blue-500 ml-1 hover:underline">
             click here
           </Link>
         </p>
@@ -25,7 +25,7 @@ const History = ({ videos = [], videoThumbnails = [] }: Props) => {
 
       <div className="relative">
         {!isEmpty ? (
-          <p className="text-gray-500">No videos in history yet.</p>
+          <p className="text-gray-500">No videos in disliked yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-fit">
             {/* {videos.map((videoUrl, index) => (
@@ -47,4 +47,4 @@ const History = ({ videos = [], videoThumbnails = [] }: Props) => {
   );
 };
 
-export default History;
+export default DislikedVideos;

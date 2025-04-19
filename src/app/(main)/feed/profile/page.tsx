@@ -1,9 +1,9 @@
-import { auth } from '@/app/api/auth/[...nextauth]/configs'
+import DislikedVideos from '@/components/profile-page-components/disliked-videos';
 import History from '@/components/profile-page-components/history';
+import LikedVideos from '@/components/profile-page-components/liked-videos';
+import Playlists from '@/components/profile-page-components/playlists';
 import UserProfile from '@/components/profile-page-components/user-profile';
-import { useSession } from 'next-auth/react';
-import Image from 'next/image'
-import { redirect } from 'next/navigation';
+import WatchLater from '@/components/profile-page-components/watch-later';
 import React from 'react'
 
 const Profile = async () => {
@@ -11,12 +11,13 @@ const Profile = async () => {
   const userName = "@johnson";
 
   return (
-    <div className='flex flex-col w-full h-full flex-grow'>
+    <div className='flex flex-col w-full h-full flex-grow gap-3'>
       <UserProfile fullName={user} userName={userName} avatarURL='https://example.com' />
       <History />
-      <div>Playlists</div>
-      <div>Watch Later</div>
-      <div>Liked Videos</div>
+      <Playlists />
+      <WatchLater />
+      <LikedVideos />
+      <DislikedVideos />
     </div>
   )
 }

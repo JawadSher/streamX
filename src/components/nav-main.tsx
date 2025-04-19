@@ -38,7 +38,7 @@ export function NavMain({
           if (materialIconsLoaded) setIconsLoaded(true);
         });
       } else {
-        setTimeout(() => setIconsLoaded(true), 500);
+        setTimeout(() => setIconsLoaded(true), 1000);
       }
     };
 

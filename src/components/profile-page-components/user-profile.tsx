@@ -27,7 +27,7 @@ const UserProfile = async ({ fullName, userName, avatarURL }: Props) => {
         {/* <Form action={xxxxxxx}> */}
         <Button
           disabled
-          className="cursor-pointer flex items-center gap-1 px-3 rounded-3xl w-fit h-[25px] font-normal text-sm overflow-clip dark:bg-zinc-800 dark:text-gray-200"
+          className="cursor-pointer flex items-center gap-1 px-3 rounded-3xl w-fit h-[25px] font-normal text-sm overflow-clip dark:bg-zinc-800 dark:text-gray-200 relative"
         >
           Switch Account
         </Button>
