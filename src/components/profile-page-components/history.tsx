@@ -1,6 +1,7 @@
 import Container from "./container";
 import VideoCard from "../video-card";
 import Link from "next/link";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
 
 interface Props {
   videos?: string[];
@@ -17,7 +18,7 @@ const History = ({ videos = [], videoThumbnails = [] }: Props) => {
         <h1 className="text-xl font-semibold">History</h1>
         <p className="text-[14px] text-zinc-400">
           Want to revisit your previously watched content?
-          <Link href="/history" className="text-blue-500 ml-1 hover:underline">
+          <Link href={API_ROUTES.HISTORY} className="text-blue-500 ml-1 hover:underline">
             click here
           </Link>
         </p>

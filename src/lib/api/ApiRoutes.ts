@@ -11,6 +11,7 @@ export const API_ROUTES = {
     WATCH_LATER: "/watch-later",
     SETTINGS: "/settings",
     PROFILE: "/feed/profile",
+    ACCOUNT: "/account",
     SIGN_UP: "/api/auth/sign-up",
     SIGN_IN: "/api/auth/sign-in",
     CHANNEL: "/channel",

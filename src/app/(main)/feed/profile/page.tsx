@@ -7,13 +7,14 @@ import Playlists from "@/components/profile-page-components/playlists";
 import UserProfile from "@/components/profile-page-components/user-profile";
 import WatchLater from "@/components/profile-page-components/watch-later";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { fullname } from "@/lib/fullname";
 import { redirect } from "next/navigation";
 import React from "react";
 
 const Profile = async () => {
   const session = await auth();
-  if (!session?.user?._id) return redirect("/sign-in");
+  if (!session?.user?._id) return redirect(API_ROUTES.SIGN_IN);
 
   const userData = (await getUserData()) as IRedisDBUser;
   const fullName = fullname({

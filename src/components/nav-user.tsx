@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Badge, BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
 
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import axios from "axios";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import Link from "next/link";
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -104,10 +106,12 @@ export function NavUser({ user }: { user: INavUserProps }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer">
-                {user.isVerified ? <BadgeCheck /> : <Badge />}
-                Account
-              </DropdownMenuItem>
+              <Link href={API_ROUTES.ACCOUNT} >
+                <DropdownMenuItem className="cursor-pointer">
+                  {user.isVerified ? <BadgeCheck /> : <Badge />}
+                  Account
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem className="cursor-pointer">
                 <Bell />
                 Notifications

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { API_ROUTES } from "./lib/api/ApiRoutes";
 
 const SECRET = process.env.NEXTAUTH_SECRET;
 
@@ -11,19 +12,23 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!token;
 
   if (isAuthenticated && pathname === "/sign-in") {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL(API_ROUTES.HOME, request.url));
   }
 
   if (
     !isAuthenticated &&
     (pathname.startsWith("/feed") || pathname.startsWith("/profile"))
   ) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    return NextResponse.redirect(new URL(API_ROUTES.SIGN_IN, request.url));
+  }
+
+  if(!isAuthenticated && (pathname.startsWith("/account"))){
+    return NextResponse.redirect(new URL(API_ROUTES.SIGN_IN, request.url))
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/feed/:path*", "/profile/:path*", "/sign-in"],
+  matcher: ["/feed/:path*", "/profile/:path*", "/sign-in", "/account", "/account/:path*"],
 };
