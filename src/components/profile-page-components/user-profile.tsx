@@ -2,6 +2,12 @@
 import { Button } from "../ui/button";
 import { UserAvatar } from "../user-avatar";
 import Container from "./container";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   fullName?: string | null;
@@ -25,12 +31,18 @@ const UserProfile = async ({ fullName, userName, avatarURL }: Props) => {
         </div>
 
         {/* <Form action={xxxxxxx}> */}
-        <Button
-          disabled
-          className="cursor-pointer flex items-center gap-1 px-3 rounded-3xl w-fit h-[25px] font-normal text-sm overflow-clip dark:bg-zinc-800 dark:text-gray-200 relative"
-        >
-          Switch Account
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button className="cursor-pointer flex items-center gap-1 px-3 rounded-3xl w-fit h-[25px] font-normal text-sm overflow-clip dark:bg-zinc-800 dark:text-gray-200 relative">
+                Switch Account
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Soon</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         {/* </Form> */}
       </div>
     </Container>
