@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { progressManager } from "@/lib/progress-manager";
+import { progressManager } from "@/components/progress-bar/progress-manager";
 import ProgressBar from "./progress-bar";
 
 export default function ProgressWrapper() {
@@ -14,7 +14,6 @@ export default function ProgressWrapper() {
 
   useEffect(() => {
     const unsubscribe = progressManager.subscribe(setProgressState);
-
     progressManager.startProgress();
 
     const timeout = setTimeout(() => {

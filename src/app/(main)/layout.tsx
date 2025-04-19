@@ -5,7 +5,6 @@ import { getPathName } from "@/lib/getPathName";
 import { auth } from "../api/auth/[...nextauth]/configs";
 import { getUserData } from "../actions/getUserData";
 import { Suspense } from "react";
-import ProgressWrapper from "@/components/progress-bar/progress-bar-wrapper";
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   const url = await getPathName();
@@ -18,7 +17,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
-        <ProgressWrapper />
+        
         <Suspense fallback={<p>Loading ....</p>}>
         <AppSidebar status={status} userData={userData} />
         </Suspense>

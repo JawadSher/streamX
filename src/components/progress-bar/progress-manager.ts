@@ -1,19 +1,12 @@
-let progressState = { 
-  isLoading: false, 
-  progress: 0 
-};
-
-let listeners: ((
-  state: { 
-    isLoading: boolean; 
-    progress: number 
-  }) => void)[] = [];
-  
+let progressState = { isLoading: false, progress: 0 };
+let listeners: ((state: { isLoading: boolean; progress: number }) => void)[] = [];
 let interval: NodeJS.Timeout | null = null;
 
 export const progressManager = {
   startProgress: () => {
-    if (progressState.isLoading) return; 
+    if (progressState.isLoading) {
+      if (interval) clearInterval(interval);
+    }
     progressState = { isLoading: true, progress: 10 };
     emitChange();
 
@@ -28,8 +21,13 @@ export const progressManager = {
   },
 
   updateProgress: (value: number) => {
-    progressState.progress = Math.min(value, 100);
+    if (!progressState.isLoading) return; 
+    progressState.progress = Math.min(Math.max(value, 0), 100);
     emitChange();
+    if (progressState.progress >= 90 && interval) {
+      clearInterval(interval);
+      interval = null;
+    }
   },
 
   finishProgress: () => {
@@ -37,12 +35,13 @@ export const progressManager = {
       clearInterval(interval);
       interval = null;
     }
-    progressState = { isLoading: false, progress: 100 };
+    if (!progressState.isLoading) return; 
+    progressState = { isLoading: true, progress: 100 };
     emitChange();
     setTimeout(() => {
       progressState = { isLoading: false, progress: 0 };
       emitChange();
-    }, 300);
+    }, 300); 
   },
 
   subscribe: (listener: (state: { isLoading: boolean; progress: number }) => void) => {
