@@ -1,18 +1,15 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 
 interface Props {
   avatarURL: string;
-  fullName?: string;
+  fullName?: string | null;
 }
 
 export async function UserAvatar({ avatarURL, fullName }: Props) {
+
   return (
-    <Avatar className="w-30 h-30">
-      <AvatarImage src={avatarURL} alt="avatar" />
-      <AvatarFallback>
-        {fullName?.split(" ")[0][0] || ""}
-        {fullName?.split(" ")[1][0] || ""}
-      </AvatarFallback>
-    </Avatar>
+    <div className="rounded-full border-2 border-zinc-400 p-1">
+      <Image src={avatarURL} width={100} height={100} alt="logo" quality={75} className="rounded-full"/>
+    </div>
   );
 }

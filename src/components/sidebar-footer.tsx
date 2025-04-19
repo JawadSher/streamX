@@ -5,9 +5,7 @@ import Link from "next/link";
 import { imagePaths } from "@/lib/ImagePaths";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { Button } from "./ui/button";
-
-const capitalize = (str: string) =>
-  str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+import { fullname } from "@/lib/fullname";
 
 export default function SidebarBottom({
   status,
@@ -40,12 +38,11 @@ export default function SidebarBottom({
 
   if (!userData) return null;
 
-  const fullName =
-    `${capitalize(userData.firstName || "")} ${capitalize(
-      userData.lastName || ""
-    )}`.trim() ||
-    userData.userName ||
-    "Unknown User";
+  const fullName = fullname({
+    firstName: userData?.firstName, 
+    lastName: userData?.lastName, 
+    userName: userData?.userName
+  });
 
   return (
     <NavUser

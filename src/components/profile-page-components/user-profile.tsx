@@ -4,8 +4,8 @@ import { UserAvatar } from "../user-avatar";
 import Container from "./container";
 
 interface Props {
-  fullName?: string;
-  userName?: string;
+  fullName?: string | null;
+  userName?: string | null;
   avatarURL: string;
 }
 
