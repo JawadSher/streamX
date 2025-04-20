@@ -18,7 +18,7 @@ interface Props {
 const UserProfile = async ({ fullName, userName, avatarURL }: Props) => {
   return (
     <Container className="gap-2 items-center">
-      <UserAvatar avatarURL={avatarURL} fullName="Hello world" />
+      <UserAvatar avatarURL={avatarURL} />
 
       <div className="flex flex-col flex-wrap gap-3  ">
         <div>

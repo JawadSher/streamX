@@ -2,23 +2,22 @@
 
 import {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { NavMain } from "./nav-main";
-import { NavMainSubscriptions } from "./nav-main-subscriptions";
 import SideBarTop from "./sidebar-header";
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
 
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import SidebarBottom from "./sidebar-footer";
 import { Suspense } from "react";
-import UserSkeleton from "./skeletons/user-skeleton";
+import UserSkeleton from "../skeletons/user-skeleton";
 import { mediaSectionItems, userSectionItems } from "@/constants/navConfig";
 import { usePathname } from "next/navigation";
+import MainSidebarContent from "./sidebar-content";
+import AccountSidebarContent from "../account-page-components/account-sidebar-content";
 
 const navItems = {
   mediaItems: mediaSectionItems,
@@ -46,29 +45,19 @@ export function AppSidebar({
       className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
     >
       <SideBarTop state={state} />
-      <SidebarContent className="overflow-y-auto custom-scroll-bar">
-        {!path.startsWith("/account") && (
-          <NavMain items={navItems.mediaItems} />
-        )}
 
-        {status === "authenticated" && (
-          <>
-            {state === "expanded" && !path.startsWith("/account") && (
-              <Separator className="max-w-[230px] mx-auto" />
-            )}
-            {!path.startsWith("/account") && (
-              <NavMain items={navItems.profileItems} />
-            )}
-            {state === "expanded" && !path.startsWith("/account") && (
-              <>
-                <Separator className="max-w-[230px] mx-auto" />
-                <NavMainSubscriptions items={navItems.subscriptionItems} />
-              </>
-            )}
-          </>
-        )}
-      </SidebarContent>
-      
+      {path.startsWith("/account") ? (
+        <AccountSidebarContent userInfo={userData} />
+      ) : (
+        <MainSidebarContent
+          mediaItems={navItems.mediaItems}
+          profileItems={navItems.profileItems}
+          subscriptionItems={navItems.subscriptionItems}
+          status={status}
+          state={state}
+        />
+      )}
+
       <Separator />
       <SidebarFooter>
         <Suspense fallback={<UserSkeleton />}>
@@ -76,7 +65,6 @@ export function AppSidebar({
         </Suspense>
       </SidebarFooter>
       <SidebarRail />
-
     </Sidebar>
   );
 }

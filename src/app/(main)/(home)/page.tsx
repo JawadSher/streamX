@@ -1,4 +1,4 @@
-import VideoGrid from "@/components/video-grid";
+import VideoGrid from "@/components/video-card/video-grid";
 import { imagePaths } from "@/lib/ImagePaths";
 
 export const revalidate = 60;

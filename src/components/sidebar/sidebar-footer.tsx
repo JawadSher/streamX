@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { imagePaths } from "@/lib/ImagePaths";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { fullname } from "@/lib/fullname";
 
 export default function SidebarBottom({

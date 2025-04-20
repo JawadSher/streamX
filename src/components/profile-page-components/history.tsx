@@ -1,5 +1,5 @@
 import Container from "./container";
-import VideoCard from "../video-card";
+import VideoCard from "../video-card/video-card";
 import Link from "next/link";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 

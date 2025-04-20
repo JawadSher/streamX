@@ -10,7 +10,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { SidebarItemsSkeleton } from "./skeletons/sidebar-items-skeleton";
+import { SidebarItemsSkeleton } from "../skeletons/sidebar-items-skeleton";
+
 
 export function NavMain({
   items,

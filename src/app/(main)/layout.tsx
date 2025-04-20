@@ -1,5 +1,5 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Header from "@/components/header";
 import { getPathName } from "@/lib/getPathName";
 import { auth } from "../api/auth/[...nextauth]/configs";
