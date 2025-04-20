@@ -18,6 +18,7 @@ import SidebarBottom from "./sidebar-footer";
 import { Suspense } from "react";
 import UserSkeleton from "./skeletons/user-skeleton";
 import { mediaSectionItems, userSectionItems } from "@/constants/navConfig";
+import { usePathname } from "next/navigation";
 
 const navItems = {
   mediaItems: mediaSectionItems,
@@ -27,7 +28,6 @@ const navItems = {
     { title: "XYZ", url: `${API_ROUTES.CHANNEL}`, avatar: "" },
     // ... other items
   ],
-
 };
 
 export function AppSidebar({
@@ -38,33 +38,37 @@ export function AppSidebar({
   userData: IRedisDBUser | null;
 }) {
   const { state } = useSidebar();
-  
+  const path = usePathname();
 
   return (
     <Sidebar
       collapsible="icon"
       className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
     >
-
       <SideBarTop state={state} />
       <SidebarContent className="overflow-y-auto custom-scroll-bar">
-        <NavMain items={navItems.mediaItems} />
+        {!path.startsWith("/account") && (
+          <NavMain items={navItems.mediaItems} />
+        )}
+
         {status === "authenticated" && (
           <>
-            {state === "expanded" && (
+            {state === "expanded" && !path.startsWith("/account") && (
               <Separator className="max-w-[230px] mx-auto" />
             )}
-            <NavMain items={navItems.profileItems} />
-            {state === "expanded" && (
+            {!path.startsWith("/account") && (
+              <NavMain items={navItems.profileItems} />
+            )}
+            {state === "expanded" && !path.startsWith("/account") && (
               <>
-              <Separator className="max-w-[230px] mx-auto" />
-              <NavMainSubscriptions items={navItems.subscriptionItems} />
+                <Separator className="max-w-[230px] mx-auto" />
+                <NavMainSubscriptions items={navItems.subscriptionItems} />
               </>
             )}
           </>
         )}
       </SidebarContent>
-
+      
       <Separator />
       <SidebarFooter>
         <Suspense fallback={<UserSkeleton />}>
@@ -72,6 +76,7 @@ export function AppSidebar({
         </Suspense>
       </SidebarFooter>
       <SidebarRail />
+
     </Sidebar>
   );
 }

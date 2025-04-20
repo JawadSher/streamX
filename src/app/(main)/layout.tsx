@@ -27,7 +27,6 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
           }`}
         >
           <Header />
-
           <main className="flex-1 mx-auto w-full mt-3">{children}</main>
 
         </div>
