@@ -1,10 +1,12 @@
+'use client';
+
 import Image from "next/image";
 
 interface Props {
   avatarURL: string;
 }
 
-export async function UserAvatar({ avatarURL }: Props) {
+export function UserAvatar({ avatarURL }: Props) {
 
   return (
     <div className="rounded-full border-2 border-zinc-400 p-[2px]">
