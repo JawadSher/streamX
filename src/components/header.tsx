@@ -31,18 +31,20 @@ import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import TopHeader from "./account-page-components/top-header";
 
-
 const Header = () => {
   const { setTheme } = useTheme();
   const path = usePathname();
-  
+
   const { status } = useSession();
-  const isAuthenticated = status === 'authenticated' ? 'authenticated' : 'unauthenticated';
+  const isAuthenticated =
+    status === "authenticated" ? "authenticated" : "unauthenticated";
 
   return (
     <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">
       <div className="flex items-center gap-3">
-        {!path.startsWith("/account") && <SidebarTrigger className="-ml-1 cursor-pointer" />}
+        {!path.startsWith("/account") && (
+          <SidebarTrigger className="-ml-1 cursor-pointer" />
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild className="cursor-pointer">
             <Button variant="outline" size="icon">
@@ -73,21 +75,20 @@ const Header = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {
-        !path.startsWith("/account") ? ( <div className="flex grow mx-2 items-center justify-center">
-        <div className="relative md:max-w-[800px] grow">
-          <Input className="rounded-3xl w-full pr-10" placeholder="Search" />
-          <Search
-            className="absolute right-3 top-1/2 transform -translate-y-1/2"
-            color="gray"
-          />
+      {!path.startsWith("/account") ? (
+        <div className="flex grow mx-2 items-center justify-center">
+          <div className="relative md:max-w-[800px] grow">
+            <Input className="rounded-3xl w-full pr-10" placeholder="Search" />
+            <Search
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              color="gray"
+            />
+          </div>
+          <Mic className="ml-1 cursor-pointer" color="gray" />
         </div>
-        <Mic className="ml-1 cursor-pointer" color="gray" />
-        </div>
-        ) : (
-          <TopHeader />
-        )
-      }
+      ) : (
+        <TopHeader />
+      )}
       {isAuthenticated === "authenticated" && !path.startsWith("/account") ? (
         <div className="flex items-center gap-2">
           <DropdownMenu>
@@ -120,11 +121,13 @@ const Header = () => {
           </div>
         </div>
       ) : (
-        <Link href={API_ROUTES.SIGN_IN}>
-          <Button  className="w-full cursor-pointer rounded-2xl h-8 bg-transparent border-[1px] border-blue-400 text-blue-400 hover:bg-transparent hover:shadow-blue-300">
-            Sign in
-          </Button>
-        </Link>
+        !isAuthenticated && (
+          <Link href={API_ROUTES.SIGN_IN}>
+            <Button className="w-full cursor-pointer rounded-2xl h-8 bg-transparent border-[1px] border-blue-400 text-blue-400 hover:bg-transparent hover:shadow-blue-300">
+              Sign in
+            </Button>
+          </Link>
+        )
       )}
     </header>
   );
