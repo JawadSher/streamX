@@ -10,7 +10,7 @@ const Account = async () => {
 
   return (
     <div className="flex w-full h-full pb-2">
-      <div className="w-full h-full rounded-lg bg-[#fafafa] dark:bg-[rgb(24_24_27)] transition-colors duration-300 px-5 md:px-10 lg:px-30">
+      <div className="w-full h-full rounded-lg bg-[#fafafa] dark:bg-[rgb(24_24_27)] transition-colors duration-300 px-5 md:px-10 lg:px-30 md:pt-10">
         <AccountForm />
       </div>
     </div>
