@@ -145,6 +145,8 @@
     'wght' 250,
     'GRAD' 0,
     'opsz' 34;
+
+  transition: font-variation-settings 0.2s ease;
 }
 
 .navItems {
@@ -152,7 +154,8 @@
     'FILL' 1, 
     'wght' 250,
     'GRAD' 0,
-    'opsz' 34;
+    'opsz' 20;
+  
 }
 
 .switchButton{

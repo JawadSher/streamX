@@ -8,7 +8,7 @@ interface AccountSidebarContentProps {
 
 const AccountSidebarContent = ({ userInfo }: AccountSidebarContentProps) => {
   return (
-    <SidebarContent className="overflow-y-auto custom-scroll-bar">
+    <SidebarContent className="overflow-y-auto custom-scroll-bar mt-4">
       <UserProfileInfo userInfo={userInfo} />
     </SidebarContent>
   );
