@@ -1,8 +1,10 @@
+"use client";
+
 import { cssFillProperty } from "@/constants/navConfig";
 import { Button } from "./ui/button";
 
 interface Props {
-  fieldName: string; // 👈 the field to make editable
+  fieldName: string;
   setEditableField: (text: string) => void;
 }
 

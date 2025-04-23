@@ -1,5 +1,5 @@
-import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 const axiosInstance = axios.create({
   baseURL: process.env.BASE_URL || "http://localhost:3000",
@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
-  const session = await auth();
+  const { data: session } = useSession();
   if (session?.user?._id) {
     config.headers["x-user-id"] = session.user._id;
   }
