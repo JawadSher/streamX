@@ -15,5 +15,5 @@ export const API_ROUTES = {
     SIGN_UP: "/api/auth/sign-up",
     SIGN_IN: "/api/auth/sign-in",
     CHANNEL: "/channel",
-    USER_UPDATE: "/user-update"
+    USER_UPDATE: "/api/user-update"
 }

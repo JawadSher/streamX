@@ -4,7 +4,6 @@ import { userUpdateSchema } from "@/schemas/userUpdateSchema";
 import { ApiError } from "@/lib/api/ApiError";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../auth/[...nextauth]/configs";
-import { rateLimitMiddleware } from "@/middlewares/rateLimiter";
 
 type UpdateUserRequestBody = {
   firstName: string;
@@ -13,13 +12,11 @@ type UpdateUserRequestBody = {
   country: string;
 };
 
-async function putHandler(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   const session = await auth();
   if (!session?.user?._id) {
     return NextResponse.json(new ApiError("Unauthorized request", 401), { status: 401 });
   }
-
-  request.headers.set("x-user-id", session.user._id);
 
   try {
     const body: UpdateUserRequestBody = await request.json();
@@ -59,5 +56,3 @@ async function putHandler(request: NextRequest) {
     return NextResponse.json(new ApiError("Internal server error", 500), { status: 500 });
   }
 }
-
-export const PUT = rateLimitMiddleware(putHandler);

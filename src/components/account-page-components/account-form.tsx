@@ -24,20 +24,21 @@ import { userUpdateSchema } from "@/schemas/userUpdateSchema";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { debounce } from "lodash";
+import { Loader2 } from "lucide-react";
 
 interface AccountFormProps {
   initialData: IRedisDBUser;
 }
 
-const fetcher = async (): Promise<IRedisDBUser> => {
-  const data = await revalidateUserData();
-  if (!data) {
-    throw new Error("Failed to fetch user data");
-  }
-  return data;
-};
-
 const AccountForm = ({ initialData }: AccountFormProps) => {
+  const fetcher = async (): Promise<IRedisDBUser> => {
+    const data = await revalidateUserData();
+    if (!data) {
+      throw new Error("Failed to fetch user data");
+    }
+    return data;
+  };
+
   const countryNames = React.useMemo(
     () =>
       Object.values(popularCountries)
@@ -86,10 +87,10 @@ const AccountForm = ({ initialData }: AccountFormProps) => {
 
   useEffect(() => {
     const isSameAsInitial =
-      initialData?.firstName?.trim() === firstName.trim() &&
-      initialData?.lastName?.trim() === lastName.trim() &&
-      initialData?.phoneNumber?.trim() === phoneNumber.trim() &&
-      initialData?.country?.trim() === country.trim();
+      (initialData?.firstName?.trim() || "") === firstName.trim() &&
+      (initialData?.lastName?.trim() || "") === lastName.trim() &&
+      (initialData?.phoneNumber?.trim() || "") === phoneNumber.trim() &&
+      (initialData?.country?.trim() || "") === country.trim();
 
     setIsDisabled(isSameAsInitial);
   }, [firstName, lastName, phoneNumber, country, initialData]);
@@ -122,6 +123,7 @@ const AccountForm = ({ initialData }: AccountFormProps) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+  
     switch (name) {
       case "firstName":
         setFirstName(value);
@@ -132,24 +134,47 @@ const AccountForm = ({ initialData }: AccountFormProps) => {
       case "phoneNumber":
         setPhoneNumber(value);
         break;
-      default:
-        break;
     }
-    validateForm({ firstName, lastName, phoneNumber, country, [name]: value });
+  
+    type FieldName = keyof typeof userUpdateSchema.shape;
+    const fieldValidation = userUpdateSchema.shape[name as FieldName];
+    const result = fieldValidation.safeParse(value);
+  
+    setErrors((prev) => ({
+      ...prev,
+      [name]: result.success ? undefined : result.error?.issues?.[0]?.message,
+    }));
   };
+  
 
   const handleSubmit = async (formData: FormData) => {
+    setIsSubmitting(true);
+  
+    const updatedData: Partial<IRedisDBUser> = {};
     const updatedFirstName = formData.get("firstName") as string;
     const updatedLastName = formData.get("lastName") as string;
     const updatedPhoneNumber = formData.get("phoneNumber") as string;
-
+  
+    if (updatedFirstName !== initialData.firstName) {
+      updatedData.firstName = updatedFirstName;
+    }
+    if (updatedLastName !== initialData.lastName) {
+      updatedData.lastName = updatedLastName;
+    }
+    if (updatedPhoneNumber !== initialData.phoneNumber) {
+      updatedData.phoneNumber = updatedPhoneNumber;
+    }
+    if (country !== initialData.country) {
+      updatedData.country = country;
+    }
+  
     const result = userUpdateSchema.safeParse({
-      firstName: updatedFirstName,
-      lastName: updatedLastName,
-      phoneNumber: updatedPhoneNumber,
-      country,
+      firstName: updatedData.firstName ?? initialData.firstName,
+      lastName: updatedData.lastName ?? initialData.lastName,
+      phoneNumber: updatedData.phoneNumber ?? initialData.phoneNumber,
+      country: updatedData.country ?? initialData.country,
     });
-
+  
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
       setErrors({
@@ -161,60 +186,19 @@ const AccountForm = ({ initialData }: AccountFormProps) => {
       setIsSubmitting(false);
       return;
     }
-
-    if (
-      (initialData.firstName || "") === updatedFirstName.trim() &&
-      (initialData.lastName || "") === updatedLastName.trim() &&
-      (initialData.phoneNumber || "") === updatedPhoneNumber.trim() &&
-      (initialData.country || "") === country.trim()
-    ) {
-      setIsDisabled(true);
-      setIsSubmitting(false);
-      return;
-    }
-
-    mutate(
-      {
-        ...userData!,
-        firstName: updatedFirstName,
-        lastName: updatedLastName,
-        phoneNumber: updatedPhoneNumber,
-        country,
-      },
-      false
-    );
-
+  
     try {
-      const response = await axiosInstance.put(API_ROUTES.USER_UPDATE, {
-        firstName: updatedFirstName,
-        lastName: updatedLastName,
-        phoneNumber: updatedPhoneNumber,
-        country: country,
-      });
-
-      if (response.status === 429) {
-        toast.error("Too many requests. Please try again later.");
-        mutate();
-        setIsSubmitting(false);
-        return;
+      const response = await axiosInstance.put(API_ROUTES.USER_UPDATE, updatedData);
+      if (response.status === 200) {
+        toast.success("Account updated successfully");
+        mutate(); // Re-fetch data
+      } else {
+        toast.error(response.data.message || "Failed to update account.");
       }
-
-      if (response.status !== 200) {
-        toast.error(
-          response.data.message || "Failed to update account. Please try again."
-        );
-        mutate();
-        setIsSubmitting(false);
-        return;
-      }
-
-      toast.success("Account updated successfully");
-
-      mutate();
     } catch (error) {
-      toast.error("Failed to update account. Please try again.");
-      console.error("Failed to update user data: ", error);
-      mutate();
+      console.log(error);
+      toast.error("Failed to update account. -----");
+      console.error("Update error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -310,8 +294,13 @@ const AccountForm = ({ initialData }: AccountFormProps) => {
           value={country}
           onValueChange={(value) => {
             setCountry(value);
-            validateForm({ firstName, lastName, phoneNumber, country: value });
+            const result = userUpdateSchema.shape.country.safeParse(value);
+            setErrors((prev) => ({
+              ...prev,
+              country: result.success ? undefined : result.error?.issues?.[0]?.message,
+            }));
           }}
+          
         >
           <SelectTrigger className="w-full dark:text-zinc-300 h-10 font-semibold">
             <SelectValue placeholder="Select a country" />
@@ -327,27 +316,32 @@ const AccountForm = ({ initialData }: AccountFormProps) => {
       </div>
 
       <div className="md:col-span-2 flex justify-center px-2 pt-4 md:pt-0">
-        <Button
-          disabled={isDisabled || isSubmitting}
-          aria-disabled={isDisabled || isSubmitting}
-          className={`
-            w-full md:w-[300px]
-            py-3
-            rounded-xl
-            font-semibold text-lg
-            tracking-wide
-            ${
-              isDisabled || isSubmitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600 dark:bg-green-400 dark:hover:bg-green-300"
-            }
-            text-white dark:text-black
-            transition-colors duration-200
-            shadow-md hover:shadow-lg
-          `}
-        >
-          {isSubmitting ? "Updating..." : "Update Account"}
-        </Button>
+        {isSubmitting ? (
+          <Loader2 className="animate-spin" size={34} />
+        ) : (
+          <Button
+            disabled={isDisabled || isSubmitting}
+            aria-disabled={isDisabled || isSubmitting}
+            className={`
+              w-full md:w-[300px]
+              py-3
+              rounded-xl
+              font-semibold text-lg
+              tracking-wide
+              ${
+                isDisabled || isSubmitting
+                  ? "bg-gray-400 hover:cursor-none"
+                  : "bg-green-500 hover:bg-green-600 dark:bg-green-400 dark:hover:bg-green-300"
+              }
+              text-white dark:text-black
+              transition-colors duration-200
+              shadow-md hover:shadow-lg
+              hover:cursor-pointer
+            `}
+          >
+            Update Account
+          </Button>
+        )}
       </div>
       <Toaster position="bottom-right" expand={false} />
     </Form>
