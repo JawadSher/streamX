@@ -1,4 +1,3 @@
-import { popularCountries } from "@/components/account-page-components/countries-list";
 import { z } from "zod";
 
 export const userUpdateSchema = z.object({
@@ -19,17 +18,13 @@ export const userUpdateSchema = z.object({
     phoneNumber: z
     .string()
     .trim()
-    .min(7, "Phone number must be at least 7 characters")
     .max(15, "Phone number cannot exceed 15 characters")
     .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format"),
 
     country: z
     .string()
     .trim()
-    .min(2, "Country name must be at least 2 characters")
     .max(256, "Country name cannot exceed 256 characters")
-    .refine((val) => popularCountries.includes(val), "Invalid country"),
-
 });
 
 export type SignupData = z.infer<typeof userUpdateSchema>;

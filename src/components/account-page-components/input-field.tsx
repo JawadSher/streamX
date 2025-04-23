@@ -14,6 +14,8 @@ interface Props {
   children?: ReactNode;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   validationError?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
 const InputField = ({
@@ -26,6 +28,8 @@ const InputField = ({
   children,
   onChange,
   validationError,
+  disabled,
+  className=""
 }: Props) => {
   return (
     <div className="flex flex-col gap-2 w-full px-2 h-fit relative">
@@ -40,13 +44,14 @@ const InputField = ({
 
       <div className="relative w-full">
         <Input
-          className="font-semibold dark:text-zinc-300 w-full pr-10"
+          className={`${className} font-semibold dark:text-zinc-300 w-full pr-10`}
           value={inputValue}
           readOnly={!editable}
           type={type}
           name={name}
           id={htmlFor}
           onChange={onChange}
+          disabled={disabled}
         />
         {children && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer h-full flex items-center">
