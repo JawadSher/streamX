@@ -101,7 +101,7 @@ export async function initAuthConfigs() {
             };
 
             try {
-              await notifyKakfa(newUserData);
+              await notifyKakfa({userData: newUserData, action: "sign-up"});
               await new Promise((resolve) => setTimeout(resolve, 1500));
 
               const newUser = await fetchUserFromMongoDB({

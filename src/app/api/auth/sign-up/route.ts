@@ -49,7 +49,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       isVerified: false,
     };
 
-    await notifyKakfa(user);
+    await notifyKakfa({userData: user, action: "sign-up"});
 
     const userWithoutPassword = {
       firstName: user.firstName,

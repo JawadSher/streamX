@@ -26,3 +26,7 @@ export const getUserData = cache(async (): Promise<IRedisDBUser | null> => {
     watchHistory: user?.watchHistory ?? [],
   };
 });
+
+export const revalidateUserData = async (): Promise<IRedisDBUser | null> => {
+  return await getUserData();
+};

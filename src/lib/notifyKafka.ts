@@ -1,36 +1,34 @@
+import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import kafkaInstance from "./kafkaInstance";
+import { IUserAccountUpdate } from "@/interfaces/IUserAccountUpdate";
 
-export interface IUserData {
-  firstName: string;
-  lastName: string;
-  userName: string;
-  email: string;
-  channelName: string;
-  isVerified: boolean;
-  password: string;
-  bio?: string;
-  avatar?: string | undefined | null;
-  storageProvider?: string;
+interface Props{
+  userData?: IRedisDBUser | IUserAccountUpdate,
+  action?: "sign-up" | "user-update"; 
 }
 
-export default async function notifyKakfa(userData: IUserData) {
+export default async function notifyKakfa({ userData, action = "sign-up" }: Props) {
   try {
     const kafka = await kafkaInstance();
     const producer = kafka.producer();
     await producer.connect();
+
+    const topic = action === "sign-up" ? "sign-up" : "user-update";
     await producer.send({
-      topic: "sign-up",
+      topic,
       messages: [
         {
           key: "sign-up",
           value: JSON.stringify(userData),
           headers: {
-            source: "google-auth",
+            source: "streamX-app",
             timestamp: Date.now().toString(),
           },
         },
       ],
     });
+
+    console.log(`Sent ${action} message to topic ${topic}`);
     await producer.disconnect();
   } catch (error) {
     console.error("Error in notifyKafka:", error);

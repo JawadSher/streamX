@@ -5,7 +5,6 @@ import AuthProvider from "@/context/AuthProvider";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner";
-import QueryProvider from "@/components/QueryProvider";
 import ProgressWrapper from "@/components/progress-bar/progress-bar-wrapper";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -37,10 +36,8 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider session={session}>
-          <QueryProvider>
             <ProgressWrapper />
             <ClientRootLayout>{children}</ClientRootLayout>
-          </QueryProvider>
           <Toaster />
         </AuthProvider>
       </body>
