@@ -3,8 +3,10 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Header from "@/components/header";
 import { getPathName } from "@/lib/getPathName";
 import { auth } from "../api/auth/[...nextauth]/configs";
-import { getUserData } from "../actions/getUserData";
+import { revalidateUserData } from "../actions/getUserData";
 import { Suspense } from "react";
+
+export const revalidate = 60;
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   const url = await getPathName();
@@ -12,7 +14,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
 
   const session = await auth();
   const status = session ? "authenticated" : "unauthenticated";
-  const userData = status === "authenticated" ? await getUserData() : null;
+  const userData = status === "authenticated" ? await revalidateUserData() : null;
 
   return (
     <div className="h-screen flex bg-white-100">

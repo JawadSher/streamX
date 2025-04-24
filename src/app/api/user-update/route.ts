@@ -4,6 +4,7 @@ import { userUpdateSchema } from "@/schemas/userUpdateSchema";
 import { ApiError } from "@/lib/api/ApiError";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../auth/[...nextauth]/configs";
+import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
 
 type UpdateUserRequestBody = {
   firstName: string;
@@ -22,24 +23,40 @@ export async function PUT(request: NextRequest) {
     const body: UpdateUserRequestBody = await request.json();
     const { firstName, lastName, phoneNumber, country } = body;
 
-    const userData = {
-      userId: session.user._id,
+    console.log(body);
+
+    const data = {
       firstName,
       lastName,
-      phoneNumber,
       country,
     };
     
-    console.log("----------- Validation Failed ----------")
-    const result = userUpdateSchema.safeParse(userData);
+    console.log(data);
+    const result = await userUpdateSchema.safeParse(data);
     if (!result.success) {
+      console.log("--------- user data validation --------")
       return NextResponse.json(
         new ApiError("Invalid request body", 400),
         { status: 400 }
       );
     }
 
-    console.log("----------- Reached ----------")
+    if(phoneNumber.length > 0){
+      const numResult = await phoneNumberSchema.safeParse(phoneNumber);
+      if(!numResult.success){
+        console.log("-----------PhoneNumber validation error -------");
+        return NextResponse.json(
+          new ApiError(result.error || "Phone number error", 400),
+          { status: 400 }
+        );
+    }
+    }
+
+    const userData = {
+      ...data,
+      userId: session.user._id,
+      phoneNumber: phoneNumber
+    }
 
     try {
       await notifyKakfa({ userData, action: "user-update" });

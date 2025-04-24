@@ -3,16 +3,17 @@ import AccountPageSkeleton from "@/components/skeletons/account-page-skeleton";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { redirect } from "next/navigation";
 import React, { Suspense } from "react";
-import { getUserData } from "@/app/actions/getUserData";
+import { getUserData, revalidateUserData } from "@/app/actions/getUserData";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import AccountForm from "@/components/account-page-components/account-form";
 
-export const revalidate = 120;
+export const revalidate = 60;
 
 const Account = async () => {
   const session = await auth();
   if (!session?.user?._id) return redirect(API_ROUTES.HOME);
-  const userData: IRedisDBUser | null = await getUserData();
+
+  const userData: IRedisDBUser | null = await revalidateUserData();
 
   if (!userData) {
     return <div className="text-red-500 text-center">No user data available.</div>;

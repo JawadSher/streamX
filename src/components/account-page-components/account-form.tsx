@@ -13,6 +13,8 @@ import { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Loader2 } from "lucide-react";
+import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
+import { Preahvihear } from "next/font/google";
 
 interface Props {
   initialData: IRedisDBUser;
@@ -75,15 +77,34 @@ const AccountForm = ({ initialData }: Props) => {
     const result = userUpdateSchema.safeParse(userData);
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
-      console.log("method called");
       setErrors({
         firstName: fieldErrors.firstName,
         lastName: fieldErrors?.lastName,
-        phoneNumber: fieldErrors?.phoneNumber,
         country: fieldErrors?.country,
       });
       toast.error("Please put the correct values in to fields.");
       return null;
+    }
+    
+    if (phoneNumber.trim().length > 0) {
+      const result = phoneNumberSchema.safeParse(phoneNumber);
+      if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors as Partial<Record<keyof typeof userData, string[]>>;
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: fieldErrors.phoneNumber,
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: undefined,
+        }));
+      }
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: undefined,
+      }));
     }
 
     setErrors({
@@ -94,7 +115,10 @@ const AccountForm = ({ initialData }: Props) => {
     });
 
     const response = await axiosInstance.put(API_ROUTES.USER_UPDATE, {
-      userData,
+      firstName,
+      lastName,
+      phoneNumber,
+      country,
     });
     return response;
   }
@@ -103,6 +127,13 @@ const AccountForm = ({ initialData }: Props) => {
 
   useEffect(() => {
     if(state?.status === 200 || state?.data.statusCode === 200){
+      setEditableFields({
+        firstName: false,
+        lastName: false,
+        phoneNumber: false,
+        country: false
+      })
+      setIsBtnDisabled(false);
       toast.success("Account information updated");
     }
 

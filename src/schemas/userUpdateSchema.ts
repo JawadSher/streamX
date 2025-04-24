@@ -15,12 +15,6 @@ export const userUpdateSchema = z.object({
     .max(50, "Last name cannot exceed 50 characters")
     .refine((val) => val.length > 0, "Last name is required"),
 
-    phoneNumber: z
-    .string()
-    .trim()
-    .max(15, "Phone number cannot exceed 15 characters")
-    .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format"),
-
     country: z
     .string()
     .trim()
