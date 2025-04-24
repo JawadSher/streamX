@@ -4,17 +4,19 @@ import { cssFillProperty } from "@/constants/navConfig";
 import { Button } from "./ui/button";
 
 interface Props {
-  fieldName: string;
-  setEditableField: (text: string) => void;
+  fieldName?: string;
+  setEditableField?: (text: string) => void;
   disabled?: boolean;
+  className?: string;
 }
 
-const EditButton = ({ fieldName, setEditableField, disabled }: Props) => {
+const EditButton = ({ fieldName, setEditableField, disabled, className = "" }: Props) => {
   return (
     <Button
-    disabled={disabled}
-      className="bg-transparent border-0 text-0 w-fit h-full p-0 hover:bg-transparent cursor-pointer"
-      onClick={() => setEditableField(fieldName)}
+      type="button"
+      disabled={disabled}
+      className={`${className} bg-transparent border-0 text-0 w-fit h-full p-0 hover:bg-transparent cursor-pointer`}
+      onClick={() => setEditableField && fieldName && setEditableField(fieldName)}
     >
       <span className={`${cssFillProperty} pt-1`}>edit</span>
     </Button>

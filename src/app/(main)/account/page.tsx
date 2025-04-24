@@ -7,6 +7,8 @@ import { getUserData } from "@/app/actions/getUserData";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import AccountForm from "@/components/account-page-components/account-form";
 
+export const revalidate = 120;
+
 const Account = async () => {
   const session = await auth();
   if (!session?.user?._id) return redirect(API_ROUTES.HOME);
@@ -15,6 +17,7 @@ const Account = async () => {
   if (!userData) {
     return <div className="text-red-500 text-center">No user data available.</div>;
   }
+
 
   return (
     <div className="flex items-center justify-center w-full h-full pb-2">

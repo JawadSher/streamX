@@ -16,6 +16,7 @@ interface Props {
   validationError?: string;
   disabled?: boolean;
   className?: string;
+  rightElement?: React.ReactNode;
 }
 
 const InputField = ({
@@ -29,7 +30,8 @@ const InputField = ({
   onChange,
   validationError,
   disabled,
-  className=""
+  className = "",
+  rightElement,
 }: Props) => {
   return (
     <div className="flex flex-col gap-2 w-full px-2 h-fit relative">
@@ -37,9 +39,7 @@ const InputField = ({
         <Label htmlFor={htmlFor} className="text-lg font-medium">
           {label}
         </Label>
-        {
-          validationError && <p className="text-red-600">{validationError}</p>
-        }
+        {validationError && <p className="text-red-600">{validationError}</p>}
       </div>
 
       <div className="relative w-full">
@@ -53,6 +53,11 @@ const InputField = ({
           onChange={onChange}
           disabled={disabled}
         />
+        {rightElement && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer h-full flex items-center">
+            {rightElement}
+          </div>
+        )}
         {children && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer h-full flex items-center">
             {children}

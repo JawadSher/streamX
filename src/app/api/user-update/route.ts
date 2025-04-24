@@ -29,7 +29,8 @@ export async function PUT(request: NextRequest) {
       phoneNumber,
       country,
     };
-
+    
+    console.log("----------- Validation Failed ----------")
     const result = userUpdateSchema.safeParse(userData);
     if (!result.success) {
       return NextResponse.json(
@@ -37,6 +38,8 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    console.log("----------- Reached ----------")
 
     try {
       await notifyKakfa({ userData, action: "user-update" });

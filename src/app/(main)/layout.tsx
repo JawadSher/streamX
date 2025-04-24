@@ -12,23 +12,21 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
 
   const session = await auth();
   const status = session ? "authenticated" : "unauthenticated";
-  const userData = status === "authenticated" ? await getUserData() : null; 
+  const userData = status === "authenticated" ? await getUserData() : null;
 
   return (
     <div className="h-screen flex bg-white-100">
       <SidebarProvider>
-        
         <Suspense fallback={<p>Loading ....</p>}>
-        <AppSidebar status={status} userData={userData} />
+          <AppSidebar status={status} userData={userData} />
         </Suspense>
         <div
           className={`flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 ${
             isShortsPage ? "overflow-hidden" : "overflow-auto custom-scroll-bar"
           }`}
         >
-          <Header />
+            <Header />
           <main className="flex-1 mx-auto w-full mt-3">{children}</main>
-
         </div>
       </SidebarProvider>
     </div>

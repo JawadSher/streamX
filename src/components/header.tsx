@@ -1,6 +1,4 @@
 "use client";
-
-import React from "react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -21,7 +19,6 @@ import {
   Video,
   StickyNote,
 } from "lucide-react";
-import { SidebarTrigger } from "./ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
@@ -31,6 +28,8 @@ import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import TopHeader from "./account-page-components/top-header";
 import useWindowWidth from "@/hooks/useWindowWidth";
+import { useEffect, useState } from "react";
+import SidebarToggle from "./sidebar/sidebar-trigger";
 
 const Header = () => {
   const { setTheme } = useTheme();
@@ -40,14 +39,23 @@ const Header = () => {
   const isAuthenticated =
     status === "authenticated" ? "authenticated" : "unauthenticated";
 
-  const width = useWindowWidth();
+  let width = useWindowWidth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">
       <div className="flex items-center gap-3">
-        {(!path.includes("/account") ||
-          (path.startsWith("/account") && width <= 767)) && (
-          <SidebarTrigger className="-ml-1 cursor-pointer" />
+        {mounted ? (
+          (!path.includes("/account") ||
+            (path.startsWith("/account") && width <= 767)) && (
+            <SidebarToggle />
+          )
+        ) : (
+          <div className="w-10 h-10" /> // Placeholder to maintain layout
         )}
 
         <DropdownMenu>
@@ -80,6 +88,7 @@ const Header = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       {!path.startsWith("/account") ? (
         <div className="flex grow mx-2 items-center justify-center">
           <div className="relative md:max-w-[800px] grow">
@@ -94,6 +103,7 @@ const Header = () => {
       ) : (
         <TopHeader />
       )}
+
       {isAuthenticated === "authenticated" && !path.startsWith("/account") ? (
         <div className="flex items-center gap-2">
           <DropdownMenu>

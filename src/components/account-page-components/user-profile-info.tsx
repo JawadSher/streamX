@@ -1,3 +1,4 @@
+
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { fullname } from "@/lib/fullname";
 import FirstSection from "./first-section";
