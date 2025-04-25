@@ -22,9 +22,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body: UpdateUserRequestBody = await request.json();
     const { firstName, lastName, phoneNumber, country } = body;
-
-    console.log(body);
-
+    
     const data = {
       firstName,
       lastName,
@@ -34,7 +32,6 @@ export async function PUT(request: NextRequest) {
     console.log(data);
     const result = await userUpdateSchema.safeParse(data);
     if (!result.success) {
-      console.log("--------- user data validation --------")
       return NextResponse.json(
         new ApiError("Invalid request body", 400),
         { status: 400 }
@@ -44,7 +41,6 @@ export async function PUT(request: NextRequest) {
     if(phoneNumber.length > 0){
       const numResult = await phoneNumberSchema.safeParse(phoneNumber);
       if(!numResult.success){
-        console.log("-----------PhoneNumber validation error -------");
         return NextResponse.json(
           new ApiError(result.error || "Phone number error", 400),
           { status: 400 }
