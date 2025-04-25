@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Form from "next/form";
-import { authSignin, authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
+
 import loginSchema from "@/schemas/loginSchema";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { authProviderSignIn, authSignin } from "@/app/actions/auth-actions/authSignin.action";
 
 type AuthSigninResult = {
   success: boolean;

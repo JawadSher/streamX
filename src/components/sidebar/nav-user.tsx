@@ -19,9 +19,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
-import axios from "axios";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
+import axiosInstance from "@/lib/axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -32,16 +35,20 @@ interface INavUserProps {
 
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/auth/sign-out");
-      window.location.href = "/sign-in";
+      const response = await axiosInstance.post(API_ROUTES.SIGN_OUT)
+      if (response.status === 200) {
+        toast.success("Logout successful");
+      }
+      router.push("/sign-in");
     } catch (error) {
-      console.log(error);
+        toast.error("Logout unsuccessful");
+      }
     }
-  };
-
+  
   return (
     <SidebarMenu>
       <SidebarMenuItem>

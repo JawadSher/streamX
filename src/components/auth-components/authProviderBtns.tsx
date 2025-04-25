@@ -1,7 +1,8 @@
-import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin";
+
 import Form from "next/form";
 import React from "react";
 import { Button } from "../ui/button";
+import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin.action";
 
 const GoogleProviderBtn = () => {
   return (

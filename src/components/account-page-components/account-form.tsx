@@ -206,6 +206,7 @@ const AccountForm = ({ initialData }: Props) => {
           disabled={true}
           inputValue={userName}
         />
+
         <InputField
           label="Email"
           htmlFor="email"
@@ -214,7 +215,9 @@ const AccountForm = ({ initialData }: Props) => {
           className="w-full"
           disabled={true}
           inputValue={email}
+          isVerified={initialData?.isVerified || null}
         />
+
         <InputField
           label="Phone Number"
           htmlFor="phoneNumber"

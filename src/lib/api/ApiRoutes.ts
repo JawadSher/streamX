@@ -14,6 +14,7 @@ export const API_ROUTES = {
     ACCOUNT: "/account",
     SIGN_UP: "/api/auth/sign-up",
     SIGN_IN: "/api/auth/sign-in",
+    SIGN_OUT: "/api/auth/sign-out",
     CHANNEL: "/channel",
     USER_UPDATE: "/api/user-update"
 }

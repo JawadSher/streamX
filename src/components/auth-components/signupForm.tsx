@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Form from "next/form";
-import { authSignUp } from "@/app/actions/auth-actions/authSignup";
 import { useActionState, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signupSchema } from "@/schemas/signupSchema";
@@ -15,8 +14,9 @@ import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
-import { checkUserName } from "@/app/actions/checkUserName";
 import { debounce } from "lodash";
+import { authSignUp } from "@/app/actions/auth-actions/authSignUp.action";
+import { checkUserName } from "@/app/actions/user-actions/checkUserName.action";
 
 type AuthSignupResult = {
   success: boolean;

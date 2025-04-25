@@ -3,6 +3,7 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ReactNode, ChangeEvent } from "react";
+import Link from "next/link";
 
 interface Props {
   label?: string;
@@ -17,6 +18,7 @@ interface Props {
   disabled?: boolean;
   className?: string;
   rightElement?: React.ReactNode;
+  isVerified?: boolean | null;
 }
 
 const InputField = ({
@@ -32,14 +34,23 @@ const InputField = ({
   disabled,
   className = "",
   rightElement,
+  isVerified = true,
 }: Props) => {
   return (
-    <div className="flex flex-col gap-2 w-full px-2 h-fit relative">
+    <div className="flex flex-col gap-1 w-full px-2 h-fit relative">
       <div className="flex gap-3 items-center">
         <Label htmlFor={htmlFor} className="text-lg font-medium">
           {label}
         </Label>
         {validationError && <p className="text-red-600">{validationError}</p>}
+        {name === "email" && !isVerified && (
+          <Link
+            className="text-sm font-medium text-sky-600 hover:text-sky-700 transition-colors duration-200"
+            href="/account/verify"
+          >
+            Verify
+          </Link>
+        )}
       </div>
 
       <div className="relative w-full">

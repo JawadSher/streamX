@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   const session = await auth();
   
   if (!session || !session.user?._id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized request" }, { status: 401 });
   }
 
   try {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
   
   }catch(error){
-    console.error("Redis deletion session operation failed: ", error);
+    return NextResponse.json({ message:"Redis deletion session operation failed: "}, {status: 400});
   }
   
   await signOut();
