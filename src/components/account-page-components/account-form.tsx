@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Loader2 } from "lucide-react";
 import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
-import { Preahvihear } from "next/font/google";
 
 interface Props {
   initialData: IRedisDBUser;
