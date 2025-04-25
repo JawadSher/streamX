@@ -15,7 +15,6 @@ type UpdateUserRequestBody = {
   country?: string | null;
 };
 
-// Explicitly type the NextResponse payload
 export async function userBasicAccountUpdate({
   firstName,
   lastName,
