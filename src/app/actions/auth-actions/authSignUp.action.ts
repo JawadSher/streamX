@@ -1,12 +1,10 @@
 "use server";
 
 import { signupSchema } from "@/schemas/signupSchema";
-import axiosInstance from "@/lib/axios";
-import { isAxiosError } from "axios";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
-import { ApiError } from "@/lib/api/ApiError";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { AuthError } from "next-auth";
+import { signUpHelper } from "./signUpHelper.action";
 
 type AuthSignupResult = {
   success: boolean;
@@ -22,49 +20,51 @@ type AuthSignupResult = {
   error?: string;
 };
 
-export async function authSignUp(
-  _state: AuthSignupResult | null,
-  formData: FormData
-): Promise<AuthSignupResult> {
-  
+interface IUserData {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  userName?: string;
+}
 
-  const userData = {
-    ...formData
-  };
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function authSignUp({
+  firstName,
+  lastName,
+  email,
+  password,
+  userName,
+}: IUserData): Promise<AuthSignupResult> {
+  const userData = { firstName, lastName, email, password, userName };
 
   const result = signupSchema.safeParse(userData);
   if (!result.success) {
-    const fieldErrors = result.error.flatten().fieldErrors;
-    return { success: false, errors: fieldErrors };
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors,
+      message: "Validation failed",
+    };
   }
 
   try {
-    const response = await axiosInstance.post(API_ROUTES.SIGN_UP, result.data, {
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (response.data.statusCode === 201) {
-      const data = {
-        email: result.data.email,
-        password: result.data.password,
-      };
-
+    const response = await signUpHelper({ userData });
+    if (response.status === 201) {
+      await sleep(1500);
       try {
-
-
         const signinResult = await signIn("credentials", {
-          email: data.email,
-          password: data.password,
+          email: result.data.email,
+          password: result.data.password,
           redirect: false,
         });
 
-        console.log("------- Raw SignIn Result: ", signinResult);
-
         if (signinResult?.error) {
-          console.error("Sign-in failed with error:", signinResult.error);
           return {
             success: false,
-            error: signinResult.error,
+            error: signinResult.error || "Login failed",
           };
         }
 
@@ -74,7 +74,6 @@ export async function authSignUp(
           redirect: API_ROUTES.HOME,
         };
       } catch (error) {
-
         if (error instanceof AuthError) {
           if (error.type === "CredentialsSignin") {
             return {
@@ -93,23 +92,24 @@ export async function authSignUp(
           error: "An unexpected error occurred during authentication",
         };
       }
-    } else {
-      throw new ApiError("Signup failed", response.status);
+    } else if (response.status === 301) {
+      return {
+        success: false,
+        error: "An account with this email or username already exists",
+      };
+    } else if (response.status === 400) {
+      return {
+        success: false,
+        error: "Invalid request data",
+      };
     }
-  } catch (error) {
-    if (isAxiosError(error) && error.response) {
-      const status = error.response.status;
-      if (status === 400) {
-        return { success: false, error: "Invalid input data" };
-      } else if (status === 409) {
-        return { success: false, error: "Email or username already taken" };
-      } else {
-        return {
-          success: false,
-          error: error.response.data.message || "Signup failed",
-        };
-      }
-    }
+
+    return {
+      success: false,
+      error: "Signup failed due to unknown error",
+    };
+  } catch (error: any) {
+    console.error("Signup error:", error);
     return { success: false, error: "An unexpected error occurred" };
   }
 }

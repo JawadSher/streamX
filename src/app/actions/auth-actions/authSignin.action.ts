@@ -43,9 +43,6 @@ export async function authSignin(
       redirect: false,
     });
 
-    console.log("SignIn result type:", typeof signInResult);
-    console.log("SignIn result details:", JSON.stringify(signInResult));
-
     if (typeof signInResult === 'string') {
       return { 
         success: true, 
@@ -56,14 +53,12 @@ export async function authSignin(
     if (signInResult?.ok) {
       redirect(API_ROUTES.HOME)
     }else{
-      console.log("Sign-in failed");
       return { 
         success: false, 
         error: signInResult?.error || "Invalid email or password" 
       };
     }
   } catch (error) {
-    console.error("Signin error:", error);
     return { success: false, error: "Authentication failed" };
   }
 }

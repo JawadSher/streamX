@@ -90,7 +90,7 @@ export async function initAuthConfigs() {
             const newUserData = {
               firstName: profile?.given_name || "",
               lastName: profile?.family_name || "",
-              userName: user.email?.split("@")[0].replace(".", ""),
+              userName: "@"+user.email?.split("@")[0].replace(".", ""),
               email: user.email,
               channelName: `${user.email?.split("@")[0]}-Channel`,
               isVerified: true,
