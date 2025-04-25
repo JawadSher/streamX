@@ -5,22 +5,11 @@ import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { AuthError } from "next-auth";
 import { signUpHelper } from "./signUpHelper.action";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import { actionError } from "@/lib/actions-templates/ActionError";
+import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 
-type AuthSignupResult = {
-  success: boolean;
-  errors?: {
-    firstName?: string[];
-    lastName?: string[];
-    userName?: string[];
-    email?: string[];
-    password?: string[];
-  };
-  message?: string;
-  redirect?: string;
-  error?: string;
-};
-
-interface IUserData {
+export interface IUserData {
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -38,21 +27,21 @@ export async function authSignUp({
   email,
   password,
   userName,
-}: IUserData): Promise<AuthSignupResult> {
+}: IUserData): Promise<ActionResponseType | ActionErrorType> {
   const userData = { firstName, lastName, email, password, userName };
 
   const result = signupSchema.safeParse(userData);
   if (!result.success) {
-    return {
-      success: false,
-      errors: result.error.flatten().fieldErrors,
-      message: "Validation failed",
-    };
+    return actionError(
+      400,
+      "Validation failed",
+      result.error.flatten().fieldErrors
+    );
   }
 
   try {
     const response = await signUpHelper({ userData });
-    if (response.status === 201) {
+    if (response.statusCode === 201) {
       await sleep(1500);
       try {
         const signinResult = await signIn("credentials", {
@@ -62,54 +51,39 @@ export async function authSignUp({
         });
 
         if (signinResult?.error) {
-          return {
-            success: false,
-            error: signinResult.error || "Login failed",
-          };
+          return actionError(400, signinResult.error || "Login failed", {});
         }
 
-        return {
-          success: true,
-          message: "User logged in successfully",
+        return actionResponse(200, "User logged in successfully", {
           redirect: API_ROUTES.HOME,
-        };
+        });
       } catch (error) {
         if (error instanceof AuthError) {
           if (error.type === "CredentialsSignin") {
-            return {
-              success: false,
-              error: "Invalid email or password",
-            };
+            return actionError(401, "Invalid email or password", {});
           }
-          return {
-            success: false,
-            error: error.message || "Authentication failed",
-          };
+          return actionError(500, error.message || "Authentication failed", {});
         }
 
-        return {
-          success: false,
-          error: "An unexpected error occurred during authentication",
-        };
+        return actionError(
+          500,
+          "An unexpected error occurred during authentication",
+          {}
+        );
       }
-    } else if (response.status === 301) {
-      return {
-        success: false,
-        error: "An account with this email or username already exists",
-      };
-    } else if (response.status === 400) {
-      return {
-        success: false,
-        error: "Invalid request data",
-      };
+    } else if (response.statusCode === 301) {
+      return actionError(
+        409,
+        "An account with this email or username already exists",
+        {}
+      );
+    } else if (response.statusCode === 400) {
+      return actionError(400, "Invalid request data", {});
     }
 
-    return {
-      success: false,
-      error: "Signup failed due to unknown error",
-    };
+    return actionError(500, "Signup failed due to unknown error", {});
   } catch (error: any) {
     console.error("Signup error:", error);
-    return { success: false, error: "An unexpected error occurred" };
+    return actionError(500, "An unexpected error occurred", {});
   }
 }

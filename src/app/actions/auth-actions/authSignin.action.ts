@@ -1,9 +1,11 @@
-"use server"
+"use server";
 
 import { loginSchema } from "@/schemas/loginSchema";
 import { signIn, signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
-import { redirect } from "next/navigation";
+import { actionError } from "@/lib/actions-templates/ActionError";
+import { actionResponse } from "@/lib/actions-templates/ActionResponse";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 
 type AuthSigninResult = {
   success: boolean;
@@ -15,7 +17,7 @@ type AuthSigninResult = {
 export async function authSignin(
   state: AuthSigninResult | null,
   formData: FormData
-): Promise<AuthSigninResult> {
+): Promise<ActionResponseType | ActionErrorType> {
 
   await signOut({ redirect: false });
 
@@ -28,15 +30,10 @@ export async function authSignin(
 
   if (!result.success) {
     const fieldErrors = result.error.flatten().fieldErrors;
-    return {
-      success: false,
-      errors: fieldErrors,
-    };
+    return actionError(400, "Validation failed", fieldErrors);
   }
 
   try {
-    console.log("Attempting to sign in with credentials:", result.data);
-    
     const signInResult = await signIn("credentials", {
       email: result.data.email,
       password: result.data.password,
@@ -44,22 +41,16 @@ export async function authSignin(
     });
 
     if (typeof signInResult === 'string') {
-      return { 
-        success: true, 
-        redirect: API_ROUTES.HOME 
-      };
+      return actionResponse(200, "Sign-in successful", { redirect: API_ROUTES.HOME });
     }
 
     if (signInResult?.ok) {
-      redirect(API_ROUTES.HOME)
-    }else{
-      return { 
-        success: false, 
-        error: signInResult?.error || "Invalid email or password" 
-      };
+      return actionResponse(200, "Sign-in successful", { redirect: API_ROUTES.HOME }); 
+    } else {
+      return actionError(401, signInResult?.error || "Invalid email or password", {});
     }
   } catch (error) {
-    return { success: false, error: "Authentication failed" };
+    return actionError(500, "Authentication failed", {}); 
   }
 }
 

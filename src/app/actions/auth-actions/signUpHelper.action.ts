@@ -2,24 +2,17 @@ import { connectDB } from "@/lib/database";
 import User from "@/models/user.model";
 import notifyKakfa from "@/lib/notifyKafka";
 import bcrypt from "bcryptjs";
+import { IUserData } from "./authSignUp.action";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import { actionError } from "@/lib/actions-templates/ActionError";
+import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 
-interface IUserData {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  password?: string;
-  userName?: string;
-}
 
 export async function signUpHelper({
   userData,
 }: {
   userData: IUserData;
-}): Promise<{
-  message: string;
-  data?: Record<string, any>;
-  status: number;
-}> {
+}): Promise<ActionResponseType | ActionErrorType> {
   try {
     await connectDB();
 
@@ -31,10 +24,7 @@ export async function signUpHelper({
     });
 
     if (userExists) {
-      return {
-        message: "Account already exists",
-        status: 409,
-      };
+      return actionError(409, "Account already exists", {});
     }
 
     const encryptedPassword = await bcrypt.hash(userData?.password!, 10);
@@ -60,22 +50,12 @@ export async function signUpHelper({
       isVerified: user.isVerified,
     };
 
-    return {
-      message: "User account created successfully",
-      data: userWithoutPassword,
-      status: 201,
-    };
+    return actionResponse(201, "User account created successfully", userWithoutPassword);
   } catch (error) {
     if (error instanceof SyntaxError) {
-      return {
-        message: "Invalid request body",
-        status: 400,
-      };
+      return actionError(400, "Invalid request body", {});
     }
 
-    return {
-      message: "Internal server error",
-      status: 500,
-    };
+    return actionError(500, "Internal server error", {});
   }
 }
