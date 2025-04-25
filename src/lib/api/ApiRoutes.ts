@@ -12,9 +12,9 @@ export const API_ROUTES = {
     SETTINGS: "/settings",
     PROFILE: "/feed/profile",
     ACCOUNT: "/account",
-    SIGN_UP: "/api/auth/sign-up",
-    SIGN_IN: "/api/auth/sign-in",
-    SIGN_OUT: "/api/auth/sign-out",
+    SIGN_UP: "/sign-up",
+    SIGN_IN: "/sign-in",
+    SIGN_OUT: "/sign-out",
     CHANNEL: "/channel",
     USER_UPDATE: "/api/user-update"
 }
