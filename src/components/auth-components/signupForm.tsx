@@ -16,6 +16,7 @@ import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { debounce } from "lodash";
 import { authSignUp } from "@/app/actions/auth-actions/authSignUp.action";
 import { checkUserName } from "@/app/actions/user-actions/checkUserName.action";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 
 export function SignupForm({
   className,
@@ -38,6 +39,11 @@ export function SignupForm({
   const [userName, setUserName] = useState<string>("");
   const [userNameAvailable, setUsernameAvailable] = useState("");
   const router = useRouter();
+
+  type FormState =
+  | { success: boolean }
+  | ActionResponseType
+  | ActionErrorType;
 
   const handleSubmit = async (prevState: any, formData: FormData) => {
     const data = {
@@ -76,7 +82,7 @@ export function SignupForm({
       return { success: false };
     }
 
-    const res = await authSignUp({
+    const response: ActionResponseType | ActionErrorType = await authSignUp({
       firstName: result.data.firstName,
       lastName: result.data.lastName,
       email: result.data.email,
@@ -84,31 +90,69 @@ export function SignupForm({
       password: result.data.password,
     });
 
-    return res;
+    return response;
   };
 
   const [state, formAction, isPending] = useActionState(handleSubmit, {
     success: false,
-  });
+  } as FormState );
 
   useEffect(() => {
-    if (state?.success) {
-      toast.success("Account created successfully", {
-        duration: 3000,
-      });
+    if ("statusCode" in state) {
+      if (state.statusCode === 200) {
+        toast.success("Account created successfully", {
+          description: state.message,
+          duration: 3000,
+        });
 
-      setErrors(null);
-      setFirstName("");
-      setLastName("");
-      setUserName("");
-      setEmail("");
-      setPassword("");
-      setConfirmPasswd("");
-      setUsernameAvailable("");
+        setErrors(null);
+        setFirstName("");
+        setLastName("");
+        setUserName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPasswd("");
+        setUsernameAvailable("");
 
-      router.push(API_ROUTES.HOME);
+        router.push(API_ROUTES.HOME);
+      } else if (state.statusCode === 400 && state.data?.fieldErrors) {
+        const fieldErrors = state.data.fieldErrors;
+        setErrors({
+          firstName: fieldErrors.firstName?.[0],
+          lastName: fieldErrors.lastName?.[0],
+          userName: fieldErrors.userName?.[0],
+          email: fieldErrors.email?.[0],
+          password: fieldErrors.password?.[0],
+        });
+        toast.error("Signup failed", {
+          description: state.message,
+          duration: 3000,
+        });
+      } else if (state.statusCode === 400) {
+        toast.error("Signup failed", {
+          description: state.message,
+          duration: 3000,
+        });
+      } else if (state.statusCode === 401) {
+        toast.error("Signup failed", {
+          description: state.message,
+          duration: 3000,
+        });
+      } else if (state.statusCode === 409) {
+        toast.error("Signup failed", {
+          description: state.message,
+          duration: 3000,
+        });
+      } else if (state.statusCode === 500) {
+        toast.error("Signup failed", {
+          description: state.message,
+          duration: 3000,
+        });
+      }
     }
   }, [state, router]);
+
+
 
   const debouncedCheck = useCallback(
     debounce(async (value: string) => {

@@ -1,13 +1,13 @@
 "use server";
 
 import { auth, signOut } from "@/app/api/auth/[...nextauth]/configs";
-import { ActionError, actionError } from "@/lib/actions-templates/ActionError";
-import { ActionResponse } from "@/lib/actions-templates/ActionResponse";
+import { actionError } from "@/lib/actions-templates/ActionError";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { connectRedis } from "@/lib/redis";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import { redirect } from "next/navigation";
 
-export async function authSignOut(): Promise<ActionResponse | ActionError> {
+export async function authSignOut(): Promise<ActionResponseType | ActionErrorType> {
   const session = await auth();
 
   if (!session || !session.user?._id) {

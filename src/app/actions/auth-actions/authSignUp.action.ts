@@ -30,6 +30,8 @@ export async function authSignUp({
 }: IUserData): Promise<ActionResponseType | ActionErrorType> {
   const userData = { firstName, lastName, email, password, userName };
 
+  console.log(userData)
+
   const result = signupSchema.safeParse(userData);
   if (!result.success) {
     return actionError(
@@ -71,7 +73,7 @@ export async function authSignUp({
           {}
         );
       }
-    } else if (response.statusCode === 301) {
+    } else if (response.statusCode === 409) {
       return actionError(
         409,
         "An account with this email or username already exists",
@@ -79,11 +81,10 @@ export async function authSignUp({
       );
     } else if (response.statusCode === 400) {
       return actionError(400, "Invalid request data", {});
+    }else {
+      return actionError(500, "Signup failed due to unknown error", {});
     }
-
-    return actionError(500, "Signup failed due to unknown error", {});
   } catch (error: any) {
-    console.error("Signup error:", error);
     return actionError(500, "An unexpected error occurred", {});
   }
 }

@@ -22,8 +22,7 @@ import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import { toast } from "sonner";
 import { authSignOut } from "@/app/actions/auth-actions/authSignOut.action";
-import { ActionResponse } from "@/lib/actions-templates/ActionResponse";
-import { ActionError } from "@/lib/actions-templates/ActionError";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -36,7 +35,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
   const handleLogout = async () => {
     try {
-      const response: ActionResponse | ActionError = await authSignOut();
+      const response: ActionResponseType | ActionErrorType = await authSignOut();
       if (response.statusCode === 401 || response.statusCode === 400) {
         toast.error("Logout Unsuccessful", {
           description: response.message,

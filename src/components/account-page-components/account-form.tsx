@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Loader2 } from "lucide-react";
 import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
+import { userBasicAccountUpdate } from "@/app/actions/user-actions/userBasicAccountUpdate.action";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 
 interface Props {
   initialData: IRedisDBUser;
@@ -63,9 +65,9 @@ const AccountForm = ({ initialData }: Props) => {
   }, [firstName, lastName, phoneNumber, country, initialData]);
 
   async function handleSubmit(
-    state: AxiosResponse<any, any> | null,
+    state: ActionErrorType | ActionResponseType | null,
     formData: FormData
-  ): Promise<AxiosResponse<any, any> | null> {
+  ): Promise<ActionErrorType | ActionResponseType | null> {
     const userData = {
       firstName: formData.get("firstName"),
       lastName: formData.get("lastName"),
@@ -84,11 +86,13 @@ const AccountForm = ({ initialData }: Props) => {
       toast.error("Please put the correct values in to fields.");
       return null;
     }
-    
+
     if (phoneNumber.trim().length > 0) {
       const result = phoneNumberSchema.safeParse(phoneNumber);
       if (!result.success) {
-        const fieldErrors = result.error.flatten().fieldErrors as Partial<Record<keyof typeof userData, string[]>>;
+        const fieldErrors = result.error.flatten().fieldErrors as Partial<
+          Record<keyof typeof userData, string[]>
+        >;
         setErrors((prev) => ({
           ...prev,
           phoneNumber: fieldErrors.phoneNumber,
@@ -113,37 +117,43 @@ const AccountForm = ({ initialData }: Props) => {
       country: undefined,
     });
 
-    const response = await axiosInstance.put(API_ROUTES.USER_UPDATE, {
-      firstName,
-      lastName,
-      phoneNumber,
-      country,
-    });
+    const response: ActionResponseType | ActionErrorType =
+      await userBasicAccountUpdate({
+        firstName,
+        lastName,
+        phoneNumber,
+        country,
+      });
     return response;
   }
 
   const [state, formAction, isPending] = useActionState(handleSubmit, null);
 
   useEffect(() => {
-    if(state?.status === 200 || state?.data.statusCode === 200){
-      setEditableFields({
-        firstName: false,
-        lastName: false,
-        phoneNumber: false,
-        country: false
-      })
-      setIsBtnDisabled(false);
-      toast.success("Account information updated");
+    if (state && "statusCode" in state) {
+      if (state?.statusCode === 200) {
+        setEditableFields({
+          firstName: false,
+          lastName: false,
+          phoneNumber: false,
+          country: false,
+        });
+        setIsBtnDisabled(false);
+        toast.success(state.message);
+      } else if (state?.statusCode === 400) {
+        toast.error(
+          state.message ||
+            "Something went wrong while updating user data. Try again"
+        );
+      } else if (state?.statusCode === 401) {
+        toast.error(state.message || "Unauthorized Request");
+      } else if (state?.statusCode === 503) {
+        toast.error(state.message || "Service temporarily unavailable");
+      } else if (state?.statusCode === 500) {
+        toast.error(state.message || "Internal server error");
+      }
     }
-
-    if(state?.status === 400 || state?.data.statusCode === 400){
-      toast.error(state.data.message || "Something went wrong while updating user data. Try again")
-    }
-
-    if(state?.status === 401 || state?.data.statusCode === 401){
-      toast.error(state.data.message || "Unauthorized Request")
-    }
-  }, [state])
+  }, [state]);
 
   return (
     <div className="w-full max-w-5xl mx-auto p-6">
