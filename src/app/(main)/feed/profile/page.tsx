@@ -1,4 +1,5 @@
-import { getUserData } from "@/app/actions/getUserData";
+
+import { getUserData } from "@/app/actions/user-actions/getUserData.action";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import DislikedVideos from "@/components/profile-page-components/disliked-videos";
 import History from "@/components/profile-page-components/history";
@@ -28,7 +29,7 @@ const Profile = async () => {
       <UserProfile
         fullName={fullName}
         userName={userData.userName}
-        avatarURL={userData?.avatarURL || "/public/defaultUser.png"}
+        avatarURL={userData?.avatarURL || "/defaultUser.png"}
       />
       <History />
       <Playlists />

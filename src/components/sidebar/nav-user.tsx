@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge, BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react";
-
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -21,10 +20,10 @@ import {
 import Image from "next/image";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
-import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-
+import { authSignOut } from "@/app/actions/auth-actions/authSignOut.action";
+import { ActionResponse } from "@/lib/actions-templates/ActionResponse";
+import { ActionError } from "@/lib/actions-templates/ActionError";
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -35,20 +34,22 @@ interface INavUserProps {
 
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
-  const router = useRouter();
-
   const handleLogout = async () => {
     try {
-      const response = await axiosInstance.post(API_ROUTES.SIGN_OUT)
-      if (response.status === 200) {
-        toast.success("Logout successful");
+      const response: ActionResponse | ActionError = await authSignOut();
+      if (response.statusCode === 401 || response.statusCode === 400) {
+        toast.error("Logout Unsuccessful", {
+          description: response.message,
+        });
       }
-      router.push("/sign-in");
     } catch (error) {
-        toast.error("Logout unsuccessful");
-      }
+      console.error("Logout error:", error);
+      toast.error("Logout Unsuccessful");
     }
-  
+
+    toast.success("Logout successfull");
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -113,7 +114,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <Link href={API_ROUTES.ACCOUNT} >
+              <Link href={API_ROUTES.ACCOUNT}>
                 <DropdownMenuItem className="cursor-pointer">
                   {user.isVerified ? <BadgeCheck /> : <Badge />}
                   Account
