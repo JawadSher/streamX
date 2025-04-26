@@ -12,6 +12,7 @@ export const API_ROUTES = {
     SETTINGS: "/settings",
     PROFILE: "/feed/profile",
     ACCOUNT: "/account",
+    ACCOUNT_SECURITY: "/account/security",
     SIGN_UP: "/sign-up",
     SIGN_IN: "/sign-in",
     SIGN_OUT: "/sign-out",
