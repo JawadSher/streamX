@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -7,18 +7,23 @@ import { Label } from "@/components/ui/label";
 import Form from "next/form";
 
 import loginSchema from "@/schemas/loginSchema";
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { authProviderSignIn, authSignin } from "@/app/actions/auth-actions/authSignin.action";
-
-type AuthSigninResult = {
-  success: boolean;
-  errors?: { email?: string[]; password?: string[] };
-  error?: string;
-  redirect?: string;
-};
+import {
+  authProviderSignIn,
+  authSignin,
+} from "@/app/actions/auth-actions/authSignin.action";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import { toast, Toaster } from "sonner";
+import {debounce} from "lodash";
 
 export function LoginForm({
   className,
@@ -30,7 +35,7 @@ export function LoginForm({
   } | null>(null);
 
   const [state, formAction, isPending] = useActionState<
-    AuthSigninResult | null,
+    ActionResponseType | ActionErrorType | null,
     FormData
   >(authSignin, null);
 
@@ -39,48 +44,54 @@ export function LoginForm({
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if(state?.success && state.redirect){
-      router.push(state.redirect);
+    if (state) {
+      if (state.statusCode === 200) {
+        toast.success(state.message);
+        router.push(state.data.redirect);
+      } else if (state.statusCode === 400) {
+        toast.error(state.message);
+        setErrors({
+          email: state.data?.email?.[0] ?? "",
+          password: state.data?.password?.[0] ?? "",
+        });
+      } else if (state.statusCode === 401 || state.statusCode === 500) {
+        setErrors({
+          email: "",
+          password: "",
+        });
+        toast.error(state.message);
+      }
     }
-    if(state?.error){
-      setErrors({
-        email: state.error,
-        password: state.error
-      });
-    }
+  }, [state, router]);
 
-    if(state?.errors){
-      setErrors({
-        email: state.errors.email?.[0],
-        password: state.errors.password?.[0]
-      });
-    }
-  }, [state, router])
+  const debouncedValidate = useCallback(
+    debounce(async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = event.target;
 
-  const handleInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = event.target;
+      const emailValue =
+        name === "email" ? value : emailRef.current?.value || "";
+      const passwordValue =
+        name === "password" ? value : passwordRef.current?.value || "";
 
-    const emailValue = name === "email" ? value : emailRef.current?.value || "";
-    const passwordValue =
-      name === "password" ? value : passwordRef.current?.value || "";
+      const data = { email: emailValue, password: passwordValue };
 
-    const data = {
-      email: emailValue,
-      password: passwordValue,
-    };
+      const result = loginSchema.safeParse(data);
 
-    const result = loginSchema.safeParse(data);
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors({
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
-      });
-    } else {
-      setErrors(null);
-    }
+      if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        setErrors({
+          email: fieldErrors.email?.[0],
+          password: passwordValue.length > 0 ? fieldErrors.password?.[0] : "",
+        });
+      } else {
+        setErrors(null);
+      }
+    }, 500),
+    []
+  );
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedValidate(event);
   };
 
   const handleSubmit = async (formData: FormData) => {
@@ -194,7 +205,7 @@ export function LoginForm({
           </Link>
         </div>
       </div>
-
+      <Toaster position="bottom-right" expand={false} />
     </div>
   );
 }

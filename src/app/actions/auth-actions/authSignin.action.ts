@@ -7,15 +7,8 @@ import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 
-type AuthSigninResult = {
-  success: boolean;
-  errors?: { email?: string[]; password?: string[] };
-  error?: string;
-  redirect?: string;
-};
-
 export async function authSignin(
-  state: AuthSigninResult | null,
+  state: ActionResponseType | ActionErrorType | null,
   formData: FormData
 ): Promise<ActionResponseType | ActionErrorType> {
 
