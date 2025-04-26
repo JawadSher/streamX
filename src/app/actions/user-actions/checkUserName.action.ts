@@ -1,45 +1,53 @@
 "use server";
+
 import { connectDB } from "@/lib/database";
 import UserModel from "@/models/user.model";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import { actionResponse } from "@/lib/actions-templates/ActionResponse";
+import { actionError } from "@/lib/actions-templates/ActionError";
 import { z } from "zod";
+
 
 const userNameSchema = z
   .string()
   .trim()
-  .min(2, "Username must be at least 2 characters")
-  .max(60, "Username cannot exceed 60 characters")
-  .toLowerCase()
+  .min(2, 'Username must be at least 2 characters')
+  .max(60, 'Username cannot exceed 60 characters')
   .regex(
     /^[a-z][a-z0-9]{1,59}$/,
-    "Username must start with a letter and contain only lowercase letters and numbers"
+    'Username must start with a letter and contain only lowercase letters and numbers'
   )
-  .refine((val) => val.length > 0, "Username is required");
+  .refine(val => val.length > 0, 'Username is required');
 
-export async function checkUserName(value: string) {
-  if (!value) {
-    return { status: "empty", message: "" };
-  }
-
-  const result = userNameSchema.safeParse(value);
-  if (!result.success) {
-    const errorMessage = result.error.issues
-      .map((issue) => issue.message)
-      .join(", ");
-    return { status: "error", message: errorMessage };
-  }
-
-  const userName = `@${result.data}`;
+export async function checkUniqueUserName({
+  userName,
+}: {
+  userName: string;
+}): Promise<ActionErrorType | ActionResponseType> {
   try {
+    if (!userName) {
+      return actionError(422, "Username is required", null);
+    }
+
+    const result = await userNameSchema.safeParse(userName);
+    if(!result.success){
+      const errors = result.error.flatten().fieldErrors;
+      const firstError = Object.values(errors).flat()[0] || "Invalid input";
+      return actionError(422, firstError, null);
+    }
+
     await connectDB();
     const user = await UserModel.findOne({ userName });
 
     if (user) {
-      return { status: "error", message: "Username is already taken" };
+      return actionError(409, "Username is already taken", null);
     }
 
-    return { status: "available", message: "Username is available" };
+    return actionResponse(200, "Username is available", null);
   } catch (error) {
-    console.error("Username check error:", error);
-    return { status: "error", message: "Unexpected error occurred" };
+    if (error instanceof Error) {
+      return actionError(400, error.message, null);
+    }
+    return actionError(500, "Internal server error", null);
   }
 }

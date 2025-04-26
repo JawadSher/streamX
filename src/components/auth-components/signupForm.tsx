@@ -15,8 +15,8 @@ import { useRouter } from "next/navigation";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { debounce } from "lodash";
 import { authSignUp } from "@/app/actions/auth-actions/authSignUp.action";
-import { checkUserName } from "@/app/actions/user-actions/checkUserName.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import { checkUniqueUserName } from "@/app/actions/user-actions/checkUserName.action";
 
 export function SignupForm({
   className,
@@ -157,17 +157,26 @@ export function SignupForm({
   const debouncedCheck = useCallback(
     debounce(async (value: string) => {
       if (value) {
-        const result = await checkUserName(value);
+        const result = await checkUniqueUserName({userName: value});
 
-        if (result?.status === "available") {
-          setUsernameAvailable(result.message);
+        if (result?.statusCode === 422) {
+          toast.error(result.message)
           setErrors((prev) => ({ ...prev, userName: "" }));
-        } else if (result?.status === "error") {
+          setUsernameAvailable("");
+        } else if (result?.statusCode === 409) {
+          setUsernameAvailable("");
           setErrors((prev) => ({ ...prev, userName: result.message }));
-          setUsernameAvailable("");
-        } else {
+        } else if(result.statusCode === 400) {
+          toast.error(result.message)
           setErrors((prev) => ({ ...prev, userName: "" }));
           setUsernameAvailable("");
+        }else if(result.statusCode === 500){
+          toast.error(result.message)
+          setErrors((prev) => ({ ...prev, userName: "" }));
+          setUsernameAvailable("");
+        }else{
+          setErrors((prev) => ({ ...prev, userName: "" }));
+          setUsernameAvailable(result.message);
         }
       }
     }, 1000),
