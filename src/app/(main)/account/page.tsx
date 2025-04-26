@@ -19,7 +19,6 @@ const Account = async () => {
     return <div className="text-red-500 text-center">No user data available.</div>;
   }
 
-
   return (
     <div className="flex items-center justify-center w-full h-full pb-2">
       <div className="flex justify-center h-full w-full rounded-lg bg-[#fafafa] dark:bg-[rgb(24_24_27)] transition-colors duration-300 md:px-10 lg:px-30 py-10 shadow-lg">

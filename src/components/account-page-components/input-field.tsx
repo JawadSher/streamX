@@ -4,6 +4,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ReactNode, ChangeEvent } from "react";
 import Link from "next/link";
+import { VerifyAccountForm } from "./verify-account-form";
 
 interface Props {
   label?: string;
@@ -43,14 +44,7 @@ const InputField = ({
           {label}
         </Label>
         {validationError && <p className="text-red-600">{validationError}</p>}
-        {name === "email" && !isVerified && (
-          <Link
-            className="text-sm font-medium text-sky-600 hover:text-sky-700 transition-colors duration-200"
-            href="/account/verify"
-          >
-            Verify
-          </Link>
-        )}
+        {name === "email" && !isVerified && <VerifyAccountForm />}
       </div>
 
       <div className="relative w-full">
