@@ -16,7 +16,9 @@ const Account = async () => {
   const userData: IRedisDBUser | null = await getUserData();
 
   if (!userData) {
-    return <div className="text-red-500 text-center">No user data available.</div>;
+    return (
+      <div className="text-red-500 text-center">No user data available.</div>
+    );
   }
 
   return (
@@ -24,7 +26,7 @@ const Account = async () => {
       <div className="flex justify-center h-full w-full rounded-lg bg-[#fafafa] dark:bg-[rgb(24_24_27)] transition-colors duration-300 md:px-10 lg:px-30 py-10 shadow-lg">
         <div className="flex justify-center w-full h-full">
           <Suspense fallback={<AccountPageSkeleton />}>
-            <AccountForm initialData={userData}/>
+            <AccountForm initialData={userData} />
           </Suspense>
         </div>
       </div>
