@@ -75,7 +75,9 @@ export function VerifyAccountForm({
         await handleUserOTP({ userId, state: "delete" });
       }
 
-      OTPHandle();
+      if (countDown <= 1 || !isSended) {
+        OTPHandle();
+      }
 
       return () => clearInterval(timer);
     }
@@ -85,20 +87,23 @@ export function VerifyAccountForm({
     const pin = data.pin;
     if (
       pin?.trim()?.length === 6 &&
-      typeof pin === "number" &&
+      typeof pin === "string" &&
       countDown > 1 &&
       isSended
     ) {
-      const userPin = await handleUserOTP({ userId, state: "get" });
-      if (userPin === pin) {
-        const res: ActionResponseType | ActionErrorType = await handleUserOTP({
-          userId,
-          state: "verified",
-        });
-
-        if (res.statusCode === 200 || res.data.isVerified === true) {
-          toast.success("Account Verified Successfully");
-          return;
+      const response: ActionResponseType | ActionErrorType = await handleUserOTP({ userId, state: "get" });
+      console.log(response);
+      if(response.statusCode === 200){
+        if (response?.data?.OTP?.toString() === pin) {
+          const res: ActionResponseType | ActionErrorType = await handleUserOTP({
+            userId,
+            state: "verified",
+          });
+  
+          if (res.statusCode === 200 || res.data.isVerified === true) {
+            toast.success("Account Verified Successfully");
+            return;
+          }
         }
       }
     }

@@ -16,19 +16,17 @@ export async function handleUserOTP({
 }: {
   code?: string;
   userId: string;
-  state: "get" | "delete" | "store" | "verified";
+  state?: "get" | "delete" | "store" | "verified";
 }): Promise<ActionResponseType | ActionErrorType> {
   if (!userId) {
     return actionError(400, "Valid userId is required", null);
   }
-
   
   if (state === "store") {
     if (!code) {
       return actionError(400, "OTP code is required for storing", null);
     }
-    
-    console.log("method called ", code, userId)
+
     await storeUserOTPInRedis({ code, userId });
     return actionResponse(200, "User OTP stored successfully", null);
   } else if (state === "get") {
@@ -38,7 +36,7 @@ export async function handleUserOTP({
       return actionError(404, "OTP not found", null);
     }
 
-    return actionResponse(200, "User OTP fetched successfully", OTP);
+    return actionResponse(200, "User OTP fetched successfully", {OTP});
   } else if (state === "delete") {
     await deleteUserOTPFromRedis({ userId });
     return actionResponse(200, "User OTP deleted successfully", null);
