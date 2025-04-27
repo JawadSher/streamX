@@ -3,7 +3,6 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { ReactNode, ChangeEvent } from "react";
-import Link from "next/link";
 import { VerifyAccountForm } from "./verify-account-form";
 
 interface Props {
@@ -21,6 +20,7 @@ interface Props {
   rightElement?: React.ReactNode;
   isVerified?: boolean | null;
   userEmail?: string;
+  userId?: string;
 }
 
 const InputField = ({
@@ -37,6 +37,7 @@ const InputField = ({
   className = "",
   rightElement,
   isVerified = true,
+  userId
 }: Props) => {
   return (
     <div className="flex flex-col gap-1 w-full px-2 h-fit relative">
@@ -45,7 +46,7 @@ const InputField = ({
           {label}
         </Label>
         {validationError && <p className="text-red-600">{validationError}</p>}
-        {name === "email" && isVerified && <VerifyAccountForm userEmail={inputValue!} />}
+        {name === "email" && isVerified && <VerifyAccountForm userEmail={inputValue!} userId={userId!} />}
       </div>
 
       <div className="relative w-full">

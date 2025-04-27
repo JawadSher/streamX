@@ -7,9 +7,6 @@ import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { useActionState, useEffect, useState } from "react";
 import EditButton from "../edit-button";
 import { userUpdateSchema } from "@/schemas/userUpdateSchema";
-import axiosInstance from "@/lib/axios";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
-import { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Loader2 } from "lucide-react";
@@ -226,6 +223,7 @@ const AccountForm = ({ initialData }: Props) => {
           disabled={true}
           inputValue={email}
           isVerified={initialData?.isVerified || null}
+          userId={initialData?._id?.toString()}
         />
 
         <InputField

@@ -141,13 +141,6 @@ const userSchema = new Schema<IUser>(
       required: true,
       default: false,
     },
-    verificationCode: {
-      type: String,
-      trim: true,
-      default: null,
-      minLength: [6, "Verification code must be at least 6 characters"],
-      maxLength: [6, "Verification code must be at most 6 characters"],
-    },
     accountStatus: {
       type: String,
       required: true,

@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { number, z } from "zod";
 import {
   Form,
   FormControl,
@@ -30,6 +30,8 @@ import {
 import { useEffect, useState } from "react";
 import { SendVerificationCode } from "@/lib/sendOTP";
 import { toast } from "sonner";
+import { handleUserOTP } from "@/app/actions/user-actions/handleUserOTP";
+import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 
 const FormSchema = z.object({
   pin: z
@@ -38,7 +40,13 @@ const FormSchema = z.object({
     .max(6, { message: "The verification code must be 6 digits." }),
 });
 
-export function VerifyAccountForm({ userEmail }: { userEmail: string }) {
+export function VerifyAccountForm({
+  userEmail,
+  userId,
+}: {
+  userEmail: string;
+  userId: string;
+}) {
   const [isSended, setIsSended] = useState<boolean>(false);
   const [countDown, setCountDown] = useState<number>(0);
 
@@ -62,12 +70,41 @@ export function VerifyAccountForm({ userEmail }: { userEmail: string }) {
           return prev - 1;
         });
       }, 1000);
+
+      async function OTPHandle() {
+        await handleUserOTP({ userId, state: "delete" });
+      }
+
+      OTPHandle();
+
       return () => clearInterval(timer);
     }
   }, [isSended]);
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log("Submitted:", data);
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    const pin = data.pin;
+    if (
+      pin?.trim()?.length === 6 &&
+      typeof pin === "number" &&
+      countDown > 1 &&
+      isSended
+    ) {
+      const userPin = await handleUserOTP({ userId, state: "get" });
+      if (userPin === pin) {
+        const res: ActionResponseType | ActionErrorType = await handleUserOTP({
+          userId,
+          state: "verified",
+        });
+
+        if (res.statusCode === 200 || res.data.isVerified === true) {
+          toast.success("Account Verified Successfully");
+          return;
+        }
+      }
+    }
+
+    toast.error("OTP is Invalid or Expired");
+    return;
   }
 
   function OTPCountdown() {
@@ -82,10 +119,10 @@ export function VerifyAccountForm({ userEmail }: { userEmail: string }) {
       }
     }, 1000);
   }
-  
+
   async function handleSendOTP() {
     try {
-      const response = await SendVerificationCode({ userEmail });
+      const response = await SendVerificationCode({ userEmail, userId });
       if (response.status && response.statusCode === 200) {
         toast.success("One-time passcode sent to your email");
         OTPCountdown();
@@ -100,7 +137,7 @@ export function VerifyAccountForm({ userEmail }: { userEmail: string }) {
       toast.error("Error sending OTP. Please try again.");
     }
   }
-  
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -108,7 +145,7 @@ export function VerifyAccountForm({ userEmail }: { userEmail: string }) {
           Verify
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full h-full md:min-w-[600px] md:h-fit">
+      <DialogContent className="w-full md:min-w-[600px] h-fit">
         <DialogHeader>
           <DialogTitle>Verify Your Account</DialogTitle>
           {isSended ? (

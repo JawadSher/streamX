@@ -1,5 +1,6 @@
 "use client";
 
+import { handleUserOTP } from "@/app/actions/user-actions/handleUserOTP";
 import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import { generateOTP } from "@/lib/generateOTP";
@@ -7,8 +8,10 @@ import emailjs from "@emailjs/browser";
 
 export async function SendVerificationCode({
   userEmail,
+  userId,
 }: {
   userEmail: string;
+  userId: string;
 }) {
   try {
     if (
@@ -45,6 +48,11 @@ export async function SendVerificationCode({
       return actionError(400, `Failed to send OTP: ${response.text}`, null);
     }
 
+    await handleUserOTP({ 
+      userId,
+      code: OTP, 
+      state: 'store' });
+    
     return actionResponse(200, "OTP email sent successfully", {
       OTP,
       expiryTime,
