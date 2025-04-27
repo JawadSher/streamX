@@ -32,6 +32,8 @@ import { SendVerificationCode } from "@/lib/sendOTP";
 import { toast } from "sonner";
 import { handleUserOTP } from "@/app/actions/user-actions/handleUserOTP";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import { useRouter } from "next/navigation";
+import { API_ROUTES } from "@/lib/api/ApiRoutes";
 
 const FormSchema = z.object({
   pin: z
@@ -49,6 +51,8 @@ export function VerifyAccountForm({
 }) {
   const [isSended, setIsSended] = useState<boolean>(false);
   const [countDown, setCountDown] = useState<number>(0);
+  const [verified, setVerified] = useState<boolean>(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -79,6 +83,10 @@ export function VerifyAccountForm({
         OTPHandle();
       }
 
+      if(verified){
+        return () => clearInterval(timer);
+      }
+
       return () => clearInterval(timer);
     }
   }, [isSended]);
@@ -94,7 +102,7 @@ export function VerifyAccountForm({
       const response: ActionResponseType | ActionErrorType = await handleUserOTP({ userId, state: "get" });
       console.log(response);
       if(response.statusCode === 200){
-        if (response?.data?.OTP?.toString() === pin) {
+        if (response?.data?.OTP?.verificationCode === pin) {
           const res: ActionResponseType | ActionErrorType = await handleUserOTP({
             userId,
             state: "verified",
@@ -102,13 +110,15 @@ export function VerifyAccountForm({
   
           if (res.statusCode === 200 || res.data.isVerified === true) {
             toast.success("Account Verified Successfully");
+            setVerified(true)
+            router.push(API_ROUTES.ACCOUNT);
             return;
           }
         }
       }
     }
 
-    toast.error("OTP is Invalid or Expired");
+    toast.error("Invalid Email or OTP Expired");
     return;
   }
 
