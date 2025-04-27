@@ -14,11 +14,8 @@ import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
 import { userBasicAccountUpdate } from "@/app/actions/user-actions/userBasicAccountUpdate.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 
-interface Props {
-  initialData: IRedisDBUser;
-}
+const AccountForm = ({ initialData }: { initialData: IRedisDBUser}) => {
 
-const AccountForm = ({ initialData }: Props) => {
   const [firstName, setFirstName] = useState<string>(
     initialData.firstName || ""
   );
