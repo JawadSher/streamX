@@ -20,6 +20,7 @@ interface Props {
   className?: string;
   rightElement?: React.ReactNode;
   isVerified?: boolean | null;
+  userEmail?: string;
 }
 
 const InputField = ({
@@ -44,7 +45,7 @@ const InputField = ({
           {label}
         </Label>
         {validationError && <p className="text-red-600">{validationError}</p>}
-        {name === "email" && !isVerified && <VerifyAccountForm />}
+        {name === "email" && isVerified && <VerifyAccountForm userEmail={inputValue!} />}
       </div>
 
       <div className="relative w-full">

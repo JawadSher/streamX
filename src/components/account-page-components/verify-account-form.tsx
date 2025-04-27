@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -28,6 +27,9 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { useEffect, useState } from "react";
+import { SendVerificationCode } from "@/lib/sendOTP";
+import { toast } from "sonner";
 
 const FormSchema = z.object({
   pin: z
@@ -36,7 +38,10 @@ const FormSchema = z.object({
     .max(6, { message: "The verification code must be 6 digits." }),
 });
 
-export function VerifyAccountForm() {
+export function VerifyAccountForm({ userEmail }: { userEmail: string }) {
+  const [isSended, setIsSended] = useState<boolean>(false);
+  const [countDown, setCountDown] = useState<number>(0);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -44,10 +49,58 @@ export function VerifyAccountForm() {
     },
   });
 
+  useEffect(() => {
+    if (isSended) {
+      const timer = setInterval(() => {
+        setCountDown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setIsSended(false);
+            toast.info("OTP expired. Please resend the code.");
+            return 120;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isSended]);
+
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("Submitted:", data);
   }
 
+  function OTPCountdown() {
+    let time = 120;
+
+    const timer = setInterval(() => {
+      if (time > 0) {
+        time = time - 1;
+        setCountDown(time);
+      } else {
+        clearInterval(timer);
+      }
+    }, 1000);
+  }
+  
+  async function handleSendOTP() {
+    try {
+      const response = await SendVerificationCode({ userEmail });
+      if (response.status && response.statusCode === 200) {
+        toast.success("One-time passcode sent to your email");
+        OTPCountdown();
+        setIsSended(true);
+        setCountDown(120);
+      } else {
+        setIsSended(false);
+        toast.error(response.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      setIsSended(false);
+      toast.error("Error sending OTP. Please try again.");
+    }
+  }
+  
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -58,9 +111,17 @@ export function VerifyAccountForm() {
       <DialogContent className="w-full h-full md:min-w-[600px] md:h-fit">
         <DialogHeader>
           <DialogTitle>Verify Your Account</DialogTitle>
-          <DialogDescription>
-            A 6-digit verification code has been sent to your email address. Please enter the code below to complete the verification process.
-          </DialogDescription>
+          {isSended ? (
+            <DialogDescription>
+              A 6-digit verification code has been sent to your email address.
+              Please enter the code below to complete the verification process.
+            </DialogDescription>
+          ) : (
+            <DialogDescription>
+              Please click on bellow resend code button to send the 6 digit
+              verification code.
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         <div className="grid pt-6 w-full">
@@ -71,7 +132,24 @@ export function VerifyAccountForm() {
                 name="pin"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-md font-semibold">Verification Code</FormLabel>
+                    <div className="flex gap-2 items-center ">
+                      <FormLabel className="text-md font-semibold">
+                        Verification Code
+                      </FormLabel>
+                      {isSended ? (
+                        <span className="text-sm text-blue-400">
+                          {countDown}
+                        </span>
+                      ) : (
+                        <Button
+                          className="text-sm text-blue-400 cursor-pointer px-0 bg-transparent hover:bg-transparent hover:text-blue-500"
+                          onClick={handleSendOTP}
+                          type="button"
+                        >
+                          resend code
+                        </Button>
+                      )}
+                    </div>
                     <FormControl>
                       <InputOTP maxLength={6} {...field}>
                         <InputOTPGroup>
@@ -91,7 +169,10 @@ export function VerifyAccountForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-blue-500 text-white hover:bg-blue-600 cursor-pointer rounded-2xl">
+              <Button
+                type="submit"
+                className="w-full bg-blue-500 text-white hover:bg-blue-600 cursor-pointer rounded-2xl"
+              >
                 Verify Account
               </Button>
             </form>

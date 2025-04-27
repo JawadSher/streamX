@@ -6,6 +6,7 @@ import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner";
 import ProgressWrapper from "@/components/progress-bar/progress-bar-wrapper";
+import emailjs from "@emailjs/browser";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -27,17 +28,22 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-      <link
+        <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
+        <script
+        type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+      ></script>
+      
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider session={session}>
-            <ProgressWrapper />
-            <ClientRootLayout>{children}</ClientRootLayout>
+          <ProgressWrapper />
+          <ClientRootLayout>{children}</ClientRootLayout>
           <Toaster />
         </AuthProvider>
       </body>
