@@ -7,7 +7,11 @@ const SECRET = process.env.NEXTAUTH_SECRET;
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const token = await getToken({ req: request, secret: SECRET });
+  const token = await getToken({
+    req: request,
+    secret: SECRET,
+    secureCookie: process.env.NODE_ENV === "production",
+  });
 
   const isAuthenticated = !!token;
 
@@ -17,18 +21,22 @@ export async function middleware(request: NextRequest) {
 
   if (
     !isAuthenticated &&
-    (pathname.startsWith("/feed") || pathname.startsWith("/profile"))
+    (pathname.startsWith("/feed") ||
+      pathname.startsWith("/profile") ||
+      pathname.startsWith("/account"))
   ) {
     return NextResponse.redirect(new URL(API_ROUTES.SIGN_IN, request.url));
-  }
-
-  if(!isAuthenticated && (pathname.startsWith("/account"))){
-    return NextResponse.redirect(new URL(API_ROUTES.SIGN_IN, request.url))
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/feed/:path*", "/profile/:path*", "/sign-in"],
+  matcher: [
+    "/feed/:path*",
+    "/profile/:path*",
+    "/sign-in",
+    "/account",
+    "/account/:path*",
+  ],
 };
