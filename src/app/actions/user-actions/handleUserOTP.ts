@@ -9,6 +9,7 @@ import { storeUserOTPInRedis } from "@/lib/storeUserOTPInRedis";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import User from "@/models/user.model";
 
+
 export async function handleUserOTP({
   code,
   userId,
@@ -21,7 +22,7 @@ export async function handleUserOTP({
   if (!userId) {
     return actionError(400, "Valid userId is required", null);
   }
-  
+
   if (state === "store") {
     if (!code) {
       return actionError(400, "OTP code is required for storing", null);
@@ -30,13 +31,16 @@ export async function handleUserOTP({
     await storeUserOTPInRedis({ code, userId });
     return actionResponse(200, "User OTP stored successfully", null);
   } else if (state === "get") {
-    const OTP = await getUserOTPFromRedis({ userId });
+    const data = await getUserOTPFromRedis({ userId });
 
-    if (!OTP) {
+    if (!data) {
       return actionError(404, "OTP not found", null);
     }
 
-    return actionResponse(200, "User OTP fetched successfully", {OTP});
+    return actionResponse(200, "User OTP fetched successfully", {
+      ...data
+    });
+
   } else if (state === "delete") {
     await deleteUserOTPFromRedis({ userId });
     return actionResponse(200, "User OTP deleted successfully", null);

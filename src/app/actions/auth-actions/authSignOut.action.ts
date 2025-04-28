@@ -22,7 +22,7 @@ export async function authSignOut(): Promise<ActionResponseType | ActionErrorTyp
       await redis.expire(`app:user:${userId}`, 0);
     }
   } catch (error) {
-    return actionError(400, "Redis deletion session operation failed", null);
+    return actionError(400, "Redis deletion session operation failed", {error});
   }
 
   await signOut({ redirect: false });

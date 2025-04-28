@@ -4,7 +4,6 @@ import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { Home } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Toaster } from "sonner";
 
 export default async function LoginPage() {
   const session = await auth();

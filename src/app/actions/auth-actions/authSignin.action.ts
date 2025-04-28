@@ -43,7 +43,7 @@ export async function authSignin(
       return actionError(401, signInResult?.error || "Invalid email or password", {});
     }
   } catch (error) {
-    return actionError(500, "Authentication failed", {}); 
+    return actionError(500, "Authentication failed", {error}); 
   }
 }
 

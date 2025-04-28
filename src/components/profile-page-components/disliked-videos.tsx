@@ -10,6 +10,7 @@ interface Props {
 const DislikedVideos = ({ videos = [], videoThumbnails = [] }: Props) => {
   // const isEmpty = videos.length === 0;
   const isEmpty = 1;
+  console.log(videos, videoThumbnails)
 
   return (
     <Container className="flex flex-col gap-4">

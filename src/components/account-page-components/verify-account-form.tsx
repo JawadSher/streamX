@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { number, z } from "zod";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -83,13 +83,13 @@ export function VerifyAccountForm({
         OTPHandle();
       }
 
-      if(verified){
+      if (verified) {
         return () => clearInterval(timer);
       }
 
       return () => clearInterval(timer);
     }
-  }, [isSended]);
+  }, [isSended, countDown, userId, verified]);
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     const pin = data.pin;
@@ -99,18 +99,22 @@ export function VerifyAccountForm({
       countDown > 1 &&
       isSended
     ) {
-      const response: ActionResponseType | ActionErrorType = await handleUserOTP({ userId, state: "get" });
-      console.log(response);
-      if(response.statusCode === 200){
-        if (response?.data?.OTP?.verificationCode === pin) {
-          const res: ActionResponseType | ActionErrorType = await handleUserOTP({
-            userId,
-            state: "verified",
-          });
-  
-          if (res.statusCode === 200 || res.data.isVerified === true) {
+      const response: ActionResponseType | ActionErrorType =
+        await handleUserOTP({ userId, state: "get" });
+        console.log(response);
+      if (response.statusCode === 200) {
+        const verifi_code = response.data.verificationCode;
+        if (verifi_code === pin) {
+          const res: ActionResponseType | ActionErrorType = await handleUserOTP(
+            {
+              userId,
+              state: "verified",
+            }
+          );
+
+          if (res.statusCode === 200 || res?.data?.isVerified === true) {
             toast.success("Account Verified Successfully");
-            setVerified(true)
+            setVerified(true);
             router.push(API_ROUTES.ACCOUNT);
             return;
           }
@@ -148,6 +152,7 @@ export function VerifyAccountForm({
         toast.error(response.message || "Failed to send OTP");
       }
     } catch (error) {
+      console.log(error);
       setIsSended(false);
       toast.error("Error sending OTP. Please try again.");
     }

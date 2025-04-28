@@ -39,7 +39,7 @@ const Header = () => {
   const isAuthenticated =
     status === "authenticated" ? "authenticated" : "unauthenticated";
 
-  let width = useWindowWidth();
+  const width = useWindowWidth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

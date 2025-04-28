@@ -20,8 +20,8 @@ const AccountForm = ({ initialData }: { initialData: IRedisDBUser}) => {
     initialData.firstName || ""
   );
   const [lastName, setLastName] = useState<string>(initialData.lastName || "");
-  const [userName, setUserName] = useState<string>(initialData.userName || "");
-  const [email, setEmail] = useState<string>(initialData.email || "");
+  const [userName, ] = useState<string>(initialData.userName || "");
+  const [email, ] = useState<string>(initialData.email || "");
   const [phoneNumber, setPhoneNumber] = useState<string>(
     initialData.phoneNumber || ""
   );

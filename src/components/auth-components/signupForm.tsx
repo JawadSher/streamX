@@ -45,7 +45,7 @@ export function SignupForm({
   | ActionResponseType
   | ActionErrorType;
 
-  const handleSubmit = async (prevState: any, formData: FormData) => {
+  const handleSubmit = async (prevState: unknown, formData: FormData) => {
     const data = {
       firstName: formData.get("firstName"),
       lastName: formData.get("lastName"),

@@ -27,7 +27,11 @@ export async function signUpHelper({
       return actionError(409, "Account already exists", {});
     }
 
-    const encryptedPassword = await bcrypt.hash(userData?.password!, 10);
+    if (!userData?.password) {
+      return actionError(400, "Password is required", {});
+    }
+
+    const encryptedPassword = await bcrypt.hash(userData.password!, 10);
 
     const user = {
       firstName: userData?.firstName,
@@ -51,11 +55,11 @@ export async function signUpHelper({
     };
 
     return actionResponse(201, "User account created successfully", userWithoutPassword);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof SyntaxError) {
-      return actionError(400, "Invalid request body", {});
+      return actionError(400, "Invalid request body", {error});
     }
 
-    return actionError(500, "Internal server error", {});
+    return actionError(500, "Internal server error", {error});
   }
 }

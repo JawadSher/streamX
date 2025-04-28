@@ -4,7 +4,6 @@ import { NavMain } from './nav-main'
 import { Separator } from '@radix-ui/react-separator'
 import { NavMainSubscriptions } from './nav-main-subscriptions'
 import { SidebarContent } from '../ui/sidebar'
-import { usePathname } from 'next/navigation';
 
 interface Props {
     mediaItems: {

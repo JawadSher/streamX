@@ -1,12 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
 
 const Shorts = () => {
-  const params = useParams<{ id: string }>();
-
-  console.log(params);
 
   const { data: session } = useSession();
   console.log("[Client] Session:", session);
@@ -25,3 +21,5 @@ const Shorts = () => {
 }
 
 export default Shorts;
+
+export const dynamic = 'force-static';

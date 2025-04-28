@@ -5,6 +5,7 @@ import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import { generateOTP } from "@/lib/generateOTP";
 import emailjs from "@emailjs/browser";
+import Error from "next/error";
 
 export async function SendVerificationCode({
   userEmail,
@@ -48,21 +49,27 @@ export async function SendVerificationCode({
       return actionError(400, `Failed to send OTP: ${response.text}`, null);
     }
 
-    await handleUserOTP({ 
+    await handleUserOTP({
       userId,
-      code: OTP, 
-      state: 'store' });
-    
+      code: OTP,
+      state: "store",
+    });
+
     return actionResponse(200, "OTP email sent successfully", {
       OTP,
       expiryTime,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return actionError(
+        500,
+        `Internal server error while sending OTP: ${"Unknown error"}`,
+        null
+      );
+    }
     return actionError(
       500,
-      `Internal server error while sending OTP: ${
-        error.message || "Unknown error"
-      }`,
+      `Internal server error while sending OTP: ${"Unknown error"}`,
       null
     );
   }

@@ -30,7 +30,7 @@ export async function authSignUp({
 }: IUserData): Promise<ActionResponseType | ActionErrorType> {
   const userData = { firstName, lastName, email, password, userName };
 
-  console.log(userData)
+  console.log(userData);
 
   const result = signupSchema.safeParse(userData);
   if (!result.success) {
@@ -59,7 +59,7 @@ export async function authSignUp({
         return actionResponse(200, "User logged in successfully", {
           redirect: API_ROUTES.HOME,
         });
-      } catch (error) {
+      } catch (error: unknown) {
         if (error instanceof AuthError) {
           if (error.type === "CredentialsSignin") {
             return actionError(401, "Invalid email or password", {});
@@ -81,10 +81,14 @@ export async function authSignUp({
       );
     } else if (response.statusCode === 400) {
       return actionError(400, "Invalid request data", {});
-    }else {
+    } else {
       return actionError(500, "Signup failed due to unknown error", {});
     }
-  } catch (error: any) {
-    return actionError(500, "An unexpected error occurred", {});
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return actionError(500, "An unexpected error occurred", { error });
+    }
+
+    return actionError(500, "An unexpected error occurred", { error });
   }
 }
