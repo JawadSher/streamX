@@ -165,3 +165,30 @@
     'GRAD' 0,
     'opsz' 34;
 }
+
+.notification{
+  font-variation-settings:
+    'FILL' 1, 
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 54;
+
+  margin-top: 8px;
+  cursor: pointer;
+}
+.plus{
+  font-variation-settings:
+    'FILL' 1, 
+    'wght' 300,
+    'GRAD' 0,
+    'opsz' 64;
+}
+.search{
+  font-variation-settings:
+    'FILL' 1, 
+    'wght' 300,
+    'GRAD' 0,
+    'opsz' 64;
+
+  cursor: pointer;
+}

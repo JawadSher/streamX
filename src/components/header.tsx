@@ -8,18 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Mic,
-  Moon,
-  Search,
-  Sun,
-  Bell,
-  Plus,
-  Upload,
-  Video,
-  StickyNote,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Moon, Sun, Bell, Plus, Upload, Video, StickyNote } from "lucide-react";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
@@ -30,6 +19,9 @@ import TopHeader from "./account-page-components/top-header";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { useEffect, useState } from "react";
 import SidebarToggle from "./sidebar/sidebar-trigger";
+import SmallSearhBar from "./searchbar-components/small-searchbar";
+import FullSearchBar from "./searchbar-components/full-searchbar";
+import { cssUnfillProperty } from "@/constants/navConfig";
 
 const Header = () => {
   const { setTheme } = useTheme();
@@ -51,11 +43,9 @@ const Header = () => {
       <div className="flex items-center gap-3">
         {mounted ? (
           (!path.includes("/account") ||
-            (path.startsWith("/account") && width <= 767)) && (
-            <SidebarToggle />
-          )
+            (path.startsWith("/account") && width <= 767)) && <SidebarToggle />
         ) : (
-          <div className="w-10 h-10" /> 
+          <div className="w-10 h-10" />
         )}
 
         <DropdownMenu>
@@ -90,26 +80,21 @@ const Header = () => {
       </div>
 
       {!path.startsWith("/account") ? (
-        <div className="flex grow mx-2 items-center justify-center">
-          <div className="relative md:max-w-[800px] grow">
-            <Input className="rounded-3xl w-full pr-10" placeholder="Search" />
-            <Search
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
-              color="gray"
-            />
-          </div>
-          <Mic className="ml-1 cursor-pointer" color="gray" />
-        </div>
+        width <= 475 ? (
+          <SmallSearhBar />
+        ) : (
+          <FullSearchBar />
+        )
       ) : (
         <TopHeader />
       )}
 
       {isAuthenticated === "authenticated" && !path.startsWith("/account") ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2 ">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="px-2 sm:py-0">
               <Button variant="outline" className="rounded-3xl cursor-pointer">
-                Create <Plus size={26} />
+                Create <span className={`${cssUnfillProperty} plus`}>add</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
@@ -132,7 +117,7 @@ const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           <div>
-            <Bell className="cursor-pointer" />
+            <span className={`${cssUnfillProperty} notification`}>notifications</span>
           </div>
         </div>
       ) : (
