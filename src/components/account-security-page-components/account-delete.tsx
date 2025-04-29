@@ -20,7 +20,7 @@ function AccountDelete() {
     debounce((checked: boolean) => {
       setIsAccBtnDisabled(!checked);
     }, 100),
-    []
+    [debounce]
   );
 
   useEffect(() => {

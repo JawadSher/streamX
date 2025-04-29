@@ -180,7 +180,7 @@ export function SignupForm({
         }
       }
     }, 1000),
-    []
+    [debounce]
   );
 
   useEffect(() => {

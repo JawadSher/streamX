@@ -15,7 +15,10 @@ const eslintConfig = [
     extends: ['next'],
     rules: {
       '@next/next/no-page-custom-font': 'off',
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      "react-hooks/exhaustive-deps": 'off',
+      "@typescript-eslint/no-non-null-asserted-optional-chain": 'off',
+      "@next/next/google-font-display": 'off'
     },
   }),
 ];

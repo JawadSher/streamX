@@ -41,7 +41,7 @@ function PasswordUpdate() {
         setIsBtnDisabled(false);
       }
     }, 500),
-    []
+    [debounce, password, confPasswd]
   );
 
   useEffect(() => {

@@ -65,7 +65,7 @@ export function LoginForm({
   }, [state, router]);
 
   const debouncedValidate = useCallback(
-    debounce(async (event: React.ChangeEvent<HTMLInputElement>, loginSchema: any) => {
+    debounce(async (event: React.ChangeEvent<HTMLInputElement>) => {
       const { name, value } = event.target;
 
       const emailValue =
@@ -87,11 +87,11 @@ export function LoginForm({
         setErrors(null);
       }
     }, 500),
-    [loginSchema]
+    [debounce]
   );
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    debouncedValidate(event, loginSchema);
+    debouncedValidate(event);
   };
 
   const handleSubmit = async (formData: FormData) => {
