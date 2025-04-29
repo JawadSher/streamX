@@ -1,9 +1,9 @@
 "use client";
 
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
 import { ReactNode, ChangeEvent } from "react";
-import { VerifyAccountForm } from "./verify-account-form";
+import { VerifyAccountForm } from "./account-page-components/verify-account-form";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 
 interface Props {
   label?: string;

@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import { Input } from "../ui/input";
 import { cssUnfillProperty } from "@/constants/navConfig";
 

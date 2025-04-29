@@ -1,7 +1,6 @@
 "use client";
 
 import Form from "next/form";
-import InputField from "./input-field";
 import { Button } from "../ui/button";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { useActionState, useEffect, useState } from "react";
@@ -13,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
 import { userBasicAccountUpdate } from "@/app/actions/user-actions/userBasicAccountUpdate.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import InputField from "../input-field";
 
 const AccountForm = ({ initialData }: { initialData: IRedisDBUser}) => {
 
@@ -150,7 +150,7 @@ const AccountForm = ({ initialData }: { initialData: IRedisDBUser}) => {
   }, [state]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-6">
+    <div className="w-full max-w-5xl mx-auto p-6 md:border-1 md:rounded-2xl">
       <h1 className="text-4xl font-semibold mb-22 text-center ">
         Account Information
       </h1>

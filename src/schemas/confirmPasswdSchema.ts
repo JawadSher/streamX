@@ -9,7 +9,7 @@ const confPassSchema = z
       .max(256, "Password cannot exceed 256 characters")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*_.,-])[A-Za-z\d!@#$%^&*_.,-]{10,256}$/,
-        "Password must include one lowercase, one uppercase, one number, and one special character (!@#$%^&*_.,-)"
+        "Password must contain a lowercase, an uppercase, a number, and a special character (!@#$%^&*_,.-)"
       ),
 
     confPasswd: z
@@ -19,7 +19,7 @@ const confPassSchema = z
       .max(256, "Password cannot exceed 256 characters")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*_.,-])[A-Za-z\d!@#$%^&*_.,-]{10,256}$/,
-        "Password must include one lowercase, one uppercase, one number, and one special character (!@#$%^&*_.,-)"
+        "Password must contain a lowercase, an uppercase, a number, and a special character (!@#$%^&*_,.-)"
       ),
   })
   .refine((data) => data.password === data.confPasswd, {
