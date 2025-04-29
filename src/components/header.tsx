@@ -92,36 +92,36 @@ const Header = () => {
       )}
 
       {isAuthenticated === "authenticated" && !path.startsWith("/account") ? (
-        <div className="flex items-center justify-center gap-2 ">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="px-2 sm:py-0">
-              <Button variant="outline" className="rounded-3xl cursor-pointer">
-                Create <Plus size={44} className="lucid-icons" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Create content</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem className="gap-6 cursor-pointer">
-                  <Upload />
-                  <span>Upload video</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-6 cursor-pointer">
-                  <Video />
-                  <span>Upload shorts</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-6 cursor-pointer">
-                  <StickyNote />
-                  <span>Create community post</span>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div>
-            <Bell size={24} className="lucid-icons" />
-          </div>
+        <div className="flex items-center justify-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild className="px-2 py-0">
+            <Button variant="outline" className="rounded-3xl cursor-pointer">
+              Create <Plus size={20} className="lucid-icons" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Create content</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem className="gap-6 cursor-pointer">
+                <Upload />
+                <span>Upload video</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-6 cursor-pointer">
+                <Video />
+                <span>Upload shorts</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-6 cursor-pointer">
+                <StickyNote />
+                <span>Create community post</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <div>
+          <Bell size={20} className="lucid-icons" />
         </div>
+      </div>
       ) : (
         !isAuthenticated && (
           <Link href={API_ROUTES.SIGN_IN}>
