@@ -1,6 +1,6 @@
 "use client";
 
-import { cssFillProperty } from "@/constants/navConfig";
+import { Pencil } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface Props {
@@ -8,17 +8,24 @@ interface Props {
   setEditableField?: (text: string) => void;
   disabled?: boolean;
   className?: string;
+  iconSize?: number; 
 }
 
-const EditButton = ({ fieldName, setEditableField, disabled, className = "" }: Props) => {
+const EditButton = ({
+  fieldName,
+  setEditableField,
+  disabled,
+  className = "",
+  iconSize = 28, 
+}: Props) => {
   return (
     <Button
       type="button"
       disabled={disabled}
-      className={`${className} bg-transparent border-0 text-0 w-fit h-full p-0 hover:bg-transparent cursor-pointer`}
+      className={`bg-transparent border-0 p-0 w-auto h-auto hover:bg-transparent cursor-pointer ${className}`}
       onClick={() => setEditableField && fieldName && setEditableField(fieldName)}
     >
-      <span className={`${cssFillProperty} pt-1`}>edit</span>
+      <Pencil size={iconSize} className="w-auto h-auto" color="white" />
     </Button>
   );
 };

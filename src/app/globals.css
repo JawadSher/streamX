@@ -149,46 +149,13 @@
   transition: font-variation-settings 0.2s ease;
 }
 
-.navItems {
-  font-variation-settings:
-    'FILL' 1, 
-    'wght' 250,
-    'GRAD' 0,
-    'opsz' 20;
-  
-}
-
-.switchButton{
-  font-variation-settings:
-    'FILL' 0, 
-    'wght' 100,
-    'GRAD' 0,
-    'opsz' 34;
-}
-
-.notification{
-  font-variation-settings:
-    'FILL' 1, 
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 54;
-
-  margin-top: 8px;
+.lucid-icons:hover {
   cursor: pointer;
+  fill: white;
 }
-.plus{
-  font-variation-settings:
-    'FILL' 1, 
-    'wght' 300,
-    'GRAD' 0,
-    'opsz' 64;
-}
-.search{
-  font-variation-settings:
-    'FILL' 1, 
-    'wght' 300,
-    'GRAD' 0,
-    'opsz' 64;
 
-  cursor: pointer;
+
+.search:hover {
+  fill: none;
 }
+

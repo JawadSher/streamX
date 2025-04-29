@@ -9,9 +9,20 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { SidebarItemsSkeleton } from "../skeletons/sidebar-items-skeleton";
+import * as LucideIcons from "lucide-react";
 
+const iconMap: { [key: string]: React.ComponentType<any> } = {
+  Home: LucideIcons.Home,
+  Film: LucideIcons.Film,
+  MessageSquare: LucideIcons.MessageSquare,
+  UserRound: LucideIcons.UserRound,
+  History: LucideIcons.History,
+  ListMusic: LucideIcons.ListMusic,
+  Video: LucideIcons.Video,
+  Clock: LucideIcons.Clock,
+  ThumbsUp: LucideIcons.ThumbsUp,
+  ThumbsDown: LucideIcons.ThumbsDown,
+};
 
 export function NavMain({
   items,
@@ -19,78 +30,57 @@ export function NavMain({
   items: {
     title: string;
     url: string;
-    icon?: string | "";
+    icon?: string;
     css?: string;
     name?: string;
   }[];
 }) {
   const pathname = usePathname();
   const { state } = useSidebar();
-  const [iconsLoaded, setIconsLoaded] = useState(false);
-
-  useEffect(() => {
-    const checkFontLoaded = () => {
-      if (document.fonts) {
-        document.fonts.ready.then(() => {
-          const materialIconsLoaded = Array.from(document.fonts).some((font) =>
-            font.family.includes("Material Symbols")
-          );
-
-          if (materialIconsLoaded) setIconsLoaded(true);
-        });
-      } else {
-        setTimeout(() => setIconsLoaded(true), 1000);
-      }
-    };
-
-    checkFontLoaded();
-  }, []);
 
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {items.map((item) => (
-          <SidebarMenuItem key={item.title}>
-            {
-              !iconsLoaded ? (
-                <SidebarItemsSkeleton />
-              ) : (
-                <SidebarMenuButton asChild className="mb-1">
-              <Link
-                href={item.url}
-                title={item.title}
-                className={`flex ${
-                  state === "expanded" ? "items-center gap-6" : "justify-center"
-                } ${
-                  pathname === item.url
-                    ? "bg-accent text-accent-foreground font-semibold"
-                    : "hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                {item.icon && item.icon !== "" && (
-                  <div
-                    className={`${item.css} ${
-                      pathname === item.url ? "navItems" : ""
-                    } ${!iconsLoaded ? "icon-loading" : ""}`}
-                  >
-                    {item.icon}
-                  </div>
-                )}
-                {state === "expanded" && (
-                  <div
-                    className={`${
-                      item.url === "/" ? "text-[16px]" : "text-[15px]"
-                    }`}
-                  >
-                    {item.title}
-                  </div>
-                )}
-              </Link>
-            </SidebarMenuButton>
-              )
-            }
-          </SidebarMenuItem>
-        ))}
+        {items.map((item) => {
+          const IconComponent = item.icon ? iconMap[item.icon] : null;
+          const isActive = pathname === item.url;
+
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild className="mb-1">
+                <Link
+                  href={item.url}
+                  title={item.title}
+                  className={`flex items-center transition-colors duration-150 rounded-lg px-3 py-2 ${
+                    state === "expanded" ? "gap-5" : "justify-center"
+                  } ${
+                    isActive
+                      ? "bg-accent text-white font-semibold"
+                      : "hover:bg-accent hover:text-white"
+                  }`}
+                >
+                  {IconComponent && (
+                    <div className="flex-shrink-0">
+                      <IconComponent
+                        size={20}
+                        strokeWidth={isActive ? 3 : 1.89}
+                      />
+                    </div>
+                  )}
+                  {state === "expanded" && (
+                    <span
+                      className={`${
+                        item.url === "/" ? "text-base" : "text-sm"
+                      }`}
+                    >
+                      {item.title}
+                    </span>
+                  )}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
   );

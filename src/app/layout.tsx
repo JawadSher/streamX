@@ -15,18 +15,19 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "streamX - Enjoy the world",
-  description: "streamX is the ultimate platform to enjoy the world with endless entertainment and content.",
+  description:
+    "streamX is the ultimate platform to enjoy the world with endless entertainment and content.",
   viewport: "width=device-width, initial-scale=1.0",
   robots: "index, follow",
   openGraph: {
     title: "streamX - Enjoy the world",
-    description: "streamX is the ultimate platform to enjoy the world with endless entertainment and content.",
+    description:
+      "streamX is the ultimate platform to enjoy the world with endless entertainment and content.",
     siteName: "streamX",
     locale: "en_US",
     type: "website",
   },
 };
-
 
 export default async function RootLayout({
   children,
@@ -37,10 +38,6 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
         <script
           type="text/javascript"
           src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"

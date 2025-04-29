@@ -1,20 +1,19 @@
 'use client';
 
+import { Mic, Search } from "lucide-react";
 import { Input } from "../ui/input";
-import { cssUnfillProperty } from "@/constants/navConfig";
 
 function FullSearchBar() {
   return (
     <div className="flex grow mx-2 items-center justify-center">
       <div className="relative md:max-w-[800px] grow">
         <Input className="rounded-3xl w-full pr-10" placeholder="Search" />
-        <span
-          className={`${cssUnfillProperty} absolute right-3 top-1/2 transform -translate-y-1/2 search`}
-        >
-          search
-        </span>
+        <Search
+          className={`absolute right-3 top-1/2 transform -translate-y-1/2 lucid-icons search`}
+          size={22}
+        />
       </div>
-      <span className={`${cssUnfillProperty} ml-1 cursor-pointer`}>mic</span>
+      <Mic size={24} className="lucid-icons ml-1" />
     </div>
   );
 }

@@ -14,10 +14,11 @@ import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import SidebarBottom from "./sidebar-footer";
 import { Suspense } from "react";
 import UserSkeleton from "../skeletons/user-skeleton";
-import { mediaSectionItems, userSectionItems } from "@/constants/navConfig";
+
 import { usePathname } from "next/navigation";
 import MainSidebarContent from "./sidebar-content";
 import AccountSidebarContent from "../account-page-components/account-sidebar-content";
+import { mediaSectionItems, userSectionItems } from "@/constants/navConfig";
 
 const navItems = {
   mediaItems: mediaSectionItems,
@@ -25,7 +26,7 @@ const navItems = {
 
   subscriptionItems: [
     { title: "XYZ", url: `${API_ROUTES.CHANNEL}`, avatar: "" },
-    // ... other items
+    
   ],
 };
 

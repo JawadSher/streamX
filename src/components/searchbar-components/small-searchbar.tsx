@@ -1,6 +1,5 @@
 "use client";
 
-import { cssUnfillProperty } from "@/constants/navConfig";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +10,7 @@ import {
 import { Input } from "../ui/input";
 import { useState } from "react";
 import { Separator } from "../ui/separator";
+import { Cross, Mic, MoveUpLeft, Search, X } from "lucide-react";
 
 function SmallSearhBar() {
   const [searchInput, setSearchInput] = useState<string>("");
@@ -21,11 +21,9 @@ function SmallSearhBar() {
       <div className="relative md:max-w-[800px] grow">
         <Dialog open={searchState}>
           <DialogTrigger asChild onClick={() => setSearchState(true)}>
-            <span
-              className={`${cssUnfillProperty} absolute right-3 top-1/2 transform -translate-y-1/2`}
-            >
-              search
-            </span>
+            <Search
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 lucid-icons`}
+            />
           </DialogTrigger>
           <DialogTitle className="hidden">Search bar</DialogTitle>
           <DialogContent
@@ -37,7 +35,7 @@ function SmallSearhBar() {
                 className="hover:bg-transparent p-0 m-0 bg-transparent text-gray-300"
                 onClick={(prev) => setSearchState(!prev)}
               >
-                <span className={`${cssUnfillProperty}`}>close</span>
+                <X size={24} strokeWidth={4} className="lucid-icons" />
               </Button>
               <Input
                 id="username"
@@ -45,44 +43,49 @@ function SmallSearhBar() {
                 className="border-none rounded-4xl h-8"
                 onChange={(e) => setSearchInput(e.target.value)}
               />
-              <span className={`${cssUnfillProperty}`}>mic</span>
+              <Mic size={24} className="lucid-icons" />
             </div>
 
             <div className="w-full px-2 bg-zinc-900 rounded-2xl">
               <div className="flex rounded-2xl  px-2 py-1 items-center justify-between">
                 <span className="w-full text-zinc-200 text-md">computer</span>
-                <span className={`${cssUnfillProperty}`}>north_west</span>
+                <MoveUpLeft size={24} className="lucid-icons" />
               </div>
               <Separator />
               <div className="flex rounded-2xl  px-2 py-1 items-center justify-between">
                 <span className="w-full text-zinc-200 text-md">computer</span>
-                <span className={`${cssUnfillProperty}`}>north_west</span>
+                <MoveUpLeft size={24} className="lucid-icons" />
               </div>
               <Separator />
               <div className="flex rounded-2xl  px-2 py-1 items-center justify-between">
                 <span className="w-full text-zinc-200 text-md">computer</span>
-                <span className={`${cssUnfillProperty}`}>north_west</span>
+                <MoveUpLeft size={24} className="lucid-icons" />
               </div>
               <Separator />
               <div className="flex rounded-2xl  px-2 py-1 items-center justify-between">
                 <span className="w-full text-zinc-200 text-md">computer</span>
-                <span className={`${cssUnfillProperty}`}>north_west</span>
+                <MoveUpLeft size={24} className="lucid-icons" />
               </div>
               <Separator />
               <div className="flex rounded-2xl  px-2 py-1 items-center justify-between">
                 <span className="w-full text-zinc-200 text-md">computer</span>
-                <span className={`${cssUnfillProperty}`}>north_west</span>
+                <MoveUpLeft size={24} className="lucid-icons" />
               </div>
               <Separator />
               <div className="flex rounded-2xl  px-2 py-1 items-center justify-between">
                 <span className="w-full text-zinc-200 text-md">computer</span>
-                <span className={`${cssUnfillProperty}`}>north_west</span>
+                <MoveUpLeft size={24} className="lucid-icons" />
+              </div>
+              <Separator />
+              <div className="flex rounded-2xl  px-2 py-1 items-center justify-between">
+                <span className="w-full text-zinc-200 text-md">computer</span>
+                <MoveUpLeft size={24} className="lucid-icons" />
               </div>
             </div>
           </DialogContent>
         </Dialog>
       </div>
-      <span className={`${cssUnfillProperty} cursor-pointer`}>mic</span>
+      <Mic size={24} className="lucid-icons" />
     </div>
   );
 }

@@ -1,7 +1,7 @@
-import { cssUnfillProperty } from "@/constants/navConfig";
 import { capitalize } from "@/lib/capitalize";
 import React from "react";
 import { Separator } from "../ui/separator";
+import * as LucideIcons from "lucide-react";
 
 interface Props {
   userName?: string | null;
@@ -12,6 +12,16 @@ interface Props {
   isVerified?: boolean | null;
   createdAt?: Date | number | string | null;
 }
+
+const iconMap: { [key: string]: React.ComponentType<any> } = {
+  User: LucideIcons.User,
+  Mail: LucideIcons.Mail,
+  UserSquare: LucideIcons.UserSquare,
+  UserRound: LucideIcons.UserRound,
+  Phone: LucideIcons.Phone,
+  MapPin: LucideIcons.MapPin,
+  Calendar: LucideIcons.Calendar,
+};
 
 const SecondSection = ({
   userName,
@@ -30,13 +40,13 @@ const SecondSection = ({
       : "text-green-500";
 
   const infoList = [
-    { icon: "person", label: userName || "Null" },
-    { icon: "mail", label: email || "Null" },
+    { icon: "User", label: userName || "Null" },
+    { icon: "Mail", label: email || "Null" },
     {
-      icon: "account_box",
+      icon: "UserSquare",
       label: (
         <>
-          Verification{" "}
+          Verification:{" "}
           <span className={isVerified ? "text-green-500" : "text-red-500"}>
             {isVerified ? "True" : "False"}
           </span>
@@ -44,10 +54,10 @@ const SecondSection = ({
       ),
     },
     {
-      icon: "account_circle",
+      icon: "UserRound",
       label: (
         <>
-          Account Status{" "}
+          Account Status:{" "}
           <span className={accountStatusColor}>
             {accountStatus ? capitalize(accountStatus) : "Unknown"}
           </span>
@@ -55,43 +65,56 @@ const SecondSection = ({
       ),
     },
     {
-      icon: "call",
+      icon: "Phone",
       label: phoneNumber || "Null",
     },
     {
-      icon: "location_on",
+      icon: "MapPin",
       label: country || "Null",
     },
     {
-      icon: "",
+      icon: "Calendar",
+      label: (
+        <span className="text-zinc-500 dark:text-zinc-300">
+          Since joined •{" "}
+          <span className="font-semibold">
+            {createdAt?.toString().split("-")[0] || "Unknown"}
+          </span>
+        </span>
+      ),
     },
   ];
 
   return (
     <div className="w-full px-4 pt-6 dark:bg-zinc-900 transition-colors duration-300">
-      <div className="space-y-2">
-        {infoList.map((item, index) => (
-          <div
-            key={index}
-            className="flex items-center gap-3 text-base font-medium"
-          >
-            <span
-              className={`${cssUnfillProperty} text-zinc-600 dark:text-white text-lg`}
+      <div className="space-y-4">
+        {infoList.map((item, index) => {
+          const IconComponent = iconMap[item.icon] || LucideIcons.HelpCircle;
+          return (
+            <div
+              key={index}
+              className="flex items-center gap-3 text-base font-medium text-zinc-800 dark:text-zinc-100 leading-none py-[2px]"
             >
-              {item.icon}
-            </span>
-            <span className="text-zinc-800 dark:text-zinc-100">
-              {item.label}
-            </span>
-          </div>
-        ))}
+              <div className="flex items-center justify-center w-[22px]">
+                <IconComponent
+                  size={20}
+                  className="text-zinc-600 dark:text-zinc-300"
+                />
+              </div>
+              <div className="flex-1">{item.label}</div>
+            </div>
+          );
+        })}
       </div>
-      <Separator className="mt-4" />
-      <p className="text-zinc-400 justify-self-center flex items-center gap-1">
-        Sence joined
-        <span className="font-bold text-lg">•</span> 
-        {createdAt?.toString().split("-")[0]}
-      </p>
+
+      <Separator className="mt-6 mb-4" />
+
+      <div className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+        <p className="font-semibold">Important Notes:</p>
+        <ul className="list-disc list-inside space-y-1 text-center">
+          <li>Ensure your account information is up to date.</li>
+        </ul>
+      </div>
     </div>
   );
 };

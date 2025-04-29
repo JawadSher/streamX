@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Moon, Sun, Upload, Video, StickyNote } from "lucide-react";
+import { Moon, Sun, Upload, Video, StickyNote, Bell, Plus } from "lucide-react";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
@@ -22,7 +22,6 @@ import { useEffect, useState } from "react";
 import SidebarToggle from "./sidebar/sidebar-trigger";
 import SmallSearhBar from "./searchbar-components/small-searchbar";
 import FullSearchBar from "./searchbar-components/full-searchbar";
-import { cssUnfillProperty } from "@/constants/navConfig";
 
 const Header = () => {
   const { setTheme } = useTheme();
@@ -95,7 +94,7 @@ const Header = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="px-2 sm:py-0">
               <Button variant="outline" className="rounded-3xl cursor-pointer">
-                Create <span className={`${cssUnfillProperty} plus`}>add</span>
+                Create <Plus size={44} className="lucid-icons" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
@@ -118,7 +117,7 @@ const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           <div>
-            <span className={`${cssUnfillProperty} notification`}>notifications</span>
+            <Bell size={24} className="lucid-icons" />
           </div>
         </div>
       ) : (
