@@ -10,10 +10,10 @@ function FullSearchBar() {
         <Input className="rounded-3xl w-full pr-10" placeholder="Search" />
         <Search
           className={`absolute right-3 top-1/2 transform -translate-y-1/2 lucid-icons search`}
-          size={22}
+          size={20}
         />
       </div>
-      <Mic size={24} className="lucid-icons ml-1" />
+      <Mic size={20} className="lucid-icons ml-1" />
     </div>
   );
 }

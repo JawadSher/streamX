@@ -22,6 +22,7 @@ const iconMap: { [key: string]: React.ComponentType<any> } = {
   Clock: LucideIcons.Clock,
   ThumbsUp: LucideIcons.ThumbsUp,
   ThumbsDown: LucideIcons.ThumbsDown,
+  ListVideo: LucideIcons.ListVideo
 };
 
 export function NavMain({
@@ -67,6 +68,7 @@ export function NavMain({
                       />
                     </div>
                   )}
+                  
                   {state === "expanded" && (
                     <span
                       className={`${

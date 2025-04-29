@@ -20,8 +20,10 @@ import TopHeader from "./account-page-components/top-header";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { useEffect, useState } from "react";
 import SidebarToggle from "./sidebar/sidebar-trigger";
-import SmallSearhBar from "./searchbar-components/small-searchbar";
-import FullSearchBar from "./searchbar-components/full-searchbar";
+import dynamic from "next/dynamic";
+
+const SmallSearchBar = dynamic(() => import("./searchbar-components/small-searchbar"), { ssr: false });
+const FullSearchBar = dynamic(() => import("./searchbar-components/full-searchbar"), { ssr: false });
 
 const Header = () => {
   const { setTheme } = useTheme();
@@ -80,8 +82,8 @@ const Header = () => {
       </div>
 
       {!path.startsWith("/account") ? (
-        width <= 475 ? (
-          <SmallSearhBar />
+        mounted && width <= 475 ? (
+          <SmallSearchBar />
         ) : (
           <FullSearchBar />
         )

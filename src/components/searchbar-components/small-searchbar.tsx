@@ -10,7 +10,7 @@ import {
 import { Input } from "../ui/input";
 import { useState } from "react";
 import { Separator } from "../ui/separator";
-import { Cross, Mic, MoveUpLeft, Search, X } from "lucide-react";
+import { Mic, MoveUpLeft, Search, X } from "lucide-react";
 
 function SmallSearhBar() {
   const [searchInput, setSearchInput] = useState<string>("");

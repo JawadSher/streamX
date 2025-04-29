@@ -32,7 +32,7 @@ export const userSectionItems = [
   {
     title: "Playlists",
     url: `${API_ROUTES.PLAYLISTS}`,
-    icon: "list-video",
+    icon: "ListVideo",
   },
   {
     title: "Your videos",
