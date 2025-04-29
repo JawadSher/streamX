@@ -22,6 +22,8 @@ export async function storeUserInRedis(user : IRedisDBUser) {
         accountStatus: user.accountStatus || "active",
         avatar: user.avatarURL || "",
         banner: user.bannerURL || "",
+        createdAt: user.createdAt || "",
+        updatedAt: user.updatedAt || ""
       };
 
     await redis.hset(`app:user:${userId}`, userData);

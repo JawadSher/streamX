@@ -24,7 +24,8 @@ const UserProfileInfo = ({ userInfo }: UserProfileInfoProps) => {
         country={userInfo?.country}  
         accountStatus={userInfo?.accountStatus}  
         phoneNumber={userInfo?.phoneNumber}  
-        isVerified={userInfo?.isVerified}  
+        isVerified={userInfo?.isVerified}
+        createdAt={userInfo?.createdAt}  
       />
 
     </div>

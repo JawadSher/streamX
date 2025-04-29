@@ -1,6 +1,7 @@
 import { cssUnfillProperty } from "@/constants/navConfig";
 import { capitalize } from "@/lib/capitalize";
 import React from "react";
+import { Separator } from "../ui/separator";
 
 interface Props {
   userName?: string | null;
@@ -9,6 +10,7 @@ interface Props {
   phoneNumber?: string | null;
   country?: string | null;
   isVerified?: boolean | null;
+  createdAt?: Date | number | string | null;
 }
 
 const SecondSection = ({
@@ -18,6 +20,7 @@ const SecondSection = ({
   accountStatus,
   phoneNumber,
   country,
+  createdAt,
 }: Props) => {
   const accountStatusColor =
     accountStatus === "suspended"
@@ -59,6 +62,9 @@ const SecondSection = ({
       icon: "location_on",
       label: country || "Null",
     },
+    {
+      icon: "",
+    },
   ];
 
   return (
@@ -80,6 +86,12 @@ const SecondSection = ({
           </div>
         ))}
       </div>
+      <Separator className="mt-4" />
+      <p className="text-zinc-400 justify-self-center flex items-center gap-1">
+        Sence joined
+        <span className="font-bold text-lg">•</span> 
+        {createdAt?.toString().split("-")[0]}
+      </p>
     </div>
   );
 };

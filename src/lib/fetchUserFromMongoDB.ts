@@ -3,25 +3,29 @@ import mongoose from "mongoose";
 import { connectDB } from "./database";
 
 interface Props {
-    userId?: string;
-    email?: string;
-    userName?: string;
+  userId?: string;
+  email?: string;
+  userName?: string;
 }
 
-export async function fetchUserFromMongoDB({userId, email, userName}: Props = {} ){
-    const matchConditions = [];
-    if(userId && userId.length > 0){
-        try{
-            matchConditions.push({ _id: new mongoose.Types.ObjectId(userId) });
-        }catch (error){
-            console.log(error);
-            throw new Error("Invalid userId format");
-        }
+export async function fetchUserFromMongoDB({
+  userId,
+  email,
+  userName,
+}: Props = {}) {
+  const matchConditions = [];
+  if (userId && userId.length > 0) {
+    try {
+      matchConditions.push({ _id: new mongoose.Types.ObjectId(userId) });
+    } catch (error) {
+      console.log(error);
+      throw new Error("Invalid userId format");
     }
-    if(email && email.length > 0) matchConditions.push({ email });
-    if(userName && userName.length > 0) matchConditions.push({ userName });
-    
-    await connectDB();
+  }
+  if (email && email.length > 0) matchConditions.push({ email });
+  if (userName && userName.length > 0) matchConditions.push({ userName });
+
+  await connectDB();
   const userInfo = await UserModel.aggregate([
     {
       $match: {
@@ -57,6 +61,8 @@ export async function fetchUserFromMongoDB({userId, email, userName}: Props = {}
         bio: 1,
         country: 1,
         phoneNumber: 1,
+        createdAt: 1,
+        updatedAt: 1,
         accountStatus: 1,
         watchHistory: 1,
         avatarURL: {
@@ -101,6 +107,8 @@ export async function fetchUserFromMongoDB({userId, email, userName}: Props = {}
         phoneNumber: 1,
         accountStatus: 1,
         watchHistory: 1,
+        createdAt: 1,
+        updatedAt: 1,
         avatarURL: "$avatarURL.fileURL",
         bannerURL: "$bannerURL.fileURL",
       },
@@ -108,5 +116,4 @@ export async function fetchUserFromMongoDB({userId, email, userName}: Props = {}
   ]);
 
   return userInfo[0] || null;
-};
-
+}

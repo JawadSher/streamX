@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IRedisDBUser{
-    _id?: string | mongoose.Types.ObjectId | null ;
+    _id?: string | mongoose.Types.ObjectId | null;
     firstName?: string | null;
     lastName?: string | null;
     email?: string | null;
@@ -15,4 +15,6 @@ export interface IRedisDBUser{
     phoneNumber?: string | null;
     userName?: string | null;
     watchHistory?: string[];
+    createdAt?: Date | number | string | null;
+    updatedAt?: Date | number | string | null;
 }

@@ -32,6 +32,8 @@ export async function getUserFromRedis(userId: string): Promise<IRedisDBUser | n
       bio: userData.bio,
       country: userData.country,
       phoneNumber: userData.phoneNumber,
+      createdAt: userData.createdAt,
+      updatedAt: userData.updatedAt
     };
 
     return user;

@@ -2,23 +2,49 @@ import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import kafkaInstance from "./kafkaInstance";
 import { IUserAccountUpdate } from "@/interfaces/IUserAccountUpdate";
 
-interface Props{
-  userData?: IRedisDBUser | IUserAccountUpdate,
-  action?: "sign-up" | "user-update"; 
+interface passwdChangeData {
+  userId: string;
+  password: string;
 }
 
-export default async function notifyKakfa({ userData, action = "sign-up" }: Props) {
+interface Props {
+  userData?: IRedisDBUser | IUserAccountUpdate | string | passwdChangeData;
+  action?:
+    | "sign-up"
+    | "user-update"
+    | "user-account-deletion"
+    | "user-passwd-change";
+}
+
+export default async function notifyKakfa({
+  userData,
+  action = "sign-up",
+}: Props) {
   try {
     const kafka = await kafkaInstance();
     const producer = kafka.producer();
     await producer.connect();
 
-    const topic = action === "sign-up" ? "sign-up" : "user-update";
+    let topic = "sign-up";
+    switch (action) {
+      case "sign-up":
+        topic = "sign-up";
+        break;
+      case "user-update":
+        topic = "user-update";
+        break;
+      case "user-account-deletion":
+        topic = "user-account-deletion";
+        break;
+      case "user-passwd-change":
+        topic = "user-passwd-change";
+        break;
+    }
     await producer.send({
       topic,
       messages: [
         {
-          key: "sign-up",
+          key: topic,
           value: JSON.stringify(userData),
           headers: {
             source: "streamX-app",
