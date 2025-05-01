@@ -1,5 +1,6 @@
 import { Schema, Document, models, model } from "mongoose";
 import * as bcrypt from "bcryptjs";
+import MediaFile from "./mediaFile.model";
 
 export interface IUser extends Document {
   firstName: string;
@@ -172,6 +173,7 @@ userSchema.pre("save", async function (this: IUser, next) {
     next(error as Error);
   }
 });
+
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
   try {

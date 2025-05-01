@@ -63,8 +63,7 @@ function PasswordUpdate() {
     formData: FormData
   ): Promise<ActionErrorType | ActionResponseType> {
     const password = formData.get("password")?.toString();
-    const hashPasswd = await bcrypt.hash(password?.toString()!, 10);
-    const response = await updateUserPasswd({ passwd: hashPasswd });
+    const response = await updateUserPasswd({ passwd: password });
     return response;
   }
 
@@ -113,7 +112,7 @@ function PasswordUpdate() {
             onChange={(e) => setConfPasswd(e.target.value)}
             editable={true}
             type="password"
-            name="confPasswd" // Add name attribute for FormData
+            name="confPasswd"
           />
           {errors.confPasswd && (
             <p className="text-red-500 text-sm px-3">

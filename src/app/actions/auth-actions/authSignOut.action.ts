@@ -2,6 +2,7 @@
 
 import { auth, signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { actionError } from "@/lib/actions-templates/ActionError";
+import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { connectRedis } from "@/lib/redis";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
@@ -26,5 +27,8 @@ export async function authSignOut(): Promise<ActionResponseType | ActionErrorTyp
   }
 
   await signOut({ redirect: false });
-  redirect(API_ROUTES.SIGN_IN);
+  redirect(API_ROUTES.SIGN_IN)
+  return actionResponse(200, "Logout successfull", {
+    data: API_ROUTES.SIGN_IN
+  })
 }

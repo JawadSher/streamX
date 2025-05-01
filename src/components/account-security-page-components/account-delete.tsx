@@ -40,9 +40,6 @@ function AccountDelete() {
     if (state && state.message) {
       if (state.statusCode === 200) {
         toast.success(state.message);
-        if (state.data) {
-          router.push(state.data);
-        }
       } else {
         toast.error(state.message);
       }
@@ -81,7 +78,7 @@ function AccountDelete() {
             </div>
 
             {isPending ? (
-              <Loader2 size={24} />
+              <Loader2 className="animate-spin justify-self-center" size={24} />
             ) : (
               <Button
                 className="px-10 w-full md:max-w-fit justify-self-center rounded-2xl bg-red-500 hover:bg-red-600 cursor-pointer text-white"

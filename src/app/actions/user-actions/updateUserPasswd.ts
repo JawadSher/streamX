@@ -4,6 +4,7 @@ import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import notifyKakfa from "@/lib/notifyKafka";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 const passwdSchema = z
@@ -23,7 +24,7 @@ export async function updateUserPasswd({ passwd }: { passwd: string | null | und
 
   if (!passwd?.trim()) return actionError(400, "Password is required", null);
 
-  const result = await passwdSchema.safeParse(passwd);
+  const result = passwdSchema.safeParse(passwd);
   if (!result.success) {
     return actionError(
       400,
@@ -32,12 +33,14 @@ export async function updateUserPasswd({ passwd }: { passwd: string | null | und
     );
   }
 
+  const hashPasswd = await bcrypt.hash(result.data?.trim()?.toString()!, 10);
+
   try {
     await notifyKakfa({
       userData: {
         userId: session.user._id,
-        password: passwd,
-      },
+        password: hashPasswd,
+      },  
       action: 'user-passwd-change'
     });
 
