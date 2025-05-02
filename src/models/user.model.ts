@@ -1,6 +1,5 @@
 import { Schema, Document, models, model } from "mongoose";
 import * as bcrypt from "bcryptjs";
-import MediaFile from "./mediaFile.model";
 
 export interface IUser extends Document {
   firstName: string;

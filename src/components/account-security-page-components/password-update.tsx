@@ -10,7 +10,6 @@ import { useActionState, useCallback, useEffect, useState } from "react";
 import InputField from "../input-field";
 import { Button } from "../ui/button";
 import Form from "next/form";
-import bcrypt from "bcryptjs";
 
 function PasswordUpdate() {
   const [password, setPassword] = useState<string>("");
