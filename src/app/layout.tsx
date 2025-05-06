@@ -1,3 +1,4 @@
+import Script from "next/script";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -6,7 +7,6 @@ import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner";
 import ProgressWrapper from "@/components/progress-bar/progress-bar-wrapper";
-import Head from "next/head";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -15,9 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "streamX - Enjoy the world",
-  description:
-    "streamX is the ultimate platform to enjoy the world with endless entertainment and content.",
+  title: "Watch Movies Online | streamX",
+  description: "Watch free movies and shows on streamX.",
   robots: "index, follow",
   openGraph: {
     title: "streamX - Enjoy the world",
@@ -27,38 +26,26 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning>
-      <Head>
-        <title>Watch Movies Online | streamX</title>
-        <meta
-          name="description"
-          content="Watch free movies and shows on streamX."
-        />
-        <meta name="robots" content="index, follow" />
-        <link rel="icon" href="/favicon.png" />
-        <script
-          type="text/javascript"
-          src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
-          async
-        ></script>
-      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script
+          src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+          strategy="afterInteractive"
+        />
         <AuthProvider session={session}>
           <ProgressWrapper />
           <ClientRootLayout>{children}</ClientRootLayout>
