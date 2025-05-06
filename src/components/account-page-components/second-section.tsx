@@ -2,6 +2,7 @@ import { capitalize } from "@/lib/capitalize";
 import React from "react";
 import { Separator } from "../ui/separator";
 import * as LucideIcons from "lucide-react";
+import { Badge } from "../ui/badge";
 
 interface Props {
   userName?: string | null;
@@ -32,12 +33,6 @@ const SecondSection = ({
   country,
   createdAt,
 }: Props) => {
-  const accountStatusColor =
-    accountStatus === "suspended"
-      ? "text-yellow-500"
-      : accountStatus === "deleted"
-      ? "text-red-500"
-      : "text-green-500";
 
   const infoList = [
     { icon: "User", label: userName || "Null" },
@@ -46,10 +41,15 @@ const SecondSection = ({
       icon: "UserSquare",
       label: (
         <>
-          Verification:{" "}
-          <span className={isVerified ? "text-green-500" : "text-red-500"}>
+          Verification{" "}
+          <Badge
+            variant="secondary"
+            className={`px-3 py-0 rounded-sm ${
+              isVerified ? "text-green-400" : "text-red-400"
+            }`}
+          >
             {isVerified ? "True" : "False"}
-          </span>
+          </Badge>
         </>
       ),
     },
@@ -57,10 +57,19 @@ const SecondSection = ({
       icon: "UserRound",
       label: (
         <>
-          Account Status:{" "}
-          <span className={accountStatusColor}>
+          Account Status{" "}
+          <Badge
+            variant="secondary"
+            className={`px-3 py-0 rounded-sm ${
+              accountStatus === "suspended"
+                ? "text-yellow-400"
+                : accountStatus === "deleted"
+                ? "text-red-400"
+                : "text-green-400"
+            }`}
+          >
             {accountStatus ? capitalize(accountStatus) : "Unknown"}
-          </span>
+          </Badge>
         </>
       ),
     },

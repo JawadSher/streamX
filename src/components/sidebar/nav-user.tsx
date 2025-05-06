@@ -17,7 +17,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import Image from "next/image";
+import Image from "next/legacy/image";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import { toast } from "sonner";

@@ -1,6 +1,7 @@
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import kafkaInstance from "./kafkaInstance";
 import { IUserAccountUpdate } from "@/interfaces/IUserAccountUpdate";
+import { IUserAssetsUpdate } from "@/interfaces/userAssetsUpdate";
 
 interface passwdChangeData {
   userId: string;
@@ -8,12 +9,13 @@ interface passwdChangeData {
 }
 
 interface Props {
-  userData?: IRedisDBUser | IUserAccountUpdate | string | passwdChangeData;
+  userData?: IRedisDBUser | IUserAccountUpdate | string | passwdChangeData | IUserAssetsUpdate;
   action?:
     | "sign-up"
     | "user-update"
     | "user-account-deletion"
-    | "user-passwd-change";
+    | "user-passwd-change"
+    | "user-assets-update";
 }
 
 export default async function notifyKakfa({
@@ -32,6 +34,9 @@ export default async function notifyKakfa({
         break;
       case "user-update":
         topic = "user-update";
+        break;
+      case "user-assets-update":
+        topic = "user-assets-update";
         break;
       case "user-account-deletion":
         topic = "user-account-deletion";

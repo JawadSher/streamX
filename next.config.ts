@@ -10,11 +10,18 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/**"
+      }
     ],
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ["localhost:3000"],
+      bodySizeLimit: '10mb',
+      allowedOrigins: ["localhost:3000", "https://streamx-seven.vercel.app"],
     },
   },
 };

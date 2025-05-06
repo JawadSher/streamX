@@ -1,12 +1,31 @@
-# Allow all crawlers to access most of the site
+# Allow all crawlers
 User-agent: *
 Allow: /
 
-# Disallow sensitive or private routes
+# Disallow authentication routes
 Disallow: /sign-in
 Disallow: /sign-up
-Disallow: /api/*
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Disallow user-specific/profile pages
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /account
+Disallow: /settings
 Disallow: /feed/profile
 
-# Sitemap (optional, if you have one)
-Sitemap: http://localhost:3000/
+# Disallow all API routes (Next.js API or server actions)
+Disallow: /api/
+Disallow: /api/*
+
+# Disallow admin or private routes
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /internal
+Disallow: /internal/*
+Disallow: /_next/
+
+# Sitemap location (corrected syntax)
+Sitemap: https://streamx-seven.vercel.app/sitemap.xml

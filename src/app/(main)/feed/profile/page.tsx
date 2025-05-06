@@ -11,7 +11,6 @@ import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 import { fullname } from "@/lib/fullname";
 import { redirect } from "next/navigation";
-import React from "react";
 
 const Profile = async () => {
   const session = await auth();
