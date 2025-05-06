@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Watch Movies Online | streamX",
-  description: "Watch free movies and shows on streamX.",
+  title: "Watch Videos Online | streamX",
+  description: "Watch free videos, movies and shows on streamX.",
   robots: "index, follow",
   openGraph: {
     title: "streamX - Enjoy the world",
