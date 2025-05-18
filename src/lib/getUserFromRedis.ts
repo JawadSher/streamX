@@ -1,44 +1,74 @@
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { connectRedis } from "./redis";
 
-const parseJSON = <T>(str: string | undefined, fallback: T): T => {
-  try {
-    return str ? JSON.parse(str) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-export async function getUserFromRedis(userId: string): Promise<IRedisDBUser | null> {
+export async function getUserFromRedis(
+  userId: string
+): Promise<IRedisDBUser | null> {
   if (!userId) return null;
+
+  const fields = [
+    "_id",
+    "userName",
+    "email",
+    "firstName",
+    "lastName",
+    "accountStatus",
+    "banner",
+    "avatar",
+    "isVerified",
+    "bio",
+    "country",
+    "phoneNumber",
+    "createdAt",
+    "updatedAt",
+  ] as const;
 
   try {
     const redis = await connectRedis();
-    const userData = await redis.hgetall(`app:user:${userId}`) as Record<string, string>;
-    if (!userData || Object.keys(userData).length === 0) return null;
+    const rawValues = await redis.hmget(`app:user:${userId}`, ...fields);
+
+    let values: (string | null)[];
+    if (Array.isArray(rawValues)) {
+      values = rawValues.map((val) =>
+        val === null || typeof val === "string" ? val : null
+      );
+    } else if (rawValues && typeof rawValues === "object") {
+      values = fields.map(
+        (field) => (rawValues as Record<string, string | null>)[field] ?? null
+      );
+    } else {
+      console.error(`Unexpected hmget response for user ${userId}:`, rawValues);
+      return null;
+    }
+
+    if (values.every((val) => val === null)) return null;
+
+    const userData = Object.fromEntries(
+      fields.map((key, index) => [key, values[index] ?? ""])
+    ) as Record<(typeof fields)[number], string>;
 
     const user: IRedisDBUser = {
       _id: userData._id,
       userName: userData.userName,
-      watchHistory: parseJSON(userData.watchHistory, []),
       email: userData.email,
       firstName: userData.firstName,
       lastName: userData.lastName,
       accountStatus: userData.accountStatus,
       bannerURL: userData.banner,
       avatarURL: userData.avatar,
-      channelName: userData.channelName,
-      isVerified: ["true", "1", true].includes(userData.isVerified), 
+      isVerified: userData.isVerified,
       bio: userData.bio,
       country: userData.country,
       phoneNumber: userData.phoneNumber,
-      createdAt: userData.createdAt,
-      updatedAt: userData.updatedAt
+      createdAt: userData.createdAt ? new Date(userData.createdAt) : null,
+      updatedAt: userData.updatedAt ? new Date(userData.updatedAt) : null,
     };
+
+    if (!user._id || !user.userName) return null;
 
     return user;
   } catch (error) {
-    console.error("Redis fetch error:", error);
+    console.error(`Failed to fetch user ${userId} from Redis:`, error);
     return null;
   }
 }

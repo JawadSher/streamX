@@ -3,7 +3,7 @@ import { Document, model, models, Schema } from "mongoose";
 export interface IDislike extends Document {
   userId: Schema.Types.ObjectId;
   dislikeable: Schema.Types.ObjectId;
-  dislikeableType: "audio" | "video" | "comment";
+  dislikeableType: "Audio" | "Video" | "Comment";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,13 +19,13 @@ const dislikeSchema = new Schema<IDislike>(
     dislikeable: {
       type: Schema.Types.ObjectId,
       required: [true, "Dislikeable reference is required"],
-      refPath: "dislikeableType",
+      ref: "dislikeableType",
       index: true,
     },
     dislikeableType: {
       type: String,
       required: [true, "Dislikeable type is required"],
-      enum: ["audio", "video", "comment"],
+      enum: ["Audio", "Video", "Comment"],
     },
   },
   { timestamps: true }

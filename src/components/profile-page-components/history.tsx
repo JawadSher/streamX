@@ -3,18 +3,12 @@ import VideoCard from "../video-card/video-card";
 import Link from "next/link";
 import { API_ROUTES } from "@/lib/api/ApiRoutes";
 
-interface Props {
-  videos?: string[];
-  videoThumbnails?: string[];
-}
 
-const History = ({ videos = [], videoThumbnails = [] }: Props) => {
-  // const isEmpty = videos.length === 0;
-  const isEmpty = 1;
-  console.log(videos, videoThumbnails)
-  
+const History = ({ watchHistory }: { watchHistory: string[]}) => {
+  const isEmpty = watchHistory.length === 0 ? true : false;
+
   return (
-    <Container className="flex flex-col gap-4">
+    <Container className="flex flex-col gap-2">
       <div>
         <h1 className="text-xl font-semibold">History</h1>
         <p className="text-[14px] text-zinc-400">
@@ -26,8 +20,10 @@ const History = ({ videos = [], videoThumbnails = [] }: Props) => {
       </div>
 
       <div className="relative">
-        {!isEmpty ? (
-          <p className="text-gray-500">No videos in history yet.</p>
+        {isEmpty ? (
+          <div className="w-full flex items-center justify-center border-1 rounded-2xl h-40 ">
+            <p className="text-gray-500">No videos in history yet.</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-fit">
             {/* {videos.map((videoUrl, index) => (

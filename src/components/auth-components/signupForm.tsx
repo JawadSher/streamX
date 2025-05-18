@@ -12,7 +12,7 @@ import Link from "next/link";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 import { debounce } from "lodash";
 import { authSignUp } from "@/app/actions/auth-actions/authSignUp.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
@@ -114,7 +114,7 @@ export function SignupForm({
         setConfirmPasswd("");
         setUsernameAvailable("");
 
-        router.push(API_ROUTES.HOME);
+        router.push(ROUTES.PAGES_ROUTES.HOME);
       } else if (state.statusCode === 400 && state.data?.fieldErrors) {
         const fieldErrors = state.data.fieldErrors;
         setErrors({

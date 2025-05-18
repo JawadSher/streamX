@@ -2,7 +2,6 @@
 
 import Form from "next/form";
 import { Button } from "../ui/button";
-import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { useActionState, useEffect, useState } from "react";
 import EditButton from "../edit-button";
 import { userUpdateSchema } from "@/schemas/userUpdateSchema";
@@ -13,15 +12,23 @@ import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
 import { userBasicAccountUpdate } from "@/app/actions/user-actions/userBasicAccountUpdate.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import InputField from "../input-field";
+import { useUser } from "@/store/features/user/userSlice";
 
-const AccountForm = ({ initialData }: { initialData: IRedisDBUser}) => {
+const AccountForm = () => {
+  const initialData = useUser();
+
+  if (!initialData) {
+    return (
+      <div className="text-red-500 text-center">No user data available.</div>
+    );
+  }
 
   const [firstName, setFirstName] = useState<string>(
     initialData.firstName || ""
   );
   const [lastName, setLastName] = useState<string>(initialData.lastName || "");
-  const [userName, ] = useState<string>(initialData.userName || "");
-  const [email, ] = useState<string>(initialData.email || "");
+  const [userName] = useState<string>(initialData.userName || "");
+  const [email] = useState<string>(initialData.email || "");
   const [phoneNumber, setPhoneNumber] = useState<string>(
     initialData.phoneNumber || ""
   );

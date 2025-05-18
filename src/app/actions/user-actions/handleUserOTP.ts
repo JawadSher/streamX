@@ -9,7 +9,6 @@ import { storeUserOTPInRedis } from "@/lib/storeUserOTPInRedis";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import User from "@/models/user.model";
 
-
 export async function handleUserOTP({
   code,
   userId,

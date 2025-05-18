@@ -14,7 +14,7 @@ import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import TopHeader from "./account-page-components/top-header";
 import useWindowWidth from "@/hooks/useWindowWidth";
@@ -22,8 +22,14 @@ import { useEffect, useState } from "react";
 import SidebarToggle from "./sidebar/sidebar-trigger";
 import dynamic from "next/dynamic";
 
-const SmallSearchBar = dynamic(() => import("./searchbar-components/small-searchbar"), { ssr: false });
-const FullSearchBar = dynamic(() => import("./searchbar-components/full-searchbar"), { ssr: false });
+const SmallSearchBar = dynamic(
+  () => import("./searchbar-components/small-searchbar"),
+  { ssr: false }
+);
+const FullSearchBar = dynamic(
+  () => import("./searchbar-components/full-searchbar"),
+  { ssr: false }
+);
 
 const Header = () => {
   const { setTheme } = useTheme();
@@ -93,38 +99,40 @@ const Header = () => {
 
       {isAuthenticated === "authenticated" && !path.startsWith("/account") ? (
         <div className="flex items-center justify-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild className="px-2 py-0">
-            <Button variant="outline" className="rounded-3xl cursor-pointer">
-              Create <Plus size={20} className="lucid-icons" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Create content</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="gap-6 cursor-pointer">
-                <Upload />
-                <span>Upload video</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-6 cursor-pointer">
-                <Video />
-                <span>Upload shorts</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-6 cursor-pointer">
-                <StickyNote />
-                <span>Create community post</span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <div>
-          <Bell size={20} className="lucid-icons" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="px-2 py-0">
+              <Button variant="outline" className="rounded-3xl cursor-pointer">
+                Create <Plus size={20} className="lucid-icons" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Create content</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem className="gap-6 cursor-pointer">
+                  <Upload />
+                  <span>Upload video</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem className="gap-6 cursor-pointer" disabled>
+                  <Video />
+                  <span>Upload shorts</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem className="gap-6 cursor-pointer" disabled>
+                  <StickyNote />
+                  <span>Create community post</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div>
+            <Bell size={20} className="lucid-icons" />
+          </div>
         </div>
-      </div>
       ) : (
         !isAuthenticated && (
-          <Link href={API_ROUTES.SIGN_IN}>
+          <Link href={ROUTES.PAGES_ROUTES.SIGN_IN}>
             <Button className="w-full cursor-pointer rounded-2xl h-8 bg-transparent border-[1px] border-blue-400 text-blue-400 hover:bg-transparent hover:shadow-blue-300">
               Sign in
             </Button>

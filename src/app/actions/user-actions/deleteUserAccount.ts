@@ -6,7 +6,7 @@ import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import notifyKakfa from "@/lib/notifyKafka";
 import { authSignOut } from "../auth-actions/authSignOut.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 import { redirect } from "next/navigation";
 
 export async function deleteUserAccount() {
@@ -38,6 +38,6 @@ export async function deleteUserAccount() {
       );
     }
   } finally {
-    redirect(API_ROUTES.SIGN_IN);
+    redirect(ROUTES.PAGES_ROUTES.SIGN_IN);
   }
 }

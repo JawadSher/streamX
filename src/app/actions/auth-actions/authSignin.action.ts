@@ -2,7 +2,7 @@
 
 import { loginSchema } from "@/schemas/loginSchema";
 import { signIn, signOut } from "@/app/api/auth/[...nextauth]/configs";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
@@ -34,11 +34,11 @@ export async function authSignin(
     });
 
     if (typeof signInResult === 'string') {
-      return actionResponse(200, "Sign-in successful", { redirect: API_ROUTES.HOME });
+      return actionResponse(200, "Sign-in successful", { redirect: ROUTES.PAGES_ROUTES.HOME });
     }
 
     if (signInResult?.ok) {
-      return actionResponse(200, "Sign-in successful", { redirect: API_ROUTES.HOME }); 
+      return actionResponse(200, "Sign-in successful", { redirect: ROUTES.PAGES_ROUTES.HOME }); 
     } else {
       return actionError(401, signInResult?.error || "Invalid email or password", {});
     }
@@ -48,5 +48,5 @@ export async function authSignin(
 }
 
 export async function authProviderSignIn() {
-  await signIn("google", { redirectTo: `${API_ROUTES.HOME}` });
+  await signIn("google", { redirectTo: `${ROUTES.PAGES_ROUTES.HOME}` });
 }

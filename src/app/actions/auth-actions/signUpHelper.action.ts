@@ -7,7 +7,6 @@ import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 
-
 export async function signUpHelper({
   userData,
 }: {

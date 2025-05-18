@@ -1,13 +1,13 @@
-export class ApiResponse<T> {
-  public success?: boolean;
-  public message?: string;
-  public data?: T;
-  public statusCode?: number;
+import { NextResponse } from "next/server";
 
-  constructor(statusCode?: number, message?: string, data?: T) {
-    this.success = true;
-    this.message = message;
-    this.data = data;
-    this.statusCode = statusCode;
-  }
+export function ApiResponse(statusCode: number = 200, message: string, data: any) {
+  return NextResponse.json(
+    {
+      message,
+      status: "success",
+      statusCode,
+      data,
+    },
+    { status: statusCode }
+  );
 }

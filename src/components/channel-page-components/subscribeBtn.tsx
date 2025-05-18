@@ -9,7 +9,7 @@ function SubscribeBtn({ className }: { className?: string}) {
     }
 
   return (
-    <Form action={handleSubmit}>
+    <Form action={handleSubmit} className='flex items-start w-full'>
         <Button className={className} type='submit'>Subscribe</Button>
     </Form>
   )

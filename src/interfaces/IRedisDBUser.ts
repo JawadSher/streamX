@@ -4,17 +4,20 @@ export interface IRedisDBUser{
     _id?: string | mongoose.Types.ObjectId | null;
     firstName?: string | null;
     lastName?: string | null;
-    email?: string | null;
     channelName?: string | null;
+    watchHistory?: string [] | null;
+    watchLater?: string [] | null;
+    likedVideos?: string [] | null;
+    disLikedVideos?: string [] | null;
+    email?: string | null;
     bio?: string | null;
     country?: string | null;
     accountStatus?: string | null;
-    isVerified?: boolean | null;
+    isVerified?: boolean | null | string;
     avatarURL?: string | null;
     bannerURL?: string | null;
     phoneNumber?: string | null;
     userName?: string | null;
-    watchHistory?: string[];
     createdAt?: Date | number | string | null;
     updatedAt?: Date | number | string | null;
 }

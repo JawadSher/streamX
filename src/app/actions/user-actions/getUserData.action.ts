@@ -23,6 +23,5 @@ export const getUserData = cache(async (): Promise<IRedisDBUser | null> => {
   return {
     ...user,
     _id: user?._id?.toString(),
-    watchHistory: user?.watchHistory ?? [],
   };
 });

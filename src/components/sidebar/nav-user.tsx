@@ -18,11 +18,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/legacy/image";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import { toast } from "sonner";
 import { authSignOut } from "@/app/actions/auth-actions/authSignOut.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+// import { persistor } from '@/store/store';
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -33,6 +34,7 @@ interface INavUserProps {
 
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
+
   const handleLogout = async () => {
     try {
       const response: ActionResponseType | ActionErrorType = await authSignOut();
@@ -46,6 +48,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
       toast.error("Logout Unsuccessful");
     }
 
+    // await persistor.purge();
     toast.success("Logout successfull");
   };
 
@@ -113,7 +116,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <Link href={API_ROUTES.ACCOUNT}>
+              <Link href={ROUTES.PAGES_ROUTES.ACCOUNT}>
                 <DropdownMenuItem className="cursor-pointer">
                   {user.isVerified ? <BadgeCheck /> : <Badge />}
                   Account

@@ -56,8 +56,8 @@ export function NavMain({
                     state === "expanded" ? "gap-5" : "justify-center"
                   } ${
                     isActive
-                      ? "bg-accent text-white font-semibold"
-                      : "hover:bg-accent hover:text-white"
+                      ? "bg-accent darK:text-white font-semibold"
+                      : "hover:bg-accent dark:hover:text-white"
                   }`}
                 >
                   {IconComponent && (

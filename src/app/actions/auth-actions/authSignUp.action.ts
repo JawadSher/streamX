@@ -2,7 +2,7 @@
 
 import { signupSchema } from "@/schemas/signupSchema";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 import { AuthError } from "next-auth";
 import { signUpHelper } from "./signUpHelper.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
@@ -30,8 +30,6 @@ export async function authSignUp({
 }: IUserData): Promise<ActionResponseType | ActionErrorType> {
   const userData = { firstName, lastName, email, password, userName };
 
-  console.log(userData);
-
   const result = signupSchema.safeParse(userData);
   if (!result.success) {
     return actionError(
@@ -57,7 +55,7 @@ export async function authSignUp({
         }
 
         return actionResponse(200, "User logged in successfully", {
-          redirect: API_ROUTES.HOME,
+          redirect: ROUTES.PAGES_ROUTES.HOME,
         });
       } catch (error: unknown) {
         if (error instanceof AuthError) {

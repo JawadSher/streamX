@@ -154,15 +154,16 @@ function UserAvatarChange({ className }: { className?: string }) {
   const [state, formAction, isPending] = useActionState(handleSubmit, null);
 
   useEffect(() => {
-    if (state?.statusCode !== 200) {
-      toast.error(state?.message);
-    } else if (state?.statusCode === 200) {
-      toast.success(state.message);
-      setTimeout(async () => {
-        await handleDialogOpenChange(false);
-      }, 2000);
-    }
-  }, [state]);
+  if (state?.statusCode !== 200 && state?.message) {
+    toast.error(state.message);
+  } else if (state?.statusCode === 200 && state?.message) {
+    toast.success(state.message);
+    setTimeout(async () => {
+      await handleDialogOpenChange(false);
+    }, 2000);
+  }
+}, [state]);
+
 
   return (
     <div className={cn(className)}>

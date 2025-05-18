@@ -2,6 +2,8 @@
 import UserChannelProfile from "./user-channel-profile";
 
 function ChannelHeader() {
+
+
   return <UserChannelProfile />;
 }
 

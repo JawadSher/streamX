@@ -1,31 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { API_ROUTES } from "./lib/api/ApiRoutes";
+import { ROUTES } from "./lib/api/ApiRoutes";
+import { verifyAuth } from "./lib/verifyAuth";
 
-const SECRET = process.env.NEXTAUTH_SECRET;
-
+const protectedPaths = ["/feed", "/profile", "/account"];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const token = await getToken({
-    req: request,
-    secret: SECRET,
-    secureCookie: process.env.NODE_ENV === "production",
-  });
-
+  const token = await verifyAuth(request);
   const isAuthenticated = !!token;
 
   if (isAuthenticated && pathname === "/sign-in") {
-    return NextResponse.redirect(new URL(API_ROUTES.HOME, request.url));
+    return NextResponse.redirect(new URL(ROUTES.PAGES_ROUTES.HOME, request.url));
   }
+
+  const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
 
   if (
     !isAuthenticated &&
-    (pathname.startsWith("/feed") ||
-      pathname.startsWith("/profile") ||
-      pathname.startsWith("/account"))
+    isProtected
   ) {
-    return NextResponse.redirect(new URL(API_ROUTES.SIGN_IN, request.url));
+    return NextResponse.redirect(new URL(ROUTES.PAGES_ROUTES.SIGN_IN, request.url));
   }
 
   return NextResponse.next();

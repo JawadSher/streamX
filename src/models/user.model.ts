@@ -59,6 +59,7 @@ export interface IUser extends Document {
   accountStatus: "active" | "suspended" | "deleted";
   lastLogin: Date;
   watchHistory: Schema.Types.ObjectId[];
+  watchLater: Schema.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -152,6 +153,11 @@ const userSchema = new Schema<IUser>(
       default: () => new Date(),
     },
     watchHistory: {
+      type: [Schema.Types.ObjectId],
+      ref: "Video",
+      default: [],
+    },
+    watchLater: {
       type: [Schema.Types.ObjectId],
       ref: "Video",
       default: [],

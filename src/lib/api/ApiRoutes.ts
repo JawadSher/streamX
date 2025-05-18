@@ -1,4 +1,5 @@
-export const API_ROUTES = {
+export const ROUTES = {
+  PAGES_ROUTES: {
     HOME: "/",
     SHORTS: "/shorts",
     HISTORY: "/feed/history",
@@ -17,5 +18,19 @@ export const API_ROUTES = {
     SIGN_IN: "/sign-in",
     SIGN_OUT: "/sign-out",
     CHANNEL: "/channel",
-    USER_UPDATE: "/api/user-update"
-}
+    USER_UPDATE: "/user-update",
+  },
+  API_ROUTES: {
+    USER_DATA_FETCH: "/api/user",
+    USER_ASSETS_UPLOAD: "/api/user/assets",
+    USER_AUTH_SIGN_IN: "/api/user/auth/sign-in",
+    USER_AUTH_SIGN_OUT: "/api/user/auth/sign-out",
+    USER_AUTH_SIGN_UP: "/api/user/auth/sign-up",
+    USER_NAME_CHECK: "/api/user/check-username",
+    USER_ACCNT_DELETE: "/api/user/delete-account",
+    USER_PROFILE_FETCH: "/api/user/profile",
+    USER_ACCNT_UPDATE: "/api/user/update",
+    USER_ACCNT_PASSWD_UPDATE: "/api/user/update/passwd",
+    USER_ACCNT_VERIFY: "/api/user/verify",
+  },
+};

@@ -22,13 +22,13 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
         <Suspense fallback={<p>Loading ....</p>}>
           <AppSidebar status={status} userData={userData} />
         </Suspense>
-        <div
-          className={`flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 ${
-            isShortsPage ? "overflow-hidden" : "overflow-auto custom-scroll-bar"
-          }`}
-        >
+        <div className="flex-1 flex flex-col h-screen pl-2 md:pl-4 relative overflow-auto">
+          <div className="pt-2 pr-2">
             <Header />
-          <main className="flex-1 mx-auto w-full mt-3">{children}</main>
+          </div>
+          <main className="flex-1 mx-auto w-full mt-1 pb-2 overflow-auto">
+            <div className="h-full w-full overflow-auto pr-1 custom-scroll-bar">{children}</div>
+          </main>
         </div>
       </SidebarProvider>
     </div>

@@ -37,8 +37,8 @@ export function NavMainSubscriptions({
         <Collapsible asChild defaultOpen={false} className="group/collapsible">
           <SidebarMenuItem>
             <CollapsibleTrigger asChild>
-              <SidebarMenuButton>
-                <SidebarGroupLabel className="text-white text-[18px]">
+              <SidebarMenuButton className="cursor-pointer">
+                <SidebarGroupLabel className="dark:text-white text-[18px]">
                   Subscriptions
                 </SidebarGroupLabel>
                 <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
