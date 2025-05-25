@@ -139,12 +139,15 @@
   background: #888; 
 }
 
+main {
+  overflow: visible; 
+  min-height: 100%; 
+}
 
 .lucid-icons:hover {
   cursor: pointer;
   fill: white;
 }
-
 
 .search:hover {
   fill: none;
@@ -155,3 +158,4 @@ body {
   height: 100%;
   overflow: hidden; 
 }
+

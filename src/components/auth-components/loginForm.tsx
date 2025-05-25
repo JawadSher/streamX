@@ -17,13 +17,10 @@ import {
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  authProviderSignIn,
-  authSignin,
-} from "@/app/actions/auth-actions/authSignin.action";
-import { ActionErrorType, ActionResponseType } from "@/lib/Types";
+import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin.action";
 import { toast, Toaster } from "sonner";
-import {debounce} from "lodash";
+import { debounce } from "lodash";
+import { useSignInUser } from "@/hooks/useUser";
 
 export function LoginForm({
   className,
@@ -34,35 +31,28 @@ export function LoginForm({
     password?: string;
   } | null>(null);
 
-  const [state, formAction, isPending] = useActionState<
-    ActionResponseType | ActionErrorType | null,
-    FormData
-  >(authSignin, null);
+  const { data, mutate, isError, error, isPending } =
+    useSignInUser();
 
   const router = useRouter();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (state) {
-      if (state.statusCode === 200) {
-        toast.success(state.message);
-        router.push(state.data.redirect);
-      } else if (state.statusCode === 400) {
-        toast.error(state.message);
-        setErrors({
-          email: state.data?.email?.[0] ?? "",
-          password: state.data?.password?.[0] ?? "",
-        });
-      } else if (state.statusCode === 401 || state.statusCode === 500) {
-        setErrors({
-          email: "",
-          password: "",
-        });
-        toast.error(state.message);
-      }
+    if (data?.status === 400) {
+      toast.error(data.data.data.message);
+      setErrors({
+        email: data?.data?.data?.email?.[0] ?? "",
+        password: data?.data?.data?.password?.[0] ?? "",
+      });
+    } else if (data?.status === 401 || data?.status === 500) {
+      setErrors({
+        email: "",
+        password: "",
+      });
+      toast.error(data.data.data.message);
     }
-  }, [state, router]);
+  }, [data, error, isError, data, router]);
 
   const debouncedValidate = useCallback(
     debounce(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,7 +100,7 @@ export function LoginForm({
       return;
     }
 
-    formAction(formData);
+    mutate(result.data as { email: string; password: string });
   };
 
   return (

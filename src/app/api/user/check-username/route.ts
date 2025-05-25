@@ -18,7 +18,7 @@ const userNameSchema = z
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
-    const { isAuthentic, userName } = body;
+    const { isAuthentic, userName } = body.data;
 
     if (!isAuthentic) {
       return ApiError(401, "Unauthorized request", null);

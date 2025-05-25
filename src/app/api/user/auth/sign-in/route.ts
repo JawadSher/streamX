@@ -16,9 +16,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const data = await request.formData();
-  const formDataObj = Object.fromEntries(data.entries());
-  const result = loginSchema.safeParse(formDataObj);
+  const data = await request.json();
+  const result = loginSchema.safeParse(data.data);
 
   if (!result.success) {
     const fieldErrors = result.error.flatten().fieldErrors;
@@ -32,18 +31,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       redirect: false,
     });
 
-    if (signInResult?.ok) {
-      return NextResponse.redirect(new URL(ROUTES.PAGES_ROUTES.HOME, request.url), {
-        status: 301,
-      });
-    } else {
+    if (signInResult?.error) {
       return ApiError(
         401,
         signInResult?.error || "Invalid email or password",
-        {}
+        null
       );
     }
+
+    return NextResponse.json({
+      success: true,
+      status: 200,
+      message: "Login successfull",
+      redirectTo: ROUTES.PAGES_ROUTES.HOME,
+    });
   } catch (error: any) {
-    return ApiError(500, "Authentication failed", { ...error });
+    return ApiError(500, "Authentication failed", { error });
   }
 }

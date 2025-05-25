@@ -3,13 +3,13 @@ import React, { Suspense } from "react";
 import AccountForm from "@/components/account-page-components/account-form";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import { redirect } from "next/navigation";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 
 export const revalidate = 60;
 
 const Account = async () => {
   const session = await auth();
-  if (!session?.user?._id) return redirect(API_ROUTES.HOME);
+  if (!session?.user?._id) return redirect(ROUTES.PAGES_ROUTES.HOME);
 
   return (
     <div className="flex items-center justify-center w-full h-full">

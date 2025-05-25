@@ -33,7 +33,7 @@ import { toast } from "sonner";
 import { handleUserOTP } from "@/app/actions/user-actions/handleUserOTP";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import { useRouter } from "next/navigation";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/lib/api/ApiRoutes";
 
 const FormSchema = z.object({
   pin: z
@@ -115,7 +115,7 @@ export function VerifyAccountForm({
           if (res.statusCode === 200 || res?.data?.isVerified === true) {
             toast.success("Account Verified Successfully");
             setVerified(true);
-            router.push(API_ROUTES.ACCOUNT);
+            router.push(ROUTES.PAGES_ROUTES.ACCOUNT);
             return;
           }
         }

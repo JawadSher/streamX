@@ -1,5 +1,5 @@
-import { IGetUserProfile } from "@/context/UserProfileDataFetcher";
 import { useAppSelector } from "@/hooks/redux.hooks";
+import { IGetUserProfile } from "@/interfaces/IGetUserProfile";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -21,6 +21,14 @@ export const userSlice = createSlice({
         setUser: (state, action: PayloadAction<IRedisDBUser>) => {
             state.userData = action.payload;
         },
+        updateUser: (state, action: PayloadAction<Partial<IRedisDBUser>>) => {
+            if(state.userData){
+                state.userData = {
+                    ...state.userData,
+                    ...action.payload
+                }
+            }
+        },
         clearUser: (state) => {
             state.userData = null;
         },
@@ -35,5 +43,5 @@ export const userSlice = createSlice({
 
 export const useUser = () => useAppSelector((state: RootState) => state.user?.userData);
 
-export const { setUser, clearUser, setUserProfile, clearUserProfile } = userSlice.actions;
+export const { setUser, updateUser, clearUser, setUserProfile, clearUserProfile } = userSlice.actions;
 export default userSlice.reducer;

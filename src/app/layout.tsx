@@ -6,6 +6,7 @@ import AuthProvider from "@/context/AuthProvider";
 import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner";
 import ProgressWrapper from "@/components/progress-bar/progress-bar-wrapper";
+import QueryProvider from "@/context/QueryProvider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -35,23 +36,24 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-lvh`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Script
           src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
           strategy="afterInteractive"
         />
-        <AuthProvider>
-          <ProgressWrapper />
-          <ClientRootLayout>
-            {children}
-            </ClientRootLayout>
-          <Toaster />
-        </AuthProvider>
+          <AuthProvider>
+            <ProgressWrapper />
+            <ClientRootLayout>
+        <QueryProvider>
+              {children}
+        </QueryProvider>
+          </ClientRootLayout>
+            <Toaster />
+          </AuthProvider>
       </body>
     </html>
   );

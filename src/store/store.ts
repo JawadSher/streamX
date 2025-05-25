@@ -6,6 +6,9 @@ import { PersistPartial } from 'redux-persist/es/persistReducer';
 
 export type RootState = ReturnType<ReturnType<typeof combineReducers<typeof rootReducers>>> & PersistPartial;
 
+let storeInstance: Awaited<ReturnType<typeof makeStore>>;
+let persistorInstance: Awaited<ReturnType<typeof makePersistor>>;
+
 export async function makeStore() {
   const persistedReducers = await createPersistedReducer(rootReducers);
 
@@ -14,7 +17,7 @@ export async function makeStore() {
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
-          ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+          ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE', 'persist/PURGE'],
         },
       }),
   });
@@ -25,6 +28,14 @@ export async function makePersistor(store: Store) {
   const { persistStore } = await import('redux-persist');
   return persistStore(store);
 }
+
+export const setupStore = async () => {
+  if (!storeInstance) {
+    storeInstance = await makeStore();
+    persistorInstance = await makePersistor(storeInstance);
+  }
+  return { store: storeInstance, persistor: persistorInstance };
+};
 
 export type AppStore = Awaited<ReturnType<typeof makeStore>>;
 export type AppDispatch = AppStore['dispatch'];

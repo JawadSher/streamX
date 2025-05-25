@@ -4,7 +4,6 @@ import Header from "@/components/header";
 import { getPathName } from "@/lib/getPathName";
 import { auth } from "../api/auth/[...nextauth]/configs";
 import { Suspense } from "react";
-import { getUserData } from "../actions/user-actions/getUserData.action";
 
 export const revalidate = 60;
 
@@ -14,24 +13,21 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
 
   const session = await auth();
   const status = session ? "authenticated" : "unauthenticated";
-  const userData = status === "authenticated" ? await getUserData() : null;
 
   return (
-    <div className="h-screen flex bg-white-100">
-      <SidebarProvider>
-        <Suspense fallback={<p>Loading ....</p>}>
-          <AppSidebar status={status} userData={userData} />
-        </Suspense>
-        <div className="flex-1 flex flex-col h-screen pl-2 md:pl-4 relative overflow-auto">
-          <div className="pt-2 pr-2">
-            <Header />
-          </div>
-          <main className="flex-1 mx-auto w-full mt-1 pb-2 overflow-auto">
-            <div className="h-full w-full overflow-auto pr-1 custom-scroll-bar">{children}</div>
-          </main>
-        </div>
-      </SidebarProvider>
-    </div>
+    // <div className="h-full bg-white-100 p-2">
+    <SidebarProvider className="py-2 pr-2">
+      <Suspense fallback={<p>Loading ....</p>}>
+        <AppSidebar status={status} />
+      </Suspense>
+
+      <div className="flex-1 flex flex-col h-screen md:pl-2 relative ml-2 gap-2 pb-2">
+        <Header />
+
+        {children}
+      </div>
+    </SidebarProvider>
+    // </div>
   );
 };
 

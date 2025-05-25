@@ -6,6 +6,7 @@ import { signOut } from "../../../auth/[...nextauth]/configs";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  console.log("user signout called");
   try {
     const token = await verifyAuth(request);
 

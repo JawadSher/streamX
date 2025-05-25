@@ -226,7 +226,7 @@ const AccountForm = () => {
           className="w-full"
           disabled={true}
           inputValue={email}
-          isVerified={initialData?.isVerified || null}
+          isVerified={Boolean(initialData?.isVerified) || null}
           userId={initialData?._id?.toString()}
         />
 

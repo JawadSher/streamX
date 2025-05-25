@@ -1,7 +1,3 @@
-"use client";
-
-import { getUserProfile } from "@/app/actions/user-actions/getUserProfile.action";
-
 export interface IGetUserProfile {
   firstName?: string | null;
   lastName?: string | null;
@@ -12,11 +8,3 @@ export interface IGetUserProfile {
   likedVideos?: string[] | null;
   disLikedVideos?: string[] | null;
 }
-
-async function UserProfileDataFetcher({ userProfileData }: { userProfileData : IGetUserProfile}) {
-  
-
-  return null;
-}
-
-export default UserProfileDataFetcher;

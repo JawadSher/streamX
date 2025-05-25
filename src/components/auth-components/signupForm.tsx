@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useActionState, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signupSchema } from "@/schemas/signupSchema";
 import confPassSchema from "@/schemas/confirmPasswdSchema";
@@ -14,9 +14,7 @@ import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { debounce } from "lodash";
-import { authSignUp } from "@/app/actions/auth-actions/authSignUp.action";
-import { ActionErrorType, ActionResponseType } from "@/lib/Types";
-import { checkUniqueUserName } from "@/app/actions/user-actions/checkUserName.action";
+import { useCheckUserName, useSignUpUser } from "@/hooks/useUser";
 
 export function SignupForm({
   className,
@@ -40,12 +38,9 @@ export function SignupForm({
   const [userNameAvailable, setUsernameAvailable] = useState("");
   const router = useRouter();
 
-  type FormState =
-  | { success: boolean }
-  | ActionResponseType
-  | ActionErrorType;
+  const { mutate, isPending, data: state } = useSignUpUser();
 
-  const handleSubmit = async (prevState: unknown, formData: FormData) => {
+  const handleSubmit = async (formData: FormData) => {
     const data = {
       firstName: formData.get("firstName"),
       lastName: formData.get("lastName"),
@@ -65,7 +60,7 @@ export function SignupForm({
         email: fieldErrors.email?.[0],
         password: fieldErrors.password?.[0],
       });
-      return { success: false };
+      return;
     }
 
     const passwdData = {
@@ -79,29 +74,25 @@ export function SignupForm({
       setErrors({
         confirmPasswd: fieldErrors.confPasswd?.[0],
       });
-      return { success: false };
+      return;
     }
 
-    const response: ActionResponseType | ActionErrorType = await authSignUp({
-      firstName: result.data.firstName,
-      lastName: result.data.lastName,
-      email: result.data.email,
-      userName: result.data.userName,
-      password: result.data.password,
+    mutate({
+      firstName,
+      lastName,
+      email,
+      userName,
+      password,
     });
-
-    return response;
   };
 
-  const [state, formAction, isPending] = useActionState(handleSubmit, {
-    success: false,
-  } as FormState );
-
   useEffect(() => {
+    if (!state) return;
+
     if ("statusCode" in state) {
       if (state.statusCode === 200) {
         toast.success("Account created successfully", {
-          description: state.message,
+          description: state.data.message,
           duration: 3000,
         });
 
@@ -125,62 +116,67 @@ export function SignupForm({
           password: fieldErrors.password?.[0],
         });
         toast.error("Signup failed", {
-          description: state.message,
+          description: state.data.message,
           duration: 3000,
         });
-      } else if (state.statusCode === 400) {
+      } else {
         toast.error("Signup failed", {
-          description: state.message,
-          duration: 3000,
-        });
-      } else if (state.statusCode === 401) {
-        toast.error("Signup failed", {
-          description: state.message,
-          duration: 3000,
-        });
-      } else if (state.statusCode === 409) {
-        toast.error("Signup failed", {
-          description: state.message,
-          duration: 3000,
-        });
-      } else if (state.statusCode === 500) {
-        toast.error("Signup failed", {
-          description: state.message,
+          description: state.data.message,
           duration: 3000,
         });
       }
     }
   }, [state, router]);
 
-
-
+  const mutation = useCheckUserName();
   const debouncedCheck = useCallback(
     debounce(async (value: string) => {
       if (value) {
-        const result = await checkUniqueUserName({userName: value});
+        mutation.mutate(
+          { userName: value, isAuthentic: true },
+          {
+            onSuccess: (data) => {
+              const res = data?.data;
+              const code = res?.statusCode;
 
-        if (result?.statusCode === 422) {
-          toast.error(result.message)
-          setErrors((prev) => ({ ...prev, userName: "" }));
-          setUsernameAvailable("");
-        } else if (result?.statusCode === 409) {
-          setUsernameAvailable("");
-          setErrors((prev) => ({ ...prev, userName: result.message }));
-        } else if(result.statusCode === 400) {
-          toast.error(result.message)
-          setErrors((prev) => ({ ...prev, userName: "" }));
-          setUsernameAvailable("");
-        }else if(result.statusCode === 500){
-          toast.error(result.message)
-          setErrors((prev) => ({ ...prev, userName: "" }));
-          setUsernameAvailable("");
-        }else{
-          setErrors((prev) => ({ ...prev, userName: "" }));
-          setUsernameAvailable(result.message);
-        }
+              if ([422, 400, 500].includes(code)) {
+                toast.error(res.message);
+                setErrors((prev) => ({ ...prev, userName: "" }));
+                setUsernameAvailable("");
+              } else if (code === 409) {
+                setErrors((prev) => ({ ...prev, userName: res.message }));
+                setUsernameAvailable("");
+              } else {
+                setErrors((prev) => ({ ...prev, userName: "" }));
+                setUsernameAvailable(res.message);
+              }
+            },
+            onError: (error: any) => {
+              const status = error?.response?.data?.statusCode;
+              const message =
+                error?.response?.data?.message || "Something went wrong";
+
+              if (status === 422 || status === 400 || status === 500) {
+                toast.error(error.response.data.message);
+                setErrors((prev) => ({ ...prev, userName: "" }));
+                setUsernameAvailable("");
+              } else if (status === 409) {
+                setErrors((prev) => ({
+                  ...prev,
+                  userName: error.response.data.message,
+                }));
+                setUsernameAvailable("");
+              } else {
+                toast.error(message);
+                setErrors((prev) => ({ ...prev, userName: "" }));
+                setUsernameAvailable("");
+              }
+            },
+          }
+        );
       }
     }, 1000),
-    [debounce]
+    []
   );
 
   useEffect(() => {
@@ -199,7 +195,7 @@ export function SignupForm({
       <form
         className={cn("flex flex-col gap-6", className)}
         {...props}
-        action={formAction}
+        action={handleSubmit}
       >
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-2xl font-bold">Create new account</h1>
@@ -208,6 +204,7 @@ export function SignupForm({
           </p>
         </div>
         <div className="grid gap-6">
+          {/* First Name */}
           <div className="grid gap-2">
             <Label htmlFor="firstName">First name</Label>
             <Input
@@ -218,12 +215,13 @@ export function SignupForm({
               required
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              aria-invalid={errors?.firstName ? "true" : "false"}
+              aria-invalid={!!errors?.firstName}
             />
             {errors?.firstName && (
               <p className="text-sm text-destructive">{errors?.firstName}</p>
             )}
           </div>
+          {/* Last Name */}
           <div className="grid gap-2">
             <Label htmlFor="lastName">Last name</Label>
             <Input
@@ -234,12 +232,13 @@ export function SignupForm({
               required
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              aria-invalid={errors?.lastName ? "true" : "false"}
+              aria-invalid={!!errors?.lastName}
             />
             {errors?.lastName && (
               <p className="text-sm text-destructive">{errors?.lastName}</p>
             )}
           </div>
+          {/* User Name */}
           <div className="grid gap-2">
             <Label htmlFor="userName">User name</Label>
             <Input
@@ -250,7 +249,7 @@ export function SignupForm({
               required
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              aria-invalid={errors?.userName ? "true" : "false"}
+              aria-invalid={!!errors?.userName}
             />
             {userNameAvailable && (
               <p className="text-sm text-green-400">{userNameAvailable}</p>
@@ -259,6 +258,7 @@ export function SignupForm({
               <p className="text-sm text-destructive">{errors?.userName}</p>
             )}
           </div>
+          {/* Email */}
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -269,12 +269,13 @@ export function SignupForm({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={errors?.email ? "true" : "false"}
+              aria-invalid={!!errors?.email}
             />
             {errors?.email && (
               <p className="text-sm text-destructive">{errors?.email}</p>
             )}
           </div>
+          {/* Password */}
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
             <Input
@@ -284,12 +285,13 @@ export function SignupForm({
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              aria-invalid={errors?.password ? "true" : "false"}
+              aria-invalid={!!errors?.password}
             />
             {errors?.password && (
               <p className="text-sm text-destructive">{errors?.password}</p>
             )}
           </div>
+          {/* Confirm Password */}
           <div className="grid gap-2">
             <Label htmlFor="confirmPasswd">Confirm Password</Label>
             <Input
@@ -299,7 +301,7 @@ export function SignupForm({
               required
               value={confirmPasswd}
               onChange={(e) => setConfirmPasswd(e.target.value)}
-              aria-invalid={errors?.confirmPasswd ? "true" : "false"}
+              aria-invalid={!!errors?.confirmPasswd}
             />
             {errors?.confirmPasswd && (
               <p className="text-sm text-destructive">
@@ -307,16 +309,25 @@ export function SignupForm({
               </p>
             )}
           </div>
+          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full cursor-pointer"
-            disabled={isPending}
+            disabled={
+              isPending ||
+              !firstName ||
+              !lastName ||
+              !userName ||
+              !email ||
+              !password ||
+              !confirmPasswd ||
+              !!errors?.userName
+            }
           >
             Sign up {isPending && <Loader2 className="animate-spin ml-2" />}
           </Button>
         </div>
       </form>
-
       <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
         <span className="relative z-10 bg-background px-2 text-muted-foreground">
           Or continue with
