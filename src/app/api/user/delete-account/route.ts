@@ -4,7 +4,7 @@ import { verifyAuth } from "@/lib/verifyAuth";
 import { NextRequest, NextResponse } from "next/server";
 import { signOut } from "../../auth/[...nextauth]/configs";
 import { connectRedis } from "@/lib/redis";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ApiResponse } from "@/lib/api/ApiResponse";
 
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   const token = await verifyAuth(request);
@@ -14,17 +14,13 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
   const userId = token._id;
   try {
-    await signOut({ redirect: false });
     const redis = await connectRedis();
-    await redis.expire(`app:user:${userId.toString()}`, 0);
+    await redis.del(`app:user:${userId.toString()}`);
     await notifyKakfa({ userData: userId, action: "user-account-deletion" });
-    return NextResponse.redirect(
-      new URL(ROUTES.PAGES_ROUTES.HOME, request.url),
-      {
-        status: 302,
-      }
-    );
+    await signOut({ redirect: false });
+    return ApiResponse(200, "Your account will be deleted next 24 hrs.", null);
   } catch (error: any) {
+    console.log(error);
     return ApiError(
       500,
       error.message || "Something went wrong while deleting account",

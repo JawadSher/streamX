@@ -1,14 +1,20 @@
-import { ApiError } from "@/lib/api/ApiError";
-import { ApiResponse } from "@/lib/api/ApiResponse";
 import { promises as fs } from "fs";
 import { v4 as uuidv4 } from "uuid";
 
 export const uploadToLocalServer = async (file: File) => {
   if (!file) {
-    return ApiError(400, "File not found", null);
+    return ({
+      statusCode: 400,
+      status: false, 
+      message: "Failed to upload file.",
+    });
   }
   if (file.size === 0) {
-    return ApiError(400, "File is empty", null);
+    return ({
+      statusCode: 400,
+      status: false, 
+      message: "File is required.",
+    });
   }
 
   try {
@@ -20,10 +26,17 @@ export const uploadToLocalServer = async (file: File) => {
       Buffer.from(data)
     );
 
-    return ApiResponse(200, "File saved locally successfull", {
+    return ({
+      statusCode: 200,
+      status: true, 
+      message: "File saved locally successfull",
       filePath: `D:/streamx/public/${fileName}`,
     });
   } catch (error: any) {
-    return ApiError(400, "Failed to save file", error);
+     return ({
+      statusCode: 400,
+      status: false, 
+      message: "Failed to upload file.",
+    });
   }
 };

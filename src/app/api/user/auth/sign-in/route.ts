@@ -1,6 +1,6 @@
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { ApiError } from "@/lib/api/ApiError";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ApiResponse } from "@/lib/api/ApiResponse";
 import { verifyAuth } from "@/lib/verifyAuth";
 import loginSchema from "@/schemas/loginSchema";
 import { NextRequest, NextResponse } from "next/server";
@@ -8,12 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const token = await verifyAuth(request);
   if (token?._id) {
-    return NextResponse.redirect(
-      new URL(ROUTES.PAGES_ROUTES.HOME, request.url),
-      {
-        status: 301,
-      }
-    );
+    return ApiResponse(301, "Already Logined", null);
   }
 
   const data = await request.json();
@@ -39,12 +34,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      status: 200,
-      message: "Login successfull",
-      redirectTo: ROUTES.PAGES_ROUTES.HOME,
-    });
+    return ApiResponse(200, "Login successfull", null);
   } catch (error: any) {
     return ApiError(500, "Authentication failed", { error });
   }

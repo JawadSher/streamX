@@ -12,7 +12,7 @@ const Account = async () => {
   if (!session?.user?._id) return redirect(ROUTES.PAGES_ROUTES.HOME);
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <div className="flex items-center justify-center w-full h-full pb-2">
       <div className="flex justify-center h-full w-full rounded-lg bg-[#fafafa] dark:bg-[rgb(24_24_27)] transition-colors duration-300 md:px-10 lg:px-30 py-10 shadow-lg">
         <div className="flex justify-center w-full h-full">
           <Suspense fallback={<AccountPageSkeleton />}>

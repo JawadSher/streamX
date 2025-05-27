@@ -26,9 +26,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const parsed = userNameSchema.safeParse(userName);
     if (!parsed.success) {
-      const errors = parsed.error.flatten().fieldErrors;
+      console.log();
+      const errors = parsed.error.flatten().formErrors[0];
       const validationError =
-        Object.values(errors).flat()[0] || "Invalid username format";
+        errors ||
+        "Username must start with a letter and contain only lowercase letters and numbers";
       return ApiError(422, "Validation error", { validationError });
     }
 

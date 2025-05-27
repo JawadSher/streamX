@@ -29,9 +29,7 @@ import { ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useLogoutUser } from "@/hooks/useUser";
-import { useDispatch } from "react-redux";;
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -42,11 +40,9 @@ interface INavUserProps {
 
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
-  const dispatch = useDispatch();
-  const router = useRouter();
-  const { mutate, isError, error, isSuccess, isPending, data } =
+  const { mutate, isError, error, isPending, data } =
     useLogoutUser();
-
+  
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     mutate();
@@ -54,10 +50,12 @@ export function NavUser({ user }: { user: INavUserProps }) {
 
   useEffect(() => {
     if (isError && error) {
-      toast.error(error.message);
+      toast.error(error.message, {
+        duration: 3000,
+      });
     }
 
-  }, [isError, error, isPending, data, router, dispatch]);
+  }, [isError, error]);
 
   return (
     <SidebarMenu>

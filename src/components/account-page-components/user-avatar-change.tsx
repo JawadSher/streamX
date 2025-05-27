@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,11 +19,8 @@ import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
-import Form from "next/form";
-import { uploadUserAssets } from "@/app/actions/user-assets-actions/uploadUserAssets.action";
-import { ActionErrorType, ActionResponseType } from "@/lib/Types";
-import { toast } from "sonner";
 import AnimatedTick from "../animated-check";
+import { useUserAssetsUpdate } from "@/hooks/useUser";
 
 function UserAvatarChange({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -34,6 +31,7 @@ function UserAvatarChange({ className }: { className?: string }) {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [cropping, setCropping] = useState(false);
   const [open, setOpen] = useState<boolean>(false);
+  const [croppedFile, setCroppedFile] = useState<File | null>(null);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -99,25 +97,13 @@ function UserAvatarChange({ className }: { className?: string }) {
       setSelectedImage(previewURL);
       setCropping(false);
 
-      if (inputRef.current) {
-        const croppedFile = new File(
-          [croppedBlob],
-          `cropped-avatar-${Date.now()}.jpg`,
-          {
-            type: croppedBlob.type || "image/jpeg",
-          }
-        );
+      const file = new File([croppedBlob], `cropped-avatar-${Date.now()}.jpg`, {
+        type: croppedBlob.type || "image/jpeg",
+      });
 
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(croppedFile);
-        inputRef.current.files = dataTransfer.files;
-      }
+      setCroppedFile(file);
     } catch (err: any) {
-      if(err instanceof Error){
-        setError("Failed to crop image");
-      }
       setError("Failed to crop image");
-      return;
     }
   };
 
@@ -138,32 +124,29 @@ function UserAvatarChange({ className }: { className?: string }) {
     };
   }, [selectedImage]);
 
-  const handleSubmit = async (
-    state: ActionResponseType | ActionErrorType | null,
-    formData: FormData
-  ): Promise<ActionResponseType | ActionErrorType | null> => {
-    const file = formData.get("file") as File;
+  const { mutate, status, isPending } = useUserAssetsUpdate();
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!croppedFile) {
+      setError("No file selected.");
+      return;
+    }
 
-    return await uploadUserAssets({
-      userAsset: file,
-      assetType: "avatar",
-      assetMemeType: "image",
-    });
-  };
+    const formData = new FormData();
+    formData.append("userAsset", croppedFile);
+    formData.append("assetType", "avatar");
+    formData.append("assetMemeType", "image");
 
-  const [state, formAction, isPending] = useActionState(handleSubmit, null);
+    mutate(formData);
+  }
 
   useEffect(() => {
-  if (state?.statusCode !== 200 && state?.message) {
-    toast.error(state.message);
-  } else if (state?.statusCode === 200 && state?.message) {
-    toast.success(state.message);
-    setTimeout(async () => {
-      await handleDialogOpenChange(false);
-    }, 2000);
-  }
-}, [state]);
-
+    if (status === "success") {
+      setTimeout(async () => {
+        await handleDialogOpenChange(false);
+      }, 2000);
+    }
+  }, [status]);
 
   return (
     <div className={cn(className)}>
@@ -175,6 +158,7 @@ function UserAvatarChange({ className }: { className?: string }) {
           <Camera
             className="cursor-pointer absolute right-1 bottom-5 transition"
             size={20}
+            color="white"
           />
         </DialogTrigger>
         <DialogContent className="sm:max-w-[480px] rounded-2xl dark:bg-[#18181B] border-none">
@@ -235,7 +219,7 @@ function UserAvatarChange({ className }: { className?: string }) {
             </div>
           )}
 
-          <Form action={formAction} className="w-full">
+          <form onSubmit={handleSubmit} className="w-full">
             {!isPending && (
               <div
                 className="flex flex-col items-center justify-center w-full border border-dashed px-1 py-5 rounded-2xl cursor-pointer relative"
@@ -278,7 +262,7 @@ function UserAvatarChange({ className }: { className?: string }) {
                 >
                   Apply Crop
                 </Button>
-              ) : state?.statusCode === 200 ? (
+              ) : status === "success" ? (
                 <AnimatedTick />
               ) : isPending ? (
                 <div className="w-full flex items-center justify-center">
@@ -294,7 +278,7 @@ function UserAvatarChange({ className }: { className?: string }) {
                 </Button>
               )}
             </DialogFooter>
-          </Form>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

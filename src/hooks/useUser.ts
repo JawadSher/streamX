@@ -1,8 +1,18 @@
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { persistPurge } from "@/lib/persistPurge";
-import { checkUserName, fetchUserData, logoutUser, signInUser, signUpUser } from "@/services/userServices";
-import { clearUser } from "@/store/features/user/userSlice";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  checkUserName,
+  fetchUserData,
+  logoutUser,
+  signInUser,
+  signUpUser,
+  userAccountDeletion,
+  userAccountPasswdUpdate,
+  userAccountUpdate,
+  userAssetsUpdate,
+} from "@/services/userServices";
+import { clearUser, updateUser } from "@/store/features/user/userSlice";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
@@ -30,17 +40,23 @@ export const useCheckUserName = () => {
 export const useLogoutUser = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["userLogout"],
     mutationFn: logoutUser,
     onSuccess: (data) => {
+      console.log("statement executed");
+      queryClient.removeQueries({
+        queryKey: ["user"],
+      });
+
       dispatch(clearUser());
       async function purge() {
         await persistPurge();
       }
       purge();
       router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
-      const message = data?.data?.message || "Logout Successful";
+      const message = data?.data?.message || "Logout Successfull";
       toast.success(message);
     },
   });
@@ -52,8 +68,10 @@ export const useSignInUser = () => {
   return useMutation({
     mutationKey: ["userSignIn"],
     mutationFn: signInUser,
-    onSuccess: () => {
-      toast.success("Login Successfull");
+    onSuccess: (data) => {
+      toast.success(data.data.message, {
+        duration: 3000,
+      });
       setTimeout(() => {
         router.push(ROUTES.PAGES_ROUTES.HOME);
       }, 1500);
@@ -71,8 +89,10 @@ export const useSignUpUser = () => {
   return useMutation({
     mutationKey: ["userSignUp"],
     mutationFn: signUpUser,
-    onSuccess: () => {
-      toast.success("Account Created Successfully");
+    onSuccess: (data) => {
+      toast.success(data.data.message, {
+        duration: 3000,
+      });
       setTimeout(() => {
         router.push(ROUTES.PAGES_ROUTES.HOME);
       }, 1500);
@@ -80,6 +100,100 @@ export const useSignUpUser = () => {
     onError: (error: any) => {
       const message = error?.response?.data?.message || "Something went wrong";
       toast.error(message);
+    },
+  });
+};
+
+export const useUserAccountUpdate = () => {
+  return useMutation({
+    mutationKey: ["userAccountUpdate"],
+    mutationFn: userAccountUpdate,
+    onSuccess: (data) => {
+      toast.success(data.data.message, {
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || "Something went wrong";
+      toast.error(message, {
+        duration: 3000,
+      });
+    },
+  });
+};
+
+export const useUserAccountDeletion = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["userAccountDelete"],
+    mutationFn: userAccountDeletion,
+    onSuccess: (data) => {
+      queryClient.removeQueries({
+        queryKey: ["user"],
+      });
+
+      dispatch(clearUser());
+      async function purge() {
+        await persistPurge();
+      }
+      purge();
+      router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
+      const message = data?.data?.message;
+      toast.success("Account Deletion", {
+        description: message,
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || "Something went wrong";
+      toast.error(message, {
+        duration: 3000,
+      });
+    },
+  });
+};
+
+export const useUserAssetsUpdate = () => {
+  const dispatch = useDispatch();
+  return useMutation({
+    mutationKey: ["userAssetsUpdate"],
+    mutationFn: userAssetsUpdate,
+    onSuccess: (data) => {
+      dispatch(
+        updateUser({
+          avatarURL: data.data.data.avatar,
+        })
+      );
+      toast.success(data.data.message, {
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || "Something went wrong";
+      toast.error(message, {
+        duration: 3000,
+      });
+    },
+  });
+};
+
+export const useUserAccountPasswdUpdate = () => {
+  return useMutation({
+    mutationKey: ["userAccountPasswdUpdate"],
+    mutationFn: userAccountPasswdUpdate,
+    onSuccess: (data) => {
+      toast.success(data.data.message, {
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data?.message || "Something went wrong";
+      toast.error(message, {
+        duration: 3000,
+      });
     },
   });
 };

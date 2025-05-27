@@ -12,7 +12,6 @@ import Link from "next/link";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
-import { ROUTES } from "@/lib/api/ApiRoutes";
 import { debounce } from "lodash";
 import { useCheckUserName, useSignUpUser } from "@/hooks/useUser";
 
@@ -88,43 +87,34 @@ export function SignupForm({
 
   useEffect(() => {
     if (!state) return;
-
-    if ("statusCode" in state) {
-      if (state.statusCode === 200) {
-        toast.success("Account created successfully", {
-          description: state.data.message,
-          duration: 3000,
-        });
-
-        setErrors(null);
-        setFirstName("");
-        setLastName("");
-        setUserName("");
-        setEmail("");
-        setPassword("");
-        setConfirmPasswd("");
-        setUsernameAvailable("");
-
-        router.push(ROUTES.PAGES_ROUTES.HOME);
-      } else if (state.statusCode === 400 && state.data?.fieldErrors) {
-        const fieldErrors = state.data.fieldErrors;
-        setErrors({
-          firstName: fieldErrors.firstName?.[0],
-          lastName: fieldErrors.lastName?.[0],
-          userName: fieldErrors.userName?.[0],
-          email: fieldErrors.email?.[0],
-          password: fieldErrors.password?.[0],
-        });
-        toast.error("Signup failed", {
-          description: state.data.message,
-          duration: 3000,
-        });
-      } else {
-        toast.error("Signup failed", {
-          description: state.data.message,
-          duration: 3000,
-        });
-      }
+    
+    if (state.status === 200 || state.data.statusCode === 201) {
+      setErrors(null);
+      setFirstName("");
+      setLastName("");
+      setUserName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPasswd("");
+      setUsernameAvailable("");
+    } else if (state.status === 400 && state.data?.fieldErrors) {
+      const fieldErrors = state.data.fieldErrors;
+      setErrors({
+        firstName: fieldErrors.firstName?.[0],
+        lastName: fieldErrors.lastName?.[0],
+        userName: fieldErrors.userName?.[0],
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+      });
+      toast.error("Signup failed", {
+        description: state.data.message,
+        duration: 3000,
+      });
+    } else {
+      toast.error("Signup failed", {
+        description: state.data.message,
+        duration: 3000,
+      });
     }
   }, [state, router]);
 
@@ -157,8 +147,10 @@ export function SignupForm({
                 error?.response?.data?.message || "Something went wrong";
 
               if (status === 422 || status === 400 || status === 500) {
-                toast.error(error.response.data.message);
-                setErrors((prev) => ({ ...prev, userName: "" }));
+                setErrors((prev) => ({
+                  ...prev,
+                  userName: error?.response?.data?.data.validationError,
+                }));
                 setUsernameAvailable("");
               } else if (status === 409) {
                 setErrors((prev) => ({
@@ -321,10 +313,11 @@ export function SignupForm({
               !email ||
               !password ||
               !confirmPasswd ||
-              !!errors?.userName
+              !!errors?.userName ||
+              confirmPasswd !== password 
             }
           >
-            Sign up {isPending && <Loader2 className="animate-spin ml-2" />}
+            {isPending ? <Loader2 className="animate-spin ml-2" /> : "Sign up"}
           </Button>
         </div>
       </form>

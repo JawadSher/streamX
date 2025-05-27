@@ -1,18 +1,17 @@
 "use client";
 
-import Form from "next/form";
+import { FormEvent, useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { useActionState, useEffect, useState } from "react";
 import EditButton from "../edit-button";
 import { userUpdateSchema } from "@/schemas/userUpdateSchema";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Loader2 } from "lucide-react";
 import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
-import { userBasicAccountUpdate } from "@/app/actions/user-actions/userBasicAccountUpdate.action";
-import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import InputField from "../input-field";
-import { useUser } from "@/store/features/user/userSlice";
+import { updateUser, useUser } from "@/store/features/user/userSlice";
+import { useUserAccountUpdate } from "@/hooks/useUser";
+import { useDispatch } from "react-redux";
 
 const AccountForm = () => {
   const initialData = useUser();
@@ -48,6 +47,7 @@ const AccountForm = () => {
     phoneNumber: undefined,
     country: undefined,
   });
+  const dispatch = useDispatch();
 
   const toggleEditableField = (fieldName: string) => {
     setEditableFields((prev) => ({
@@ -62,53 +62,53 @@ const AccountForm = () => {
       lastName !== (initialData.lastName || "") ||
       phoneNumber !== (initialData.phoneNumber || "") ||
       country !== (initialData.country || "");
+
     setIsBtnDisabled(isChanged);
   }, [firstName, lastName, phoneNumber, country, initialData]);
 
-  async function handleSubmit(
-    state: ActionErrorType | ActionResponseType | null,
-    formData: FormData
-  ): Promise<ActionErrorType | ActionResponseType | null> {
+  const { mutate, isPending, isError, error, isSuccess, data } =
+    useUserAccountUpdate();
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
     const userData = {
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
-      phoneNumber: formData.get("phoneNumber"),
-      country: formData.get("country"),
+      firstName,
+      lastName,
+      phoneNumber,
+      country,
     };
 
     const result = userUpdateSchema.safeParse(userData);
+
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors({
-        firstName: fieldErrors.firstName,
-        lastName: fieldErrors?.lastName,
-        country: fieldErrors?.country,
-      });
-      toast.error("Please put the correct values in to fields.");
-      return null;
-    }
-
-    if (phoneNumber.trim().length > 0) {
-      const result = phoneNumberSchema.safeParse(phoneNumber);
-      if (!result.success) {
-        const fieldErrors = result.error.flatten().fieldErrors as Partial<
-          Record<keyof typeof userData, string[]>
-        >;
-        setErrors((prev) => ({
-          ...prev,
-          phoneNumber: fieldErrors.phoneNumber,
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          phoneNumber: undefined,
-        }));
-      }
-    } else {
       setErrors((prev) => ({
         ...prev,
-        phoneNumber: undefined,
+        firstName: fieldErrors.firstName,
+        lastName: fieldErrors.lastName,
+        country: fieldErrors.country,
       }));
+      toast.error("Please enter valid values in the fields.", {
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (phoneNumber.trim()) {
+      const phoneResult = phoneNumberSchema.safeParse(phoneNumber);
+      if (!phoneResult.success) {
+        const phoneErrors = phoneResult.error.flatten().fieldErrors as {
+          phoneNumber?: string[];
+        };
+
+        setErrors((prev) => ({
+          ...prev,
+          phoneNumber: phoneErrors.phoneNumber,
+        }));
+
+        return;
+      }
     }
 
     setErrors({
@@ -118,52 +118,56 @@ const AccountForm = () => {
       country: undefined,
     });
 
-    const response: ActionResponseType | ActionErrorType =
-      await userBasicAccountUpdate({
-        firstName,
-        lastName,
-        phoneNumber,
-        country,
-      });
-    return response;
+    mutate({ firstName, lastName, phoneNumber, country });
   }
 
-  const [state, formAction, isPending] = useActionState(handleSubmit, null);
-
   useEffect(() => {
-    if (state && "statusCode" in state) {
-      if (state?.statusCode === 200) {
-        setEditableFields({
-          firstName: false,
-          lastName: false,
-          phoneNumber: false,
-          country: false,
-        });
-        setIsBtnDisabled(false);
-        toast.success(state.message);
-      } else if (state?.statusCode === 400) {
-        toast.error(
-          state.message ||
-            "Something went wrong while updating user data. Try again"
-        );
-      } else if (state?.statusCode === 401) {
-        toast.error(state.message || "Unauthorized Request");
-      } else if (state?.statusCode === 503) {
-        toast.error(state.message || "Service temporarily unavailable");
-      } else if (state?.statusCode === 500) {
-        toast.error(state.message || "Internal server error");
-      }
+      const status = data?.data?.statusCode;
+      const message = data?.data?.message || "An error occurred";
+
+      switch (status) {
+        case 200:
+          console.log("--------- This case executed --------")
+          console.log(firstName, lastName, phoneNumber, country);
+          dispatch(
+            updateUser({
+              firstName,
+              lastName,
+              phoneNumber,
+              country,
+            })
+          );
+          setEditableFields({
+            firstName: false,
+            lastName: false,
+            phoneNumber: false,
+            country: false,
+          });
+          setIsBtnDisabled(false);
+          break;
+        case 400:
+          toast.error(message || "Invalid request", { duration: 3000 });
+          break;
+        case 401:
+          toast.error(message || "Unauthorized request", { duration: 3000 });
+          break;
+        case 503:
+          toast.error(message || "Service unavailable", { duration: 3000 });
+          break;
+        case 500:
+          toast.error(message || "Internal server error", { duration: 3000 });
+          break;
     }
-  }, [state]);
+  }, [data, isError, error, isSuccess]);
 
   return (
     <div className="w-full max-w-5xl mx-auto p-6 md:border-1 md:rounded-2xl">
-      <h1 className="text-4xl font-semibold mb-22 text-center ">
+      <h1 className="text-4xl font-semibold mb-10 text-center">
         Account Information
       </h1>
 
-      <Form
-        action={formAction}
+      <form
+        onSubmit={handleSubmit}
         className="grid grid-cols-1 gap-6 lg:grid-cols-2"
       >
         <InputField
@@ -174,12 +178,10 @@ const AccountForm = () => {
           className="w-full"
           validationError={errors?.firstName?.[0]}
           inputValue={firstName}
-          onChange={(e) => (
-            setErrors({
-              firstName: undefined,
-            }),
-            setFirstName(e.target.value.toString())
-          )}
+          onChange={(e) => {
+            setErrors((prev) => ({ ...prev, firstName: undefined }));
+            setFirstName(e.target.value);
+          }}
           rightElement={
             <EditButton
               fieldName="firstName"
@@ -193,14 +195,12 @@ const AccountForm = () => {
           name="lastName"
           editable={editableFields.lastName}
           className="w-full"
+          validationError={errors?.lastName?.[0]}
           inputValue={lastName}
-          validationError={errors.lastName?.[0]}
-          onChange={(e) => (
-            setErrors({
-              lastName: undefined,
-            }),
-            setLastName(e.target.value.toString())
-          )}
+          onChange={(e) => {
+            setErrors((prev) => ({ ...prev, lastName: undefined }));
+            setLastName(e.target.value);
+          }}
           rightElement={
             <EditButton
               fieldName="lastName"
@@ -214,37 +214,33 @@ const AccountForm = () => {
           name="userName"
           editable={false}
           className="w-full"
-          disabled={true}
+          disabled
           inputValue={userName}
         />
-
         <InputField
           label="Email"
           htmlFor="email"
           name="email"
           editable={false}
           className="w-full"
-          disabled={true}
+          disabled
           inputValue={email}
-          isVerified={Boolean(initialData?.isVerified) || null}
+          isVerified={Boolean(initialData?.isVerified)}
           userId={initialData?._id?.toString()}
         />
-
         <InputField
           label="Phone Number"
           htmlFor="phoneNumber"
           name="phoneNumber"
           editable={editableFields.phoneNumber}
-          validationError={errors.phoneNumber?.[0]}
           className="w-full"
-          type="tel"
+          validationError={errors?.phoneNumber?.[0]}
           inputValue={phoneNumber}
-          onChange={(e) => (
-            setErrors({
-              phoneNumber: undefined,
-            }),
-            setPhoneNumber(e.target.value.toString())
-          )}
+          type="tel"
+          onChange={(e) => {
+            setErrors((prev) => ({ ...prev, phoneNumber: undefined }));
+            setPhoneNumber(e.target.value);
+          }}
           rightElement={
             <EditButton
               fieldName="phoneNumber"
@@ -258,14 +254,12 @@ const AccountForm = () => {
           name="country"
           editable={editableFields.country}
           className="w-full"
+          validationError={errors?.country?.[0]}
           inputValue={country}
-          validationError={errors.country?.[0]}
-          onChange={(e) => (
-            setErrors({
-              country: undefined,
-            }),
-            setCountry(e.target.value.toString())
-          )}
+          onChange={(e) => {
+            setErrors((prev) => ({ ...prev, country: undefined }));
+            setCountry(e.target.value);
+          }}
           rightElement={
             <EditButton
               fieldName="country"
@@ -281,7 +275,6 @@ const AccountForm = () => {
             <Button
               type="submit"
               disabled={!isBtnDisabled}
-              aria-disabled={!isBtnDisabled}
               className="w-full max-w-xs cursor-pointer dark:bg-blue-300 dark:hover:bg-blue-400 text-md font-semibold"
             >
               Update Account
@@ -291,7 +284,8 @@ const AccountForm = () => {
             Only editable fields can be updated
           </p>
         </div>
-      </Form>
+      </form>
+
       <Toaster position="bottom-right" expand={false} />
     </div>
   );

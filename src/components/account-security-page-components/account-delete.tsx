@@ -3,18 +3,14 @@
 import { debounce } from "lodash";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { useActionState, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import Form from "next/form";
-import { deleteUserAccount } from "@/app/actions/user-actions/deleteUserAccount";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useUserAccountDeletion } from "@/hooks/useUser";
 
 function AccountDelete() {
   const [isAccDelBtnDisabled, setIsAccBtnDisabled] = useState<boolean>(true);
   const [isChecked, setIsChecked] = useState<boolean>(false);
-  const router = useRouter();
 
   const debouncedCheck = useCallback(
     debounce((checked: boolean) => {
@@ -31,20 +27,12 @@ function AccountDelete() {
     };
   }, [isChecked, debouncedCheck]);
 
-  const [state, formAction, isPending] = useActionState(
-    deleteUserAccount,
-    null
-  );
 
-  useEffect(() => {
-    if (state && state.message) {
-      if (state.statusCode === 200) {
-        toast.success(state.message);
-      } else {
-        toast.error(state.message);
-      }
-    }
-  }, [state, router]);
+  const { isPending, mutate } = useUserAccountDeletion();
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    mutate();
+  }
 
   return (
     <div>
@@ -55,7 +43,7 @@ function AccountDelete() {
             Are you sure you want to permanently delete your account? This
             action cannot be undone.
           </p>
-          <Form action={formAction} className="">
+          <form onSubmit={handleSubmit} className="">
             <div className="flex flex-col leading-none gap-2 mb-4">
               <div className="flex items-center justify-start">
                 <Checkbox
@@ -88,7 +76,7 @@ function AccountDelete() {
                 Delete Account Permanently
               </Button>
             )}
-          </Form>
+          </form>
         </div>
         <Separator className="mt-5" />
         <p className="text-sm text-gray-500 text-center">

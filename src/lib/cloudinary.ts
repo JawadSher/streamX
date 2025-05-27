@@ -1,6 +1,4 @@
 import { v2 as cloudinary } from "cloudinary";
-import { actionResponse } from "./actions-templates/ActionResponse";
-import { actionError } from "./actions-templates/ActionError";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -11,11 +9,19 @@ cloudinary.config({
 
 export const uploadOnCloudinary = async (fileLocalPath: string) => {
   try {
-    if (!fileLocalPath) return actionError(400, "File is not found", null);
+    if (!fileLocalPath) return ({
+      statusCode: 400, 
+      message: "File is not found", 
+      body: null
+    });
 
     const validExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     if (!validExtensions.some((ext) => fileLocalPath.endsWith(ext))) {
-      return actionError(400, "Unsupported file type", null);
+      return ({
+      statusCode: 400, 
+      message: "Unsupported file type", 
+      body: null
+    });
     }
 
     const normalizedPath = fileLocalPath.replace(/\\/g, "/");
@@ -25,13 +31,17 @@ export const uploadOnCloudinary = async (fileLocalPath: string) => {
       transformation: [{ quality: "auto", fetch_format: "auto" }],
     });
 
-    return actionResponse(
-      200,
-      "File is uploaded on cloudinary successfully",
-      response
-    );
+    return ({
+      statusCode: 200, 
+      message: "File is uploaded on cloudinary successfully", 
+      body: response
+    });
   } catch (error: any) {
-    return actionError(400, error.message, null);
+    return ({
+      statusCode: 400, 
+      message: error.message, 
+      body: null
+    });
   }
 };
 
@@ -44,14 +54,22 @@ export const deletFromCloudinary = async (fileURL: string) => {
     const result = await cloudinary.uploader.destroy(publicId);
 
     if (result.result !== "ok")
-      return actionError(400, "Failed to delete image from cloudinary", null);
+      return ({
+      statusCode: 400, 
+      message: "Failed to delete image from cloudinary", 
+      body: null
+    });
 
-    return actionResponse(
-      200,
-      "Image deleted successfully from cloudinary",
-      null
-    );
+    return ({
+      statusCode: 200, 
+      message: "Image deleted successfully from cloudinary", 
+      body: null
+    });
   } catch (error: any) {
-    return actionError(400, error.message, null);
+    return ({
+      statusCode: 400, 
+      message: error.message, 
+      body: null
+    });
   }
 };

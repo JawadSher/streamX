@@ -2,8 +2,8 @@ import { ApiError } from "@/lib/api/ApiError";
 import { signupSchema } from "@/schemas/signupSchema";
 import { NextRequest, NextResponse } from "next/server";
 import { signupHelper } from "./signup-helper";
-import { ROUTES } from "@/lib/api/ApiRoutes";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
+import { ApiResponse } from "@/lib/api/ApiResponse";
 
 export interface IUserData {
   firstName?: string;
@@ -54,12 +54,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return ApiError(400, "Invalid email or password", null);
     }
 
-    return NextResponse.json({
-      success: true,
-      status: 200,
-      message: "Account Created Successfully",
-      redirectTo: ROUTES.PAGES_ROUTES.HOME
-    })
+    return ApiResponse(201, "Account Created Successfully", null);
   } catch (error: any) {
     console.log(error);
     return ApiError(500, "Signup failed due to unknown error", error);

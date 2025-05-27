@@ -24,7 +24,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     }
 
     const body = await request.json();
-    const passwd: string | undefined = body?.passwd;
+    const { password: passwd } = body?.data ?? {};
 
     if (!passwd?.trim()) {
       return ApiError(400, "Password is required", null);

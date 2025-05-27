@@ -84,7 +84,7 @@ const SecondSection = ({
     {
       icon: "Calendar",
       label: (
-        <span className="text-zinc-500 dark:text-zinc-300">
+        <span className="text-zinc-800 dark:text-zinc-300">
           Since joined •{" "}
           <span className="font-semibold">
             {createdAt ? new Date(createdAt).getFullYear() : "Unknown"}

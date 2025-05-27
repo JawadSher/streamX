@@ -10,6 +10,7 @@ import { useActionState, useCallback, useEffect, useState } from "react";
 import InputField from "../input-field";
 import { Button } from "../ui/button";
 import Form from "next/form";
+import { useUserAccountPasswdUpdate } from "@/hooks/useUser";
 
 function PasswordUpdate() {
   const [password, setPassword] = useState<string>("");
@@ -57,39 +58,28 @@ function PasswordUpdate() {
     };
   }, [password, confPasswd, debounceInputChange]);
 
-  async function handlePasswdSubmit(
-    state: ActionErrorType | ActionResponseType | null,
-    formData: FormData
-  ): Promise<ActionErrorType | ActionResponseType> {
+  const { mutate, isPending, status } = useUserAccountPasswdUpdate();
+  async function handlePasswdSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     const password = formData.get("password")?.toString();
-    const response = await updateUserPasswd({ passwd: password });
-    return response;
+    mutate({ password });
   }
 
-  const [state, formAction, isPending] = useActionState(
-    handlePasswdSubmit,
-    null
-  );
-
   useEffect(() => {
-    if (state && state.message) {
-      if (state.statusCode === 200) {
-        toast.success(state.message);
-        setPassword("");
-        setConfPasswd("");
-        setIsBtnDisabled(true);
-      } else {
-        toast.error(state.message);
-      }
+    if (status === "success") {
+      setPassword("");
+      setConfPasswd("");
+      setIsBtnDisabled(true);
     }
-  }, [state]);
+  }, [status]);
 
   return (
     <div>
       <h1 className="font-semibold text-2xl mb-3">Update Your Password</h1>
       <div className="border-1 rounded-2xl py-5 mb-4 overflow-clip">
-        <Form
-          action={formAction}
+        <form
+          onSubmit={handlePasswdSubmit}
           className="flex flex-col gap-2 items-center justify-center px-2"
         >
           <InputField
@@ -130,7 +120,7 @@ function PasswordUpdate() {
               Change Password
             </Button>
           )}
-        </Form>
+        </form>
       </div>
     </div>
   );

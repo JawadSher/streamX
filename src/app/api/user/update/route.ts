@@ -14,7 +14,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await request.json();
-    const { firstName, lastName, country, phoneNumber } = body;
+    const { firstName, lastName, country, phoneNumber } = body.data;
     const data = { firstName, lastName, country };
 
     const result = userUpdateSchema.safeParse(data);
