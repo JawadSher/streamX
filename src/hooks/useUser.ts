@@ -1,8 +1,8 @@
+import { GET_USER } from "@/graphql/queries/user";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { persistPurge } from "@/lib/persistPurge";
 import {
   checkUserName,
-  fetchUserData,
   logoutUser,
   signInUser,
   signUpUser,
@@ -13,20 +13,18 @@ import {
 } from "@/services/userServices";
 import { clearUser, updateUser } from "@/store/features/user/userSlice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import { useQuery as apolloUserQuery } from "@apollo/client";
+import { UserResponse } from "@/reseponseTypes/UserResponse";
 
-export const useFetchUserData = () => {
-  const { status } = useSession();
-  return useQuery({
-    queryKey: ["user"],
-    queryFn: fetchUserData,
-    enabled: status === "authenticated",
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-    refetchOnWindowFocus: false,
+export const useFetchUserData = (enabled: boolean) => {
+  return apolloUserQuery<UserResponse>(GET_USER, {
+    skip: !enabled,
+    errorPolicy: "all",
+    fetchPolicy: "cache-and-network",
+    notifyOnNetworkStatusChange: true
   });
 };
 

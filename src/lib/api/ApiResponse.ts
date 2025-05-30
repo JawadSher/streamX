@@ -1,13 +1,9 @@
-import { NextResponse } from "next/server";
-
-export function ApiResponse(statusCode: number = 200, message: string, data: any) {
-  return NextResponse.json(
-    {
-      message,
-      status: "success",
-      statusCode,
-      data,
-    },
-    { status: statusCode }
-  );
-}
+export const ApiResponse = <T>(params: {
+  statusCode?: number;
+  success?: boolean;
+  message: string;
+  data?: T;
+}) => {
+  const { statusCode = 200, success = true, message, data = null } = params;
+  return { statusCode, success, message, data };
+};

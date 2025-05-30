@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const token = await verifyAuth(request);
+    console.log(token);
     if (!token) {
       return ApiError(400, "Unauthorized request", null);
     }

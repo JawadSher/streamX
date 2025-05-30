@@ -7,6 +7,7 @@ import ClientRootLayout from "./clientRootLayout";
 import { Toaster } from "@/components/ui/sonner";
 import ProgressWrapper from "@/components/progress-bar/progress-bar-wrapper";
 import QueryProvider from "@/context/QueryProvider";
+import { ApoloProvider } from "@/context/ApolloProvider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -45,15 +46,15 @@ export default async function RootLayout({
           src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
           strategy="afterInteractive"
         />
-          <AuthProvider>
-            <ProgressWrapper />
-            <ClientRootLayout>
-        <QueryProvider>
-              {children}
-        </QueryProvider>
+        <AuthProvider>
+          <ProgressWrapper />
+          <ClientRootLayout>
+            <QueryProvider>
+              <ApoloProvider>{children}</ApoloProvider>
+            </QueryProvider>
           </ClientRootLayout>
-            <Toaster />
-          </AuthProvider>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

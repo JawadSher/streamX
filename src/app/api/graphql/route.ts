@@ -1,0 +1,16 @@
+import { startServerAndCreateNextHandler } from '@as-integrations/next';
+import { server } from "@/graphql/server";
+import { createContext } from "@/graphql/context";
+import { NextRequest } from 'next/server';
+
+const handler = startServerAndCreateNextHandler(server, {
+    context: async (req: NextRequest) => createContext(req),
+})
+
+export async function GET(request: NextRequest) {
+  return handler(request)
+}
+
+export async function POST(request: NextRequest) {
+  return handler(request)
+}

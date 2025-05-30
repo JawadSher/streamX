@@ -1,4 +1,3 @@
-import { IUserAsset } from "@/app/api/user/assets/route";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import axiosInstance from "@/lib/axios";
 
