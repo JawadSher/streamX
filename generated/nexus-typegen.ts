@@ -28,8 +28,9 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  Mutation: {};
   Query: {};
-  User: { // root type
+  UserData: { // root type
     _id?: string | null; // String
     accountStatus?: string | null; // String
     avatarURL?: string | null; // String
@@ -50,8 +51,24 @@ export interface NexusGenObjects {
     watchHistory?: Array<string | null> | null; // [String]
     watchLater?: Array<string | null> | null; // [String]
   }
+  UserLogoutResponse: { // root type
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
+  UserNameAvailabilityData: { // root type
+    available?: boolean | null; // Boolean
+    validationError?: string | null; // String
+  }
+  UserNameCheckResponse: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['UserNameAvailabilityData'] | null; // UserNameAvailabilityData
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
   UserResponse: { // root type
-    data?: NexusGenRootTypes['User'] | null; // User
+    data?: NexusGenRootTypes['UserData'] | null; // UserData
     message?: string | null; // String
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
@@ -69,10 +86,14 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
+  Mutation: { // field return type
+    logoutUser: NexusGenRootTypes['UserLogoutResponse'] | null; // UserLogoutResponse
+  }
   Query: { // field return type
+    checkUserName: NexusGenRootTypes['UserNameCheckResponse'] | null; // UserNameCheckResponse
     getUser: NexusGenRootTypes['UserResponse'] | null; // UserResponse
   }
-  User: { // field return type
+  UserData: { // field return type
     _id: string | null; // String
     accountStatus: string | null; // String
     avatarURL: string | null; // String
@@ -93,8 +114,24 @@ export interface NexusGenFieldTypes {
     watchHistory: Array<string | null> | null; // [String]
     watchLater: Array<string | null> | null; // [String]
   }
+  UserLogoutResponse: { // field return type
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
+  UserNameAvailabilityData: { // field return type
+    available: boolean | null; // Boolean
+    validationError: string | null; // String
+  }
+  UserNameCheckResponse: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['UserNameAvailabilityData'] | null; // UserNameAvailabilityData
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
   UserResponse: { // field return type
-    data: NexusGenRootTypes['User'] | null; // User
+    data: NexusGenRootTypes['UserData'] | null; // UserData
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
@@ -102,10 +139,14 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  Mutation: { // field return type name
+    logoutUser: 'UserLogoutResponse'
+  }
   Query: { // field return type name
+    checkUserName: 'UserNameCheckResponse'
     getUser: 'UserResponse'
   }
-  User: { // field return type name
+  UserData: { // field return type name
     _id: 'String'
     accountStatus: 'String'
     avatarURL: 'String'
@@ -126,8 +167,24 @@ export interface NexusGenFieldTypeNames {
     watchHistory: 'String'
     watchLater: 'String'
   }
+  UserLogoutResponse: { // field return type name
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
+  UserNameAvailabilityData: { // field return type name
+    available: 'Boolean'
+    validationError: 'String'
+  }
+  UserNameCheckResponse: { // field return type name
+    code: 'String'
+    data: 'UserNameAvailabilityData'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
   UserResponse: { // field return type name
-    data: 'User'
+    data: 'UserData'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
@@ -135,6 +192,12 @@ export interface NexusGenFieldTypeNames {
 }
 
 export interface NexusGenArgTypes {
+  Query: {
+    checkUserName: { // args
+      isAuthentic?: boolean | null; // Boolean
+      userName?: string | null; // String
+    }
+  }
 }
 
 export interface NexusGenAbstractTypeMembers {

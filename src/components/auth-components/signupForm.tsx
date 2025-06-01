@@ -87,7 +87,7 @@ export function SignupForm({
 
   useEffect(() => {
     if (!state) return;
-    
+
     if (state.status === 200 || state.data.statusCode === 201) {
       setErrors(null);
       setFirstName("");
@@ -118,54 +118,36 @@ export function SignupForm({
     }
   }, [state, router]);
 
-  const mutation = useCheckUserName();
+  const [checkUserName] = useCheckUserName();
   const debouncedCheck = useCallback(
     debounce(async (value: string) => {
       if (value) {
-        mutation.mutate(
-          { userName: value, isAuthentic: true },
-          {
-            onSuccess: (data) => {
-              const res = data?.data;
-              const code = res?.statusCode;
+        checkUserName({
+          variables: { userName: value, isAuthentic: true },
+          fetchPolicy: 'no-cache',
+          onCompleted: (res) => {
+            const code = res?.checkUserName?.statusCode;
+            const message = res?.checkUserName?.message;
+            const isAvailable = res?.checkUserName?.data?.available;
 
-              if ([422, 400, 500].includes(code)) {
-                toast.error(res.message);
-                setErrors((prev) => ({ ...prev, userName: "" }));
-                setUsernameAvailable("");
-              } else if (code === 409) {
-                setErrors((prev) => ({ ...prev, userName: res.message }));
-                setUsernameAvailable("");
-              } else {
-                setErrors((prev) => ({ ...prev, userName: "" }));
-                setUsernameAvailable(res.message);
-              }
-            },
-            onError: (error: any) => {
-              const status = error?.response?.data?.statusCode;
-              const message =
-                error?.response?.data?.message || "Something went wrong";
-
-              if (status === 422 || status === 400 || status === 500) {
-                setErrors((prev) => ({
-                  ...prev,
-                  userName: error?.response?.data?.data.validationError,
-                }));
-                setUsernameAvailable("");
-              } else if (status === 409) {
-                setErrors((prev) => ({
-                  ...prev,
-                  userName: error.response.data.message,
-                }));
-                setUsernameAvailable("");
-              } else {
-                toast.error(message);
-                setErrors((prev) => ({ ...prev, userName: "" }));
-                setUsernameAvailable("");
-              }
-            },
-          }
-        );
+            if ([422, 400, 500].includes(code)) {
+              setErrors((prev) => ({ ...prev, userName: res.checkUserName.data?.validationError }));
+              setUsernameAvailable("");
+            } else if (code === 409 || isAvailable === false) {
+              setErrors((prev) => ({ ...prev, userName: message }));
+              setUsernameAvailable("");
+            } else if (code === 200 && isAvailable === true) {
+              setErrors((prev) => ({ ...prev, userName: "" }));
+              setUsernameAvailable(message);
+            }
+          },
+          onError: (err) => {
+            toast.error("Something went wrong", {
+              description: err.message,
+              duration: 3000,
+            });
+          },
+        });
       }
     }, 1000),
     []
@@ -314,7 +296,7 @@ export function SignupForm({
               !password ||
               !confirmPasswd ||
               !!errors?.userName ||
-              confirmPasswd !== password 
+              confirmPasswd !== password
             }
           >
             {isPending ? <Loader2 className="animate-spin ml-2" /> : "Sign up"}

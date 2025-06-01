@@ -29,8 +29,8 @@ export default function Home() {
     networkStatus === NetworkStatus.refetch
   ) {
     return (
-      <div className="flex flex-col w-full h-full rounded-md bg-gray-600 relative items-center overflow-auto custom-scroll-bar mb-2">
-        <Loader2 size={24} className="animate-spin text-white" />
+      <div className="flex w-full h-full rounded-md bg-gray-600 relative items-center justify-center overflow-auto custom-scroll-bar mb-2">
+        <Loader2 size={34} className="animate-spin text-white absolute top-60" />
       </div>
     );
   }

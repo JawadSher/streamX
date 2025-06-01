@@ -50,7 +50,7 @@ export default function SidebarBottom({
         fullName,
         email: userData.email || null,
         avatar: userData.avatarURL || imagePaths.defaultUserLogo,
-        isVerified: userData.isVerified,
+        isVerified: userData?.isVerified,
       }}
     />
   );

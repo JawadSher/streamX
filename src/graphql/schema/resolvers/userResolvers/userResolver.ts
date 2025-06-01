@@ -1,15 +1,15 @@
-import { queryType } from "nexus";
+import { extendType, queryType } from "nexus";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
-import { UserResponse } from "@/graphql/responseSchema";
 import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 
-export const UserQuery = queryType({
+export const UserQuery = extendType({
+  type: "Query",
   definition(t) {
     t.field("getUser", {
-      type: UserResponse,
+      type: "UserResponse",
       resolve: async (_parnt, _args, ctx) => {
         try {
           const { user: authUser } = ctx;

@@ -6,6 +6,7 @@ export const GET_USER = gql`
       statusCode
       success
       message
+      code
       data {
         _id
         firstName

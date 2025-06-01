@@ -1,10 +1,13 @@
 import { makeSchema } from "nexus";
 import { join } from "path";
 import * as types from "@/graphql/schema/types";
-import * as resolvers from "@/graphql/schema/resolvers";
+import * as resolvers from "./resolvers";
 
 export const schema = makeSchema({
-  types: [types, resolvers],
+   types: [
+    ...Object.values(types),
+    ...Object.values(resolvers),
+  ],
 
   outputs: {
     schema: join(process.cwd(), "generated", "schema.graphql"),

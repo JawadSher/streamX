@@ -2,11 +2,16 @@
 ### Do not make changes to this file directly
 
 
+type Mutation {
+  logoutUser: UserLogoutResponse
+}
+
 type Query {
+  checkUserName(isAuthentic: Boolean, userName: String): UserNameCheckResponse
   getUser: UserResponse
 }
 
-type User {
+type UserData {
   _id: String
   accountStatus: String
   avatarURL: String
@@ -28,8 +33,27 @@ type User {
   watchLater: [String]
 }
 
+type UserLogoutResponse {
+  message: String
+  statusCode: Int
+  success: Boolean
+}
+
+type UserNameAvailabilityData {
+  available: Boolean
+  validationError: String
+}
+
+type UserNameCheckResponse {
+  code: String
+  data: UserNameAvailabilityData
+  message: String
+  statusCode: Int
+  success: Boolean
+}
+
 type UserResponse {
-  data: User
+  data: UserData
   message: String
   statusCode: Int
   success: Boolean

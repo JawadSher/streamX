@@ -40,27 +40,18 @@ interface INavUserProps {
 
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
-  const { mutate, isError, error, isPending, data } =
+  const [logoutUser, { loading }] =
     useLogoutUser();
   
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    mutate();
+    logoutUser();
   };
-
-  useEffect(() => {
-    if (isError && error) {
-      toast.error(error.message, {
-        duration: 3000,
-      });
-    }
-
-  }, [isError, error]);
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        {isPending ? (
+        {loading ? (
           <Loader2 size={24} className="animate-spin mx-auto" />
         ) : (
           <DropdownMenu>

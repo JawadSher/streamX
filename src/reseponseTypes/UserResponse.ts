@@ -1,4 +1,4 @@
-import { User } from "../types";
+import { IRedisDBUser as User } from "../interfaces/IRedisDBUser";
 
 export interface UserResponse {
   getUser: {

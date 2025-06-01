@@ -2,8 +2,6 @@ import { GET_USER } from "@/graphql/queries/user";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { persistPurge } from "@/lib/persistPurge";
 import {
-  checkUserName,
-  logoutUser,
   signInUser,
   signUpUser,
   userAccountDeletion,
@@ -12,61 +10,62 @@ import {
   userAssetsUpdate,
 } from "@/services/userServices";
 import { clearUser, updateUser } from "@/store/features/user/userSlice";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { useQuery as apolloUserQuery } from "@apollo/client";
+import {
+  useQuery as apolloUserQuery,
+  useLazyQuery,
+  useMutation as apolloMutation,
+} from "@apollo/client";
 import { UserResponse } from "@/reseponseTypes/UserResponse";
+import { CHECK_USER_NAME } from "@/graphql/queries/checkUserName";
+import { LOGOUT_USER } from "@/graphql/mutations/userLogout";
+import { LogoutUserResponse } from "@/reseponseTypes/LogoutUserResponse";
+import { UserNameResponse } from "@/reseponseTypes/UserNameCheckResponse";
 
 export const useFetchUserData = (enabled: boolean) => {
   return apolloUserQuery<UserResponse>(GET_USER, {
     skip: !enabled,
     errorPolicy: "all",
     fetchPolicy: "cache-and-network",
-    notifyOnNetworkStatusChange: true
+    notifyOnNetworkStatusChange: true,
   });
 };
 
 export const useCheckUserName = () => {
-  return useMutation({
-    mutationKey: ["checkUserName"],
-    mutationFn: checkUserName,
-  });
+  return useLazyQuery<UserNameResponse>(CHECK_USER_NAME);
 };
 
 export const useLogoutUser = () => {
-  const dispatch = useDispatch();
   const router = useRouter();
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationKey: ["userLogout"],
-    mutationFn: logoutUser,
-    onSuccess: (data) => {
-      console.log("statement executed");
-      queryClient.removeQueries({
-        queryKey: ["user"],
-      });
-
-      dispatch(clearUser());
-      async function purge() {
-        await persistPurge();
-      }
-      purge();
+  return apolloMutation<LogoutUserResponse>(LOGOUT_USER, {
+    onCompleted: async (res) => {
       router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
-      const message = data?.data?.message || "Logout Successfull";
-      toast.success(message);
+      await persistPurge();
+      toast.success(res.logoutUser.message, {
+        duration: 3000,
+      });
+    },
+    onError: (err) => {
+      toast.error(err.message, {
+        duration: 3000,
+      });
     },
   });
 };
 
 export const useSignInUser = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   return useMutation({
     mutationKey: ["userSignIn"],
     mutationFn: signInUser,
     onSuccess: (data) => {
+      dispatch(clearUser());
+
       toast.success(data.data.message, {
         duration: 3000,
       });

@@ -13,7 +13,7 @@ export interface IRedisDBUser{
     bio?: string | null;
     country?: string | null;
     accountStatus?: string | null;
-    isVerified?: boolean | null | string;
+    isVerified?: boolean | null;
     avatarURL?: string | null;
     bannerURL?: string | null;
     phoneNumber?: string | null;
