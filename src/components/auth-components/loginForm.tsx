@@ -15,7 +15,6 @@ import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin.action
 import { toast, Toaster } from "sonner";
 import { debounce } from "lodash";
 import { useSignInUser } from "@/hooks/useUser";
-import { ROUTES } from "@/lib/api/ApiRoutes";
 
 export function LoginForm({
   className,
@@ -26,38 +25,34 @@ export function LoginForm({
     password?: string;
   } | null>(null);
 
-  const { data, mutate, isError, error, isPending } = useSignInUser();
+  const [loginUser, { data, loading, error }] = useSignInUser();
 
   const router = useRouter();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (data?.status === 400) {
-      toast.error(data.data.message);
-      setErrors({
-        email: data?.data?.email?.[0] ?? "",
-        password: data?.data?.password?.[0] ?? "",
+    if (data?.loginUser.statusCode === 400) {
+      toast.error(data?.loginUser.message, {
+        duration: 3000,
       });
-    } else if (data?.status === 401 || data?.status === 500) {
+      setErrors({
+        email: data?.loginUser?.email?.[0] ?? "",
+        password: data?.loginUser?.password?.[0] ?? "",
+      });
+    } else if (
+      data?.loginUser.statusCode === 401 ||
+      data?.loginUser?.statusCode === 500
+    ) {
       setErrors({
         email: "",
         password: "",
       });
-      toast.error(data.data.message, {
+      toast.error(data?.loginUser.message, {
         duration: 3000,
       });
-    } else if (data?.data.statusCode === 301) {
-      setErrors({
-        email: "",
-        password: "",
-      });
-      toast.success(data.data.message, {
-        duration: 3000,
-      });
-      router.push(ROUTES.PAGES_ROUTES.HOME);
     }
-  }, [data, error, isError, data, router]);
+  }, [data, error, data, router]);
 
   const debouncedValidate = useCallback(
     debounce(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +100,12 @@ export function LoginForm({
       return;
     }
 
-    mutate(result.data as { email: string; password: string });
+    loginUser({
+      variables: {
+        email: result.data.email,
+        password: result.data.password,
+      },
+    });
   };
 
   return (
@@ -167,13 +167,13 @@ export function LoginForm({
               type="submit"
               className="w-full cursor-pointer"
               disabled={
-                isPending ||
+                loading ||
                 !!errors ||
                 !emailRef.current?.value ||
                 !passwordRef.current?.value
               }
             >
-              {isPending ? (
+              {loading ? (
                 <Loader2 className="animate-spin" size={24} />
               ) : (
                 "Login"

@@ -21,9 +21,10 @@ import {
 } from "@apollo/client";
 import { UserResponse } from "@/reseponseTypes/UserResponse";
 import { CHECK_USER_NAME } from "@/graphql/queries/checkUserName";
-import { LOGOUT_USER } from "@/graphql/mutations/userLogout";
+import { LOGOUT_USER } from "@/graphql/mutations/auth/userLogout";
 import { LogoutUserResponse } from "@/reseponseTypes/LogoutUserResponse";
 import { UserNameResponse } from "@/reseponseTypes/UserNameCheckResponse";
+import { LOGIN_USER } from "@/graphql/mutations/auth/userLogin";
 
 export const useFetchUserData = (enabled: boolean) => {
   return apolloUserQuery<UserResponse>(GET_USER, {
@@ -48,7 +49,7 @@ export const useLogoutUser = () => {
         duration: 3000,
       });
     },
-    onError: (err) => {
+    onError: (err: any) => {
       toast.error(err.message, {
         duration: 3000,
       });
@@ -58,15 +59,15 @@ export const useLogoutUser = () => {
 
 export const useSignInUser = () => {
   const router = useRouter();
-  const dispatch = useDispatch();
-
-  return useMutation({
-    mutationKey: ["userSignIn"],
-    mutationFn: signInUser,
-    onSuccess: (data) => {
-      dispatch(clearUser());
-
-      toast.success(data.data.message, {
+  return apolloMutation(LOGIN_USER, {
+    onCompleted: (res) => {
+      if (!res.loginUser.success) {
+        toast.error(res.loginUser.message, {
+          duration: 3000,
+        });
+        return;
+      }
+      toast.success(res.loginUser.message, {
         duration: 3000,
       });
       setTimeout(() => {
@@ -74,8 +75,10 @@ export const useSignInUser = () => {
       }, 1500);
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message || "Something went wrong";
-      toast.error(message);
+      const message = error.message || "Something went wrong";
+      toast.error(message, {
+        duration: 3000,
+      });
     },
   });
 };

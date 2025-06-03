@@ -20,42 +20,13 @@ export async function initAuthConfigs() {
           password: { label: "Password", type: "password" },
         },
         authorize: async (credentials) => {
-          if (!credentials?.email || !credentials?.password) return null;
-          const userData = {
-            email: credentials.email,
-            password: credentials.password,
+          const email = credentials?.email as string;
+          const userInfo = await fetchUserFromMongoDB({ email });
+          await storeUserInRedis(userInfo as IRedisDBUser);
+
+          return {
+            _id: userInfo._id.toString(),
           };
-
-          try {
-            const { email, password } = await loginSchema.parseAsync(userData);
-
-            await connectDB();
-            const existingUser = await UserModel.findOne({ email });
-
-            if (!existingUser) {
-              throw new Error("Invalid email or password");
-            }
-
-            const isPasswdCorrect = await existingUser.isPasswordCorrect(
-              password
-            );
-
-            if (!isPasswdCorrect) {
-              throw new Error("Invalid email or password");
-            }
-            
-            const userInfo = await fetchUserFromMongoDB({ email });
-            await storeUserInRedis(userInfo);
-
-            const user =  {
-              _id: existingUser._id.toString(),
-            };
-
-            return user;
-          } catch (error) {
-            console.error("Authorization error: ", error);
-            return null;
-          }
         },
       }),
       GoogleProvider({
@@ -90,7 +61,7 @@ export async function initAuthConfigs() {
             const newUserData = {
               firstName: profile?.given_name || "",
               lastName: profile?.family_name || "",
-              userName: "@"+user.email?.split("@")[0].replace(".", ""),
+              userName: "@" + user.email?.split("@")[0].replace(".", ""),
               email: user.email,
               channelName: `${user.email?.split("@")[0]}-Channel`,
               isVerified: true,
@@ -101,46 +72,31 @@ export async function initAuthConfigs() {
             };
 
             try {
-              await notifyKakfa({userData: newUserData, action: "sign-up"});
+              await notifyKakfa({ userData: newUserData, action: "sign-up" });
               await new Promise((resolve) => setTimeout(resolve, 1500));
-
-              const newUser = await fetchUserFromMongoDB({
-                email: newUserData.email,
-              });
-
-              if (!newUser) {
-                throw new Error(
-                  "User creation via Kafka appears to have failed"
-                );
-              }
-
-              await storeUserInRedis(newUser);
-              user._id = newUser._id.toString();
-              return true;
             } catch (kafkaError) {
-              console.error(
-                "Error with Kafka flow, falling back to direct DB creation:",
+              console.warn(
+                "Kafka failed, falling back to DB flow:",
                 kafkaError
               );
-              try {
-                await connectDB();
-                const newUser = new UserModel(newUserData);
-                await newUser.save();
-
-                const userInfo = await fetchUserFromMongoDB({
-                  userId: newUser._id,
-                });
-                
-                await storeUserInRedis(userInfo as IRedisDBUser);
-                user._id = newUser._id.toString();
-                return true;
-              } catch (dbError) {
-                console.error("Direct DB user creation failed:", dbError);
-                return false;
-              }
             }
-          } catch (overallError) {
-            console.error("Overall Google auth error:", overallError);
+
+            let newUser = await fetchUserFromMongoDB({
+              email: newUserData.email,
+            });
+
+            if (!newUser) {
+              newUser = new UserModel({
+                ...newUserData,
+              });
+              await newUser.save();
+            }
+
+            await storeUserInRedis(newUser);
+            user._id = newUser._id.toString();
+            return true;
+          } catch (error) {
+            console.error("Overall Google auth error:", error);
             return false;
           }
         }
@@ -153,7 +109,7 @@ export async function initAuthConfigs() {
         }
         return token;
       },
-      
+
       async session({ session, token }: { session: Session; token: JWT }) {
         if (token) {
           session.user = {

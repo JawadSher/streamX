@@ -3,6 +3,7 @@
 
 
 type Mutation {
+  loginUser(email: String!, password: String!): UserLoginResponse
   logoutUser: UserLogoutResponse
 }
 
@@ -31,6 +32,13 @@ type UserData {
   userName: String
   watchHistory: [String]
   watchLater: [String]
+}
+
+type UserLoginResponse {
+  code: String
+  message: String
+  statusCode: Int
+  success: Boolean
 }
 
 type UserLogoutResponse {

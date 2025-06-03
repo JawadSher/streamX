@@ -1,3 +1,5 @@
+import { GraphQLError } from "graphql";
+
 export const ApiError = ({
   statusCode = 400,
   success = false,
@@ -10,18 +12,12 @@ export const ApiError = ({
   success?: boolean;
   data?: any;
   code?: string;
-}): {
-  statusCode: number;
-  success: boolean;
-  code: string;
-  message: string;
-  data: any;
-} => {
+}) => {
   return {
     statusCode,
     success,
-    code,
     message,
+    code,
     data,
   };
 };

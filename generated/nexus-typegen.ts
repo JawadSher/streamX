@@ -51,6 +51,12 @@ export interface NexusGenObjects {
     watchHistory?: Array<string | null> | null; // [String]
     watchLater?: Array<string | null> | null; // [String]
   }
+  UserLoginResponse: { // root type
+    code?: string | null; // String
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
   UserLogoutResponse: { // root type
     message?: string | null; // String
     statusCode?: number | null; // Int
@@ -87,6 +93,7 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
   Mutation: { // field return type
+    loginUser: NexusGenRootTypes['UserLoginResponse'] | null; // UserLoginResponse
     logoutUser: NexusGenRootTypes['UserLogoutResponse'] | null; // UserLogoutResponse
   }
   Query: { // field return type
@@ -114,6 +121,12 @@ export interface NexusGenFieldTypes {
     watchHistory: Array<string | null> | null; // [String]
     watchLater: Array<string | null> | null; // [String]
   }
+  UserLoginResponse: { // field return type
+    code: string | null; // String
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
   UserLogoutResponse: { // field return type
     message: string | null; // String
     statusCode: number | null; // Int
@@ -140,6 +153,7 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
+    loginUser: 'UserLoginResponse'
     logoutUser: 'UserLogoutResponse'
   }
   Query: { // field return type name
@@ -167,6 +181,12 @@ export interface NexusGenFieldTypeNames {
     watchHistory: 'String'
     watchLater: 'String'
   }
+  UserLoginResponse: { // field return type name
+    code: 'String'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
   UserLogoutResponse: { // field return type name
     message: 'String'
     statusCode: 'Int'
@@ -192,6 +212,12 @@ export interface NexusGenFieldTypeNames {
 }
 
 export interface NexusGenArgTypes {
+  Mutation: {
+    loginUser: { // args
+      email: string; // String!
+      password: string; // String!
+    }
+  }
   Query: {
     checkUserName: { // args
       isAuthentic?: boolean | null; // Boolean
