@@ -56,7 +56,7 @@ Webpack, Babel, ESLint, Prettier
 System design is the process of defining the architecture, components, modules, interfaces, and data flow of a system to meet specified requirements. It focuses on planning how different parts of a software or hardware system interact and work together efficiently, reliably, and at scale.
 
 ### System Design (1)
-![system-design-1](https://github.com/user-attachments/assets/1afe1d62-6f5f-42cf-8ab1-9fec6622c1b1)
+![system-design-1](https://github.com/user-attachments/assets/1b3b7fb4-646e-4774-97b5-70fef48e5fd8)
 
 
 ## 📬 Contact
