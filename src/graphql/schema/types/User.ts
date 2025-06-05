@@ -6,6 +6,7 @@ export const User = objectType({
     t.int("statusCode");
     t.boolean("success");
     t.string("message");
+    t.string("code");
     t.field("data", {
       type: objectType({
         name: "UserData",

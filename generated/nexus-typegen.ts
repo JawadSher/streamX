@@ -58,6 +58,8 @@ export interface NexusGenObjects {
     success?: boolean | null; // Boolean
   }
   UserLogoutResponse: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['data'] | null; // data
     message?: string | null; // String
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
@@ -74,10 +76,25 @@ export interface NexusGenObjects {
     success?: boolean | null; // Boolean
   }
   UserResponse: { // root type
+    code?: string | null; // String
     data?: NexusGenRootTypes['UserData'] | null; // UserData
     message?: string | null; // String
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
+  }
+  UserSignupResponse: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['resDat'] | null; // resDat
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
+  data: { // root type
+    error?: string | null; // String
+    null?: string | null; // String
+  }
+  resDat: { // root type
+    error?: string | null; // String
   }
 }
 
@@ -95,6 +112,7 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     loginUser: NexusGenRootTypes['UserLoginResponse'] | null; // UserLoginResponse
     logoutUser: NexusGenRootTypes['UserLogoutResponse'] | null; // UserLogoutResponse
+    signUpUser: NexusGenRootTypes['UserSignupResponse'] | null; // UserSignupResponse
   }
   Query: { // field return type
     checkUserName: NexusGenRootTypes['UserNameCheckResponse'] | null; // UserNameCheckResponse
@@ -128,6 +146,8 @@ export interface NexusGenFieldTypes {
     success: boolean | null; // Boolean
   }
   UserLogoutResponse: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['data'] | null; // data
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
@@ -144,10 +164,25 @@ export interface NexusGenFieldTypes {
     success: boolean | null; // Boolean
   }
   UserResponse: { // field return type
+    code: string | null; // String
     data: NexusGenRootTypes['UserData'] | null; // UserData
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
+  }
+  UserSignupResponse: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['resDat'] | null; // resDat
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
+  data: { // field return type
+    error: string | null; // String
+    null: string | null; // String
+  }
+  resDat: { // field return type
+    error: string | null; // String
   }
 }
 
@@ -155,6 +190,7 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     loginUser: 'UserLoginResponse'
     logoutUser: 'UserLogoutResponse'
+    signUpUser: 'UserSignupResponse'
   }
   Query: { // field return type name
     checkUserName: 'UserNameCheckResponse'
@@ -188,6 +224,8 @@ export interface NexusGenFieldTypeNames {
     success: 'Boolean'
   }
   UserLogoutResponse: { // field return type name
+    code: 'String'
+    data: 'data'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
@@ -204,10 +242,25 @@ export interface NexusGenFieldTypeNames {
     success: 'Boolean'
   }
   UserResponse: { // field return type name
+    code: 'String'
     data: 'UserData'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
+  }
+  UserSignupResponse: { // field return type name
+    code: 'String'
+    data: 'resDat'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
+  data: { // field return type name
+    error: 'String'
+    null: 'String'
+  }
+  resDat: { // field return type name
+    error: 'String'
   }
 }
 
@@ -216,6 +269,13 @@ export interface NexusGenArgTypes {
     loginUser: { // args
       email: string; // String!
       password: string; // String!
+    }
+    signUpUser: { // args
+      email: string; // String!
+      firstName: string; // String!
+      lastName: string; // String!
+      password: string; // String!
+      userName: string; // String!
     }
   }
   Query: {

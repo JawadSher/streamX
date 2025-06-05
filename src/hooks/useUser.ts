@@ -2,8 +2,6 @@ import { GET_USER } from "@/graphql/queries/user";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { persistPurge } from "@/lib/persistPurge";
 import {
-  signInUser,
-  signUpUser,
   userAccountDeletion,
   userAccountPasswdUpdate,
   userAccountUpdate,
@@ -25,6 +23,7 @@ import { LOGOUT_USER } from "@/graphql/mutations/auth/userLogout";
 import { LogoutUserResponse } from "@/reseponseTypes/LogoutUserResponse";
 import { UserNameResponse } from "@/reseponseTypes/UserNameCheckResponse";
 import { LOGIN_USER } from "@/graphql/mutations/auth/userLogin";
+import { SIGNUP_USER } from "@/graphql/mutations/auth/userSignup";
 
 export const useFetchUserData = (enabled: boolean) => {
   return apolloUserQuery<UserResponse>(GET_USER, {
@@ -86,11 +85,16 @@ export const useSignInUser = () => {
 export const useSignUpUser = () => {
   const router = useRouter();
 
-  return useMutation({
-    mutationKey: ["userSignUp"],
-    mutationFn: signUpUser,
-    onSuccess: (data) => {
-      toast.success(data.data.message, {
+  return apolloMutation(SIGNUP_USER, {
+    onCompleted: (res) => {
+      console.log(res);
+      if (!res.signUpUser.success) {
+        toast.error(res.signUpUser.message, {
+          duration: 3000,
+        });
+        return;
+      }
+      toast.success(res.signUpUser.message, {
         duration: 3000,
       });
       setTimeout(() => {
@@ -98,6 +102,7 @@ export const useSignUpUser = () => {
       }, 1500);
     },
     onError: (error: any) => {
+      console.log(error);
       const message = error?.response?.data?.message || "Something went wrong";
       toast.error(message);
     },

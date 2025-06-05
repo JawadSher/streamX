@@ -5,6 +5,7 @@
 type Mutation {
   loginUser(email: String!, password: String!): UserLoginResponse
   logoutUser: UserLogoutResponse
+  signUpUser(email: String!, firstName: String!, lastName: String!, password: String!, userName: String!): UserSignupResponse
 }
 
 type Query {
@@ -42,6 +43,8 @@ type UserLoginResponse {
 }
 
 type UserLogoutResponse {
+  code: String
+  data: data
   message: String
   statusCode: Int
   success: Boolean
@@ -61,8 +64,26 @@ type UserNameCheckResponse {
 }
 
 type UserResponse {
+  code: String
   data: UserData
   message: String
   statusCode: Int
   success: Boolean
+}
+
+type UserSignupResponse {
+  code: String
+  data: resDat
+  message: String
+  statusCode: Int
+  success: Boolean
+}
+
+type data {
+  error: String
+  null: String
+}
+
+type resDat {
+  error: String
 }

@@ -35,10 +35,7 @@ export function SignupForm({
   const [confirmPasswd, setConfirmPasswd] = useState("");
   const [userName, setUserName] = useState<string>("");
   const [userNameAvailable, setUsernameAvailable] = useState("");
-  const router = useRouter();
-
-  const { mutate, isPending, data: state } = useSignUpUser();
-
+  const [signUp, { loading }] = useSignUpUser();
   const handleSubmit = async (formData: FormData) => {
     const data = {
       firstName: formData.get("firstName"),
@@ -76,47 +73,49 @@ export function SignupForm({
       return;
     }
 
-    mutate({
-      firstName,
-      lastName,
-      email,
-      userName,
-      password,
+    signUp({
+      variables: {
+        firstName,
+        lastName,
+        email,
+        userName,
+        password,
+      },
     });
   };
 
-  useEffect(() => {
-    if (!state) return;
+  // useEffect(() => {
+  //   if (!state) return;
 
-    if (state.status === 200 || state.data.statusCode === 201) {
-      setErrors(null);
-      setFirstName("");
-      setLastName("");
-      setUserName("");
-      setEmail("");
-      setPassword("");
-      setConfirmPasswd("");
-      setUsernameAvailable("");
-    } else if (state.status === 400 && state.data?.fieldErrors) {
-      const fieldErrors = state.data.fieldErrors;
-      setErrors({
-        firstName: fieldErrors.firstName?.[0],
-        lastName: fieldErrors.lastName?.[0],
-        userName: fieldErrors.userName?.[0],
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
-      });
-      toast.error("Signup failed", {
-        description: state.data.message,
-        duration: 3000,
-      });
-    } else {
-      toast.error("Signup failed", {
-        description: state.data.message,
-        duration: 3000,
-      });
-    }
-  }, [state, router]);
+  //   if (state.status === 200 || state.data.statusCode === 201) {
+  //     setErrors(null);
+  //     setFirstName("");
+  //     setLastName("");
+  //     setUserName("");
+  //     setEmail("");
+  //     setPassword("");
+  //     setConfirmPasswd("");
+  //     setUsernameAvailable("");
+  //   } else if (state.status === 400 && state.data?.fieldErrors) {
+  //     const fieldErrors = state.data.fieldErrors;
+  //     setErrors({
+  //       firstName: fieldErrors.firstName?.[0],
+  //       lastName: fieldErrors.lastName?.[0],
+  //       userName: fieldErrors.userName?.[0],
+  //       email: fieldErrors.email?.[0],
+  //       password: fieldErrors.password?.[0],
+  //     });
+  //     toast.error("Signup failed", {
+  //       description: state.data.message,
+  //       duration: 3000,
+  //     });
+  //   } else {
+  //     toast.error("Signup failed", {
+  //       description: state.data.message,
+  //       duration: 3000,
+  //     });
+  //   }
+  // }, [state, router]);
 
   const [checkUserName] = useCheckUserName();
   const debouncedCheck = useCallback(
@@ -124,14 +123,17 @@ export function SignupForm({
       if (value) {
         checkUserName({
           variables: { userName: value, isAuthentic: true },
-          fetchPolicy: 'no-cache',
+          fetchPolicy: "no-cache",
           onCompleted: (res) => {
             const code = res?.checkUserName?.statusCode;
             const message = res?.checkUserName?.message;
             const isAvailable = res?.checkUserName?.data?.available;
 
             if ([422, 400, 500].includes(code)) {
-              setErrors((prev) => ({ ...prev, userName: res.checkUserName.data?.validationError }));
+              setErrors((prev) => ({
+                ...prev,
+                userName: res.checkUserName.data?.validationError,
+              }));
               setUsernameAvailable("");
             } else if (code === 409 || isAvailable === false) {
               setErrors((prev) => ({ ...prev, userName: message }));
@@ -288,7 +290,7 @@ export function SignupForm({
             type="submit"
             className="w-full cursor-pointer"
             disabled={
-              isPending ||
+              loading ||
               !firstName ||
               !lastName ||
               !userName ||
@@ -299,7 +301,7 @@ export function SignupForm({
               confirmPasswd !== password
             }
           >
-            {isPending ? <Loader2 className="animate-spin ml-2" /> : "Sign up"}
+            {loading ? <Loader2 className="animate-spin ml-2" /> : "Sign up"}
           </Button>
         </div>
       </form>

@@ -182,7 +182,6 @@ userSchema.pre("save", async function (this: IUser, next) {
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
   try {
-    console.log("Comparing password:", password, "with hash:", this.password);
     return await bcrypt.compare(password, this.password);
   } catch (error) {
     console.log("Error comparing password: ", error);

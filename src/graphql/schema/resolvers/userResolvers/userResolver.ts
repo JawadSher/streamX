@@ -1,4 +1,4 @@
-import { extendType, queryType } from "nexus";
+import { extendType } from "nexus";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";

@@ -6,6 +6,16 @@ export const UserLogout = objectType({
     t.int("statusCode");
     t.string("message");
     t.boolean("success");
+    t.string("code");
+    t.field("data", {
+      type: objectType({
+        name: "data",
+        definition(t){
+          t.string("error"),
+          t.string("null")
+        }
+      })
+    })
   },
 });
 
@@ -16,5 +26,23 @@ export const UserLogin = objectType({
     t.string("message");
     t.boolean("success");
     t.string("code");
+  },
+});
+
+export const UserSignUp = objectType({
+  name: "UserSignupResponse",
+  definition(t) {
+    t.int("statusCode");
+    t.string("message");
+    t.boolean("success");
+    t.string("code");
+    t.field("data", {
+      type: objectType({
+        name: "resDat",
+        definition(t) {
+          t.string("error");
+        },
+      }),
+    });
   },
 });

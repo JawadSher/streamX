@@ -7,7 +7,10 @@ export const LOGOUT_USER = gql`
       message
       success
       code
-      data
+      data{
+        error,
+        null
+      }
     }
   }
 `;
