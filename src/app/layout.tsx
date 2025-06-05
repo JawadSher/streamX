@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import ProgressWrapper from "@/components/progress-bar/progress-bar-wrapper";
 import QueryProvider from "@/context/QueryProvider";
 import { ApoloProvider } from "@/context/ApolloProvider";
+import { UserProvider } from "@/context/UserProvider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -50,7 +51,10 @@ export default async function RootLayout({
           <ProgressWrapper />
           <ClientRootLayout>
             <QueryProvider>
-              <ApoloProvider>{children}</ApoloProvider>
+              <ApoloProvider>
+                <UserProvider />
+                {children}
+              </ApoloProvider>
             </QueryProvider>
           </ClientRootLayout>
           <Toaster />
