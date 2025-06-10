@@ -30,6 +30,17 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
   Mutation: {};
   Query: {};
+  UserAccountData: { // root type
+    error?: string | null; // String
+    null?: string | null; // String
+  }
+  UserAccountDeleteResponse: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['UserAccountData'] | null; // UserAccountData
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
   UserData: { // root type
     _id?: string | null; // String
     accountStatus?: string | null; // String
@@ -113,10 +124,22 @@ export interface NexusGenFieldTypes {
     loginUser: NexusGenRootTypes['UserLoginResponse'] | null; // UserLoginResponse
     logoutUser: NexusGenRootTypes['UserLogoutResponse'] | null; // UserLogoutResponse
     signUpUser: NexusGenRootTypes['UserSignupResponse'] | null; // UserSignupResponse
+    userAccountDel: NexusGenRootTypes['UserAccountDeleteResponse'] | null; // UserAccountDeleteResponse
   }
   Query: { // field return type
     checkUserName: NexusGenRootTypes['UserNameCheckResponse'] | null; // UserNameCheckResponse
     getUser: NexusGenRootTypes['UserResponse'] | null; // UserResponse
+  }
+  UserAccountData: { // field return type
+    error: string | null; // String
+    null: string | null; // String
+  }
+  UserAccountDeleteResponse: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['UserAccountData'] | null; // UserAccountData
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
   }
   UserData: { // field return type
     _id: string | null; // String
@@ -191,10 +214,22 @@ export interface NexusGenFieldTypeNames {
     loginUser: 'UserLoginResponse'
     logoutUser: 'UserLogoutResponse'
     signUpUser: 'UserSignupResponse'
+    userAccountDel: 'UserAccountDeleteResponse'
   }
   Query: { // field return type name
     checkUserName: 'UserNameCheckResponse'
     getUser: 'UserResponse'
+  }
+  UserAccountData: { // field return type name
+    error: 'String'
+    null: 'String'
+  }
+  UserAccountDeleteResponse: { // field return type name
+    code: 'String'
+    data: 'UserAccountData'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
   }
   UserData: { // field return type name
     _id: 'String'

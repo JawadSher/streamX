@@ -27,19 +27,18 @@ function AccountDelete() {
     };
   }, [isChecked, debouncedCheck]);
 
-
-  const { isPending, mutate } = useUserAccountDeletion();
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
+  const [accountDelete, { loading }] = useUserAccountDeletion();
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    mutate();
+    accountDelete();
   }
 
   return (
     <div>
       <div className="flex flex-col gap-3 w-full ">
         <h1 className="font-semibold text-2xl">Permanently Delete Account</h1>
-        <div className="flex flex-col items-center border-1 border-red-400 rounded-2xl py-3 px-2 gap-10 overflow-clip">
-          <p className="bg-amber-600 rounded-xl p-2 text-center w-fit">
+        <div className="flex flex-col justify-center border-1 border-red-400 rounded-2xl py-3 px-3 gap-10 overflow-clip">
+          <p className="bg-amber-600 rounded-sm px-2 py-1 text-center w-fit">
             Are you sure you want to permanently delete your account? This
             action cannot be undone.
           </p>
@@ -65,7 +64,7 @@ function AccountDelete() {
               </p>
             </div>
 
-            {isPending ? (
+            {loading ? (
               <Loader2 className="animate-spin justify-self-center" size={24} />
             ) : (
               <Button

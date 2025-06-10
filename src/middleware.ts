@@ -8,11 +8,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const rateLimitResponse = await tokenLimiter(request, {
-    maxTokens: 100,
-    refillRate: 10,
+    maxTokens: 50,
+    refillRate: 3,
   });
 
-  if(rateLimitResponse) return rateLimitResponse;
+  if (rateLimitResponse) return rateLimitResponse;
 
   const token = await verifyAuth(request);
   const isAuthenticated = !!token;

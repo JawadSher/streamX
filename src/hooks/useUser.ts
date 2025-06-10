@@ -16,6 +16,7 @@ import {
   useQuery as apolloUserQuery,
   useLazyQuery,
   useMutation as apolloMutation,
+  useApolloClient,
 } from "@apollo/client";
 import { UserResponse } from "@/reseponseTypes/UserResponse";
 import { CHECK_USER_NAME } from "@/graphql/queries/checkUserName";
@@ -24,6 +25,7 @@ import { LogoutUserResponse } from "@/reseponseTypes/LogoutUserResponse";
 import { UserNameResponse } from "@/reseponseTypes/UserNameCheckResponse";
 import { LOGIN_USER } from "@/graphql/mutations/auth/userLogin";
 import { SIGNUP_USER } from "@/graphql/mutations/auth/userSignup";
+import { USER_ACC_DELETE } from "@/graphql/mutations/user/userAccountDel";
 
 export const useFetchUserData = (enabled: boolean) => {
   return apolloUserQuery<UserResponse>(GET_USER, {
@@ -130,23 +132,28 @@ export const useUserAccountUpdate = () => {
 export const useUserAccountDeletion = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationKey: ["userAccountDelete"],
-    mutationFn: userAccountDeletion,
-    onSuccess: (data) => {
-      queryClient.removeQueries({
-        queryKey: ["user"],
-      });
-
+  return apolloMutation(USER_ACC_DELETE, {
+    onCompleted: (res) => {
+      console.log(res);
+      if (
+        res.userAccountDel.success === false ||
+        res.userAccountDel.statusCode !== 202
+      ) {
+        const message = res.userAccountDel.message;
+        toast.error("Account Deletion Error", {
+          description: message,
+          duration: 3000,
+        });
+        return;
+      }
       dispatch(clearUser());
       async function purge() {
         await persistPurge();
       }
       purge();
       router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
-      const message = data?.data?.message;
+      const message = res.userAccountDel.message;
       toast.success("Account Deletion", {
         description: message,
         duration: 3000,

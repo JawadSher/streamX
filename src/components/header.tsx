@@ -9,7 +9,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Moon, Sun, Upload, Video, StickyNote, Bell, Plus } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Upload,
+  Video,
+  StickyNote,
+  Bell,
+  Plus,
+  MessageCircleMore,
+} from "lucide-react";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
@@ -99,6 +108,7 @@ const Header = () => {
 
       {isAuthenticated === "authenticated" && !path.startsWith("/account") ? (
         <div className="flex items-center justify-center gap-2">
+          <MessageCircleMore size={22} strokeWidth={1.9} className="cursor-pointer"/>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="px-2 py-0">
               <Button variant="outline" className="rounded-3xl cursor-pointer">
@@ -126,7 +136,7 @@ const Header = () => {
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div>
+          <div className="flex items-center gap-3 justify-center">
             <Bell size={20} className="lucid-icons" />
           </div>
         </div>

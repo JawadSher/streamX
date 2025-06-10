@@ -57,9 +57,9 @@ export async function tokenLimiter(
       '1',
     ]);
 
-    if (allowed !== 1) {
+    if (Number(allowed) !== 1) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded' },
+        { error: 'To many request - try later' },
         {
           status: 429,
           headers: {
@@ -72,7 +72,7 @@ export async function tokenLimiter(
     }
 
     return null;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Rate limiting error:', error);
     return null;
   }

@@ -6,11 +6,25 @@ type Mutation {
   loginUser(email: String!, password: String!): UserLoginResponse
   logoutUser: UserLogoutResponse
   signUpUser(email: String!, firstName: String!, lastName: String!, password: String!, userName: String!): UserSignupResponse
+  userAccountDel: UserAccountDeleteResponse
 }
 
 type Query {
   checkUserName(isAuthentic: Boolean, userName: String): UserNameCheckResponse
   getUser: UserResponse
+}
+
+type UserAccountData {
+  error: String
+  null: String
+}
+
+type UserAccountDeleteResponse {
+  code: String
+  data: UserAccountData
+  message: String
+  statusCode: Int
+  success: Boolean
 }
 
 type UserData {
