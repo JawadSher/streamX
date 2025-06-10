@@ -15,6 +15,7 @@ import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin.action
 import { toast, Toaster } from "sonner";
 import { debounce } from "lodash";
 import { useSignInUser } from "@/hooks/useUser";
+import { extractGraphQLError } from "@/lib/extractGraphqlError";
 
 export function LoginForm({
   className,
@@ -25,34 +26,28 @@ export function LoginForm({
     password?: string;
   } | null>(null);
 
-  const [loginUser, { data, loading, error }] = useSignInUser();
+  const [loginUser, { loading, error }] = useSignInUser();
 
   const router = useRouter();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (data?.loginUser.statusCode === 400) {
-      toast.error(data?.loginUser.message, {
-        duration: 3000,
-      });
-      setErrors({
-        email: data?.loginUser?.email?.[0] ?? "",
-        password: data?.loginUser?.password?.[0] ?? "",
-      });
-    } else if (
-      data?.loginUser.statusCode === 401 ||
-      data?.loginUser?.statusCode === 500
-    ) {
-      setErrors({
-        email: "",
-        password: "",
-      });
-      toast.error(data?.loginUser.message, {
-        duration: 3000,
-      });
+    if (error) {
+      const { statusCode, data } = extractGraphQLError(error);
+      if (statusCode === 400) {
+        setErrors({
+          email: data?.email?.[0] ?? "",
+          password: data?.password?.[0] ?? "",
+        });
+      } else if (statusCode === 401 || statusCode === 500) {
+        setErrors({
+          email: "",
+          password: "",
+        });
+      }
     }
-  }, [data, error, data, router]);
+  }, [error, router]);
 
   const debouncedValidate = useCallback(
     debounce(async (event: React.ChangeEvent<HTMLInputElement>) => {

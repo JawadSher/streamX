@@ -41,6 +41,17 @@ export interface NexusGenObjects {
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
   }
+  UserAccountUpdateData: { // root type
+    error?: string | null; // String
+    null?: string | null; // String
+  }
+  UserAccountUpdateResponse: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['UserAccountUpdateData'] | null; // UserAccountUpdateData
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
   UserData: { // root type
     _id?: string | null; // String
     accountStatus?: string | null; // String
@@ -125,6 +136,7 @@ export interface NexusGenFieldTypes {
     logoutUser: NexusGenRootTypes['UserLogoutResponse'] | null; // UserLogoutResponse
     signUpUser: NexusGenRootTypes['UserSignupResponse'] | null; // UserSignupResponse
     userAccountDel: NexusGenRootTypes['UserAccountDeleteResponse'] | null; // UserAccountDeleteResponse
+    userAccountUpdate: NexusGenRootTypes['UserAccountUpdateResponse'] | null; // UserAccountUpdateResponse
   }
   Query: { // field return type
     checkUserName: NexusGenRootTypes['UserNameCheckResponse'] | null; // UserNameCheckResponse
@@ -137,6 +149,17 @@ export interface NexusGenFieldTypes {
   UserAccountDeleteResponse: { // field return type
     code: string | null; // String
     data: NexusGenRootTypes['UserAccountData'] | null; // UserAccountData
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
+  UserAccountUpdateData: { // field return type
+    error: string | null; // String
+    null: string | null; // String
+  }
+  UserAccountUpdateResponse: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['UserAccountUpdateData'] | null; // UserAccountUpdateData
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
@@ -215,6 +238,7 @@ export interface NexusGenFieldTypeNames {
     logoutUser: 'UserLogoutResponse'
     signUpUser: 'UserSignupResponse'
     userAccountDel: 'UserAccountDeleteResponse'
+    userAccountUpdate: 'UserAccountUpdateResponse'
   }
   Query: { // field return type name
     checkUserName: 'UserNameCheckResponse'
@@ -227,6 +251,17 @@ export interface NexusGenFieldTypeNames {
   UserAccountDeleteResponse: { // field return type name
     code: 'String'
     data: 'UserAccountData'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
+  UserAccountUpdateData: { // field return type name
+    error: 'String'
+    null: 'String'
+  }
+  UserAccountUpdateResponse: { // field return type name
+    code: 'String'
+    data: 'UserAccountUpdateData'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
@@ -311,6 +346,12 @@ export interface NexusGenArgTypes {
       lastName: string; // String!
       password: string; // String!
       userName: string; // String!
+    }
+    userAccountUpdate: { // args
+      country?: string | null; // String
+      firstName?: string | null; // String
+      lastName?: string | null; // String
+      phoneNumber?: string | null; // String
     }
   }
   Query: {

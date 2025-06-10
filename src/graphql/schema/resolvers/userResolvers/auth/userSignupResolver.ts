@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { validateUserCredentials } from "@/lib/validateUserCredentials";
+import { GraphQLError } from "graphql";
 
 export interface IUserData {
   firstName?: string;
@@ -81,7 +82,7 @@ export const UserSignupMutation = extendType({
               (field) => field?.trim().length === 0
             )
           ) {
-            return ApiError({
+            ApiError({
               statusCode: 400,
               success: false,
               code: "INVALID_FIELDS",
@@ -92,7 +93,7 @@ export const UserSignupMutation = extendType({
           const result = signupSchema.safeParse(args);
           if (!result.success) {
             const error = result.error.flatten().fieldErrors;
-            return ApiError({
+            ApiError({
               statusCode: 400,
               success: false,
               code: "VALIDATION_ERROR",
@@ -103,7 +104,7 @@ export const UserSignupMutation = extendType({
 
           const response = await signupHelper({ userData: args });
           if (!response.success) {
-            return ApiError({
+            ApiError({
               statusCode: 400,
               success: false,
               message: response.message,
@@ -115,7 +116,7 @@ export const UserSignupMutation = extendType({
           const { success } = await validateUserCredentials(email, password);
 
           if (!success) {
-            return ApiError({
+            ApiError({
               statusCode: 401,
               success: false,
               code: "INVALID_FIELDS",
@@ -125,8 +126,8 @@ export const UserSignupMutation = extendType({
           }
 
           await signIn("credentials", {
-            email: result.data.email,
-            password: result.data.password,
+            email: result?.data?.email,
+            password: result?.data?.password,
             redirect: false,
           });
 
@@ -138,7 +139,9 @@ export const UserSignupMutation = extendType({
             data: null,
           });
         } catch (error: any) {
-          return ApiError({
+          if (error instanceof GraphQLError) throw error;
+
+          ApiError({
             statusCode: 500,
             success: false,
             code: "INTERNAL_ERROR",

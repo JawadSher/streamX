@@ -5,19 +5,15 @@ export const ApiError = ({
   success = false,
   code = "INTERNAL_ERROR",
   message,
-  data = null,
+  data,
 }: {
   message: string;
   statusCode?: number;
   success?: boolean;
-  data?: any;
   code?: string;
+  data?: any;
 }) => {
-  return {
-    statusCode,
-    success,
-    message,
-    code,
-    data,
-  };
+  throw new GraphQLError(message, {
+    extensions: { code, success, message, statusCode, data },
+  });
 };

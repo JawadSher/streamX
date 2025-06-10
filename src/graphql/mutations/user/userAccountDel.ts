@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-export const USER_ACC_DELETE = gql`
+export const USER_ACCNT_DELETE = gql`
   mutation UserAccountDel {
     userAccountDel {
       statusCode

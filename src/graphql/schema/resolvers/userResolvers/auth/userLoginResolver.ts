@@ -3,6 +3,7 @@ import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { validateUserCredentials } from "@/lib/validateUserCredentials";
 import loginSchema from "@/schemas/loginSchema";
+import { GraphQLError } from "graphql";
 import { extendType, nonNull, stringArg } from "nexus";
 
 export const UserLoginMutation = extendType({
@@ -18,7 +19,7 @@ export const UserLoginMutation = extendType({
         try {
           const { user: authUser } = ctx;
           if (authUser) {
-            return ApiError({
+            ApiError({
               statusCode: 409,
               success: false,
               message: "User is already authenticated",
@@ -29,7 +30,7 @@ export const UserLoginMutation = extendType({
 
           const { email, password } = args;
           if (!email?.trim() || !password?.trim()) {
-            return ApiError({
+            ApiError({
               statusCode: 400,
               success: false,
               message: "Email & Password is required to login",
@@ -38,10 +39,14 @@ export const UserLoginMutation = extendType({
             });
           }
 
-          const result = loginSchema.safeParse(args);
+          const result = loginSchema.safeParse({
+            email: args.email,
+            password: args.password
+          });
+          
           if (!result.success) {
             const fieldErrors = result.error.flatten().fieldErrors;
-            return ApiError({
+            ApiError({
               statusCode: 400,
               success: false,
               code: "VALIDATION_ERROR",
@@ -51,21 +56,23 @@ export const UserLoginMutation = extendType({
               },
             });
           }
-
+         
           const { success } = await validateUserCredentials(email, password);
-
           if (!success) {
-            return ApiError({
-              statusCode: 401,
+            ApiError({
+              statusCode: 400,
               code: "INVALID_FIELDS",
+              success: false,
               message: "Invalid email or password",
               data: null,
             });
+
+            return;
           }
 
           await signIn("credentials", {
-            email: result.data.email,
-            password: result.data.password,
+            email: result?.data?.email,
+            password: result?.data?.password,
             redirect: false,
           });
 
@@ -77,11 +84,13 @@ export const UserLoginMutation = extendType({
             data: null,
           });
         } catch (error: any) {
-          return ApiError({
+           if (error instanceof GraphQLError) throw error;
+
+          ApiError({
             statusCode: 500,
             success: false,
             code: "INTERNAL_ERROR",
-            message: error?.message || "Internal Server Error",
+            message: "Internal Server Error",
             data: null,
           });
         }

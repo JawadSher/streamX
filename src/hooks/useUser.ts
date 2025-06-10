@@ -2,7 +2,6 @@ import { GET_USER } from "@/graphql/queries/user";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { persistPurge } from "@/lib/persistPurge";
 import {
-  userAccountDeletion,
   userAccountPasswdUpdate,
   userAccountUpdate,
   userAssetsUpdate,
@@ -16,7 +15,6 @@ import {
   useQuery as apolloUserQuery,
   useLazyQuery,
   useMutation as apolloMutation,
-  useApolloClient,
 } from "@apollo/client";
 import { UserResponse } from "@/reseponseTypes/UserResponse";
 import { CHECK_USER_NAME } from "@/graphql/queries/checkUserName";
@@ -25,7 +23,9 @@ import { LogoutUserResponse } from "@/reseponseTypes/LogoutUserResponse";
 import { UserNameResponse } from "@/reseponseTypes/UserNameCheckResponse";
 import { LOGIN_USER } from "@/graphql/mutations/auth/userLogin";
 import { SIGNUP_USER } from "@/graphql/mutations/auth/userSignup";
-import { USER_ACC_DELETE } from "@/graphql/mutations/user/userAccountDel";
+import { USER_ACCNT_DELETE } from "@/graphql/mutations/user/userAccountDel";
+import { USER_ACCNT_UPDATE } from "@/graphql/mutations/user/userAccountUpdate";
+import { extractGraphQLError } from "@/lib/extractGraphqlError";
 
 export const useFetchUserData = (enabled: boolean) => {
   return apolloUserQuery<UserResponse>(GET_USER, {
@@ -37,7 +37,9 @@ export const useFetchUserData = (enabled: boolean) => {
 };
 
 export const useCheckUserName = () => {
-  return useLazyQuery<UserNameResponse>(CHECK_USER_NAME);
+  return useLazyQuery<UserNameResponse>(CHECK_USER_NAME, {
+    fetchPolicy: "cache-and-network",
+  });
 };
 
 export const useLogoutUser = () => {
@@ -51,7 +53,8 @@ export const useLogoutUser = () => {
       });
     },
     onError: (err: any) => {
-      toast.error(err.message, {
+      const { message } = extractGraphQLError(err);
+      toast.error(message, {
         duration: 3000,
       });
     },
@@ -62,12 +65,6 @@ export const useSignInUser = () => {
   const router = useRouter();
   return apolloMutation(LOGIN_USER, {
     onCompleted: (res) => {
-      if (!res.loginUser.success) {
-        toast.error(res.loginUser.message, {
-          duration: 3000,
-        });
-        return;
-      }
       toast.success(res.loginUser.message, {
         duration: 3000,
       });
@@ -76,7 +73,7 @@ export const useSignInUser = () => {
       }, 1500);
     },
     onError: (error: any) => {
-      const message = error.message || "Something went wrong";
+      const { message } = extractGraphQLError(error);
       toast.error(message, {
         duration: 3000,
       });
@@ -89,13 +86,6 @@ export const useSignUpUser = () => {
 
   return apolloMutation(SIGNUP_USER, {
     onCompleted: (res) => {
-      console.log(res);
-      if (!res.signUpUser.success) {
-        toast.error(res.signUpUser.message, {
-          duration: 3000,
-        });
-        return;
-      }
       toast.success(res.signUpUser.message, {
         duration: 3000,
       });
@@ -104,24 +94,23 @@ export const useSignUpUser = () => {
       }, 1500);
     },
     onError: (error: any) => {
-      console.log(error);
-      const message = error?.response?.data?.message || "Something went wrong";
-      toast.error(message);
+      const { message } = extractGraphQLError(error);
+      toast.error(message, {
+        duration: 3000,
+      });
     },
   });
 };
 
 export const useUserAccountUpdate = () => {
-  return useMutation({
-    mutationKey: ["userAccountUpdate"],
-    mutationFn: userAccountUpdate,
-    onSuccess: (data) => {
-      toast.success(data.data.message, {
+  return apolloMutation(USER_ACCNT_UPDATE, {
+    onCompleted: (res) => {
+      toast.success(res.userAccountUpdate.message, {
         duration: 3000,
       });
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message || "Something went wrong";
+      const { message } = extractGraphQLError(error);
       toast.error(message, {
         duration: 3000,
       });
@@ -133,20 +122,8 @@ export const useUserAccountDeletion = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  return apolloMutation(USER_ACC_DELETE, {
+  return apolloMutation(USER_ACCNT_DELETE, {
     onCompleted: (res) => {
-      console.log(res);
-      if (
-        res.userAccountDel.success === false ||
-        res.userAccountDel.statusCode !== 202
-      ) {
-        const message = res.userAccountDel.message;
-        toast.error("Account Deletion Error", {
-          description: message,
-          duration: 3000,
-        });
-        return;
-      }
       dispatch(clearUser());
       async function purge() {
         await persistPurge();
@@ -160,7 +137,7 @@ export const useUserAccountDeletion = () => {
       });
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.message || "Something went wrong";
+      const { message } = extractGraphQLError(error);
       toast.error(message, {
         duration: 3000,
       });

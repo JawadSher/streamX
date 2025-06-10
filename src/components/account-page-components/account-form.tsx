@@ -66,8 +66,7 @@ const AccountForm = () => {
     setIsBtnDisabled(isChanged);
   }, [firstName, lastName, phoneNumber, country, initialData]);
 
-  const { mutate, isPending, isError, error, isSuccess, data } =
-    useUserAccountUpdate();
+  const [userAccountUpdate, { loading, data }] = useUserAccountUpdate();
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -118,47 +117,37 @@ const AccountForm = () => {
       country: undefined,
     });
 
-    mutate({ firstName, lastName, phoneNumber, country });
+    userAccountUpdate({
+      variables: {
+        firstName,
+        lastName,
+        phoneNumber,
+        country,
+      },
+    });
   }
 
   useEffect(() => {
-      const status = data?.data?.statusCode;
-      const message = data?.data?.message || "An error occurred";
-
-      switch (status) {
-        case 200:
-          console.log("--------- This case executed --------")
-          console.log(firstName, lastName, phoneNumber, country);
-          dispatch(
-            updateUser({
-              firstName,
-              lastName,
-              phoneNumber,
-              country,
-            })
-          );
-          setEditableFields({
-            firstName: false,
-            lastName: false,
-            phoneNumber: false,
-            country: false,
-          });
-          setIsBtnDisabled(false);
-          break;
-        case 400:
-          toast.error(message || "Invalid request", { duration: 3000 });
-          break;
-        case 401:
-          toast.error(message || "Unauthorized request", { duration: 3000 });
-          break;
-        case 503:
-          toast.error(message || "Service unavailable", { duration: 3000 });
-          break;
-        case 500:
-          toast.error(message || "Internal server error", { duration: 3000 });
-          break;
+    const status = data?.userAccountUpdate?.statusCode;
+    const success = data?.userAccountUpdate?.success;
+    if (status === 200 || success === true) {
+      dispatch(
+        updateUser({
+          firstName,
+          lastName,
+          phoneNumber,
+          country,
+        })
+      );
+      setEditableFields({
+        firstName: false,
+        lastName: false,
+        phoneNumber: false,
+        country: false,
+      });
+      setIsBtnDisabled(false);
     }
-  }, [data, isError, error, isSuccess]);
+  }, [data]);
 
   return (
     <div className="w-full max-w-5xl mx-auto p-6 md:border-1 md:rounded-2xl">
@@ -269,7 +258,7 @@ const AccountForm = () => {
         />
 
         <div className="w-full lg:col-span-2 flex flex-col items-center mt-10">
-          {isPending ? (
+          {loading ? (
             <Loader2 className="animate-spin" size={34} />
           ) : (
             <Button

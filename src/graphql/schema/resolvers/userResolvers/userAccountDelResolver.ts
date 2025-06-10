@@ -4,6 +4,7 @@ import notifyKakfa from "@/lib/notifyKafka";
 import { connectRedis } from "@/lib/redis";
 import { signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphQLError } from "graphql";
 
 export const UserAccountDelete = extendType({
   type: "Mutation",
@@ -14,7 +15,7 @@ export const UserAccountDelete = extendType({
         try {
           const { user: authUser } = ctx;
           if (!authUser || !authUser._id) {
-            return ApiError({
+            ApiError({
               statusCode: 401,
               success: false,
               code: "UNAUTHORIZED",
@@ -40,7 +41,9 @@ export const UserAccountDelete = extendType({
             data: null,
           });
         } catch (error: any) {
-          return ApiError({
+          if (error instanceof GraphQLError) throw error;
+
+          ApiError({
             statusCode: 500,
             success: false,
             code: "INTERNAL_ERROR",

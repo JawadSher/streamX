@@ -4,6 +4,7 @@ import { booleanArg, extendType, stringArg } from "nexus";
 import UserModel from "@/models/user.model";
 import { z } from "zod";
 import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphQLError } from "graphql";
 
 const userNameSchema = z
   .string()
@@ -28,7 +29,7 @@ export const UserNameCheckQuery = extendType({
         try {
           const { userName, isAuthentic } = args;
           if (!isAuthentic) {
-            return ApiError({
+            ApiError({
               statusCode: 400,
               message: "Unauthorized request",
               success: false,
@@ -44,7 +45,7 @@ export const UserNameCheckQuery = extendType({
               errors ||
               "Username must start with a letter and contain only lowercase letters and numbers";
 
-            return ApiError({
+            ApiError({
               statusCode: 422,
               message: "Validation error",
               success: false,
@@ -62,7 +63,7 @@ export const UserNameCheckQuery = extendType({
           });
 
           if (existingUser) {
-            return ApiResponse({
+            ApiError({
               statusCode: 409,
               success: false,
               message: "Username is already taken",
@@ -83,7 +84,8 @@ export const UserNameCheckQuery = extendType({
             },
           });
         } catch (error: any) {
-          return ApiError({
+          if (error instanceof GraphQLError) throw error;
+          ApiError({
             statusCode: 500,
             success: false,
             message: "Internal server error",

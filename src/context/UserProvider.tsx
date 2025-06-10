@@ -1,6 +1,7 @@
 "use client";
 
 import { useFetchUserData } from "@/hooks/useUser";
+import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { setError, setLoading, setUser } from "@/store/features/user/userSlice";
 import { NetworkStatus } from "@apollo/client";
 import { useSession } from "next-auth/react";
@@ -14,7 +15,6 @@ export const UserProvider = () => {
 
   const [enabled, setEnabled] = useState(false);
   const { data, error, loading, networkStatus } = useFetchUserData(enabled);
-  console.log(error);
 
   useEffect(() => {
     setEnabled(status === "authenticated");
@@ -26,7 +26,8 @@ export const UserProvider = () => {
     }
 
     if (error) {
-      dispatch(setError(error.message));
+      const { message } = extractGraphQLError(error);
+      dispatch(setError(message));
 
       let isRateLimit = false;
       if (error?.networkError) {

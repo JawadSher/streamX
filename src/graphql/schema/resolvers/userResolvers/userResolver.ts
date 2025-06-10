@@ -4,6 +4,7 @@ import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphQLError } from "graphql";
 
 export const UserQuery = extendType({
   type: "Query",
@@ -15,7 +16,7 @@ export const UserQuery = extendType({
           const { user: authUser } = ctx;
 
           if (!authUser) {
-            throw ApiError({
+            ApiError({
               statusCode: 401,
               success: false,
               code: "UNAUTHORIZED",
@@ -33,7 +34,7 @@ export const UserQuery = extendType({
           }
 
           if (!user) {
-            throw ApiError({
+            ApiError({
               statusCode: 404,
               success: false,
               code: "USER_NOT_FOUND",
@@ -45,6 +46,7 @@ export const UserQuery = extendType({
           return ApiResponse({
             statusCode: 200,
             success: true,
+            code: "USER_FETCHED",
             message: "User fetched successfully",
             data: {
               ...user,
@@ -52,7 +54,8 @@ export const UserQuery = extendType({
             },
           });
         } catch (error: any) {
-          throw ApiError({
+          if (error instanceof GraphQLError) throw error;
+          ApiError({
             statusCode: 400,
             success: false,
             code: "INTERNAL_SERVER_ERROR",

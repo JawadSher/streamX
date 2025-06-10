@@ -2,6 +2,7 @@ import { signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { connectRedis } from "@/lib/redis";
+import { GraphQLError } from "graphql";
 import { extendType } from "nexus";
 
 export const UserLogoutMutation = extendType({
@@ -13,7 +14,7 @@ export const UserLogoutMutation = extendType({
         try {
           const { user: authUser } = ctx;
           if (!authUser) {
-            throw ApiError({
+            ApiError({
               statusCode: 401,
               success: false,
               code: "UNAUTHORIZED",
@@ -34,7 +35,9 @@ export const UserLogoutMutation = extendType({
             data: null,
           });
         } catch (error: any) {
-          throw ApiError({
+          if (error instanceof GraphQLError) throw error;
+
+          ApiError({
             statusCode: 400,
             success: false,
             code: "INTERNAL_ERROR",

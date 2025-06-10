@@ -11,9 +11,9 @@ import confPassSchema from "@/schemas/confirmPasswdSchema";
 import Link from "next/link";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
-import { useRouter } from "next/navigation";
 import { debounce } from "lodash";
 import { useCheckUserName, useSignUpUser } from "@/hooks/useUser";
+import { extractGraphQLError } from "@/lib/extractGraphqlError";
 
 export function SignupForm({
   className,
@@ -35,7 +35,8 @@ export function SignupForm({
   const [confirmPasswd, setConfirmPasswd] = useState("");
   const [userName, setUserName] = useState<string>("");
   const [userNameAvailable, setUsernameAvailable] = useState("");
-  const [signUp, { loading }] = useSignUpUser();
+
+  const [signUp, { loading, data: signUpData, error }] = useSignUpUser();
   const handleSubmit = async (formData: FormData) => {
     const data = {
       firstName: formData.get("firstName"),
@@ -84,38 +85,34 @@ export function SignupForm({
     });
   };
 
-  // useEffect(() => {
-  //   if (!state) return;
+  useEffect(() => {
+    if (signUpData) {
+      const status = signUpData.signUpUser.statusCode;
 
-  //   if (state.status === 200 || state.data.statusCode === 201) {
-  //     setErrors(null);
-  //     setFirstName("");
-  //     setLastName("");
-  //     setUserName("");
-  //     setEmail("");
-  //     setPassword("");
-  //     setConfirmPasswd("");
-  //     setUsernameAvailable("");
-  //   } else if (state.status === 400 && state.data?.fieldErrors) {
-  //     const fieldErrors = state.data.fieldErrors;
-  //     setErrors({
-  //       firstName: fieldErrors.firstName?.[0],
-  //       lastName: fieldErrors.lastName?.[0],
-  //       userName: fieldErrors.userName?.[0],
-  //       email: fieldErrors.email?.[0],
-  //       password: fieldErrors.password?.[0],
-  //     });
-  //     toast.error("Signup failed", {
-  //       description: state.data.message,
-  //       duration: 3000,
-  //     });
-  //   } else {
-  //     toast.error("Signup failed", {
-  //       description: state.data.message,
-  //       duration: 3000,
-  //     });
-  //   }
-  // }, [state, router]);
+      if (status === 200 || status === 201) {
+        setErrors(null);
+        setFirstName("");
+        setLastName("");
+        setUserName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPasswd("");
+        setUsernameAvailable("");
+      } else if (error) {
+        const { data, message } = extractGraphQLError(error);
+        setErrors({
+          firstName: data?.firstName?.[0],
+          lastName: data?.lastName?.[0],
+          userName: data?.userName?.[0],
+          email: data?.email?.[0],
+          password: data?.password?.[0],
+        });
+        toast.error(message, {
+          duration: 3000,
+        });
+      }
+    }
+  }, [signUpData, error]);
 
   const [checkUserName] = useCheckUserName();
   const debouncedCheck = useCallback(
@@ -125,29 +122,23 @@ export function SignupForm({
           variables: { userName: value, isAuthentic: true },
           fetchPolicy: "no-cache",
           onCompleted: (res) => {
-            const code = res?.checkUserName?.statusCode;
-            const message = res?.checkUserName?.message;
-            const isAvailable = res?.checkUserName?.data?.available;
+            setErrors((prev) => ({ ...prev, userName: "" }));
+            setUsernameAvailable(res.checkUserName.message);
+          },
+          onError: (err: any) => {
+            const { message, statusCode, data } = extractGraphQLError(err);
 
-            if ([422, 400, 500].includes(code)) {
+            const isAvailable = data?.available;
+            if ([422, 400, 500].includes(statusCode)) {
               setErrors((prev) => ({
                 ...prev,
-                userName: res.checkUserName.data?.validationError,
+                userName: data.validationError,
               }));
               setUsernameAvailable("");
-            } else if (code === 409 || isAvailable === false) {
+            } else if (statusCode === 409 || isAvailable === false) {
               setErrors((prev) => ({ ...prev, userName: message }));
               setUsernameAvailable("");
-            } else if (code === 200 && isAvailable === true) {
-              setErrors((prev) => ({ ...prev, userName: "" }));
-              setUsernameAvailable(message);
             }
-          },
-          onError: (err) => {
-            toast.error("Something went wrong", {
-              description: err.message,
-              duration: 3000,
-            });
           },
         });
       }
@@ -180,7 +171,6 @@ export function SignupForm({
           </p>
         </div>
         <div className="grid gap-6">
-          {/* First Name */}
           <div className="grid gap-2">
             <Label htmlFor="firstName">First name</Label>
             <Input
@@ -197,7 +187,6 @@ export function SignupForm({
               <p className="text-sm text-destructive">{errors?.firstName}</p>
             )}
           </div>
-          {/* Last Name */}
           <div className="grid gap-2">
             <Label htmlFor="lastName">Last name</Label>
             <Input
@@ -214,7 +203,6 @@ export function SignupForm({
               <p className="text-sm text-destructive">{errors?.lastName}</p>
             )}
           </div>
-          {/* User Name */}
           <div className="grid gap-2">
             <Label htmlFor="userName">User name</Label>
             <Input
@@ -234,7 +222,6 @@ export function SignupForm({
               <p className="text-sm text-destructive">{errors?.userName}</p>
             )}
           </div>
-          {/* Email */}
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -251,7 +238,6 @@ export function SignupForm({
               <p className="text-sm text-destructive">{errors?.email}</p>
             )}
           </div>
-          {/* Password */}
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
             <Input
@@ -267,7 +253,6 @@ export function SignupForm({
               <p className="text-sm text-destructive">{errors?.password}</p>
             )}
           </div>
-          {/* Confirm Password */}
           <div className="grid gap-2">
             <Label htmlFor="confirmPasswd">Confirm Password</Label>
             <Input
@@ -285,7 +270,6 @@ export function SignupForm({
               </p>
             )}
           </div>
-          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full cursor-pointer"
