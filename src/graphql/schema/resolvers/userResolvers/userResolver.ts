@@ -5,6 +5,7 @@ import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { GraphQLError } from "graphql";
+import mongoose from "mongoose";
 
 export const UserQuery = extendType({
   type: "Query",
@@ -15,7 +16,11 @@ export const UserQuery = extendType({
         try {
           const { user: authUser } = ctx;
 
-          if (!authUser) {
+          if (
+            !authUser ||
+            !authUser._id ||
+            !mongoose.isValidObjectId(authUser._id)
+          ) {
             ApiError({
               statusCode: 401,
               success: false,

@@ -5,6 +5,7 @@ import { validateUserCredentials } from "@/lib/validateUserCredentials";
 import loginSchema from "@/schemas/loginSchema";
 import { GraphQLError } from "graphql";
 import { extendType, nonNull, stringArg } from "nexus";
+import mongoose from "mongoose";
 
 export const UserLoginMutation = extendType({
   type: "Mutation",
@@ -18,7 +19,11 @@ export const UserLoginMutation = extendType({
       resolve: async (_parnt, args, ctx) => {
         try {
           const { user: authUser } = ctx;
-          if (authUser) {
+          if (
+            authUser ||
+            authUser._id ||
+            mongoose.isValidObjectId(authUser._id)
+          ) {
             ApiError({
               statusCode: 409,
               success: false,
@@ -41,9 +46,9 @@ export const UserLoginMutation = extendType({
 
           const result = loginSchema.safeParse({
             email: args.email,
-            password: args.password
+            password: args.password,
           });
-          
+
           if (!result.success) {
             const fieldErrors = result.error.flatten().fieldErrors;
             ApiError({
@@ -56,7 +61,7 @@ export const UserLoginMutation = extendType({
               },
             });
           }
-         
+
           const { success } = await validateUserCredentials(email, password);
           if (!success) {
             ApiError({
@@ -84,7 +89,7 @@ export const UserLoginMutation = extendType({
             data: null,
           });
         } catch (error: any) {
-           if (error instanceof GraphQLError) throw error;
+          if (error instanceof GraphQLError) throw error;
 
           ApiError({
             statusCode: 500,

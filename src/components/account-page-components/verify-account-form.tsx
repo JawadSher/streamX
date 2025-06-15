@@ -9,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,13 +26,39 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useEffect, useState } from "react";
-import { SendVerificationCode } from "@/lib/sendOTP";
-import { toast } from "sonner";
-import { handleUserOTP } from "@/app/actions/user-actions/handleUserOTP";
-import { ActionErrorType, ActionResponseType } from "@/lib/Types";
-import { useRouter } from "next/navigation";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { useEffect, useReducer } from "react";
+import { Loader2 } from "lucide-react";
+import { userAccountVerification } from "@/services";
+import { useDispatch } from "react-redux";
+import { updateUser } from "@/store/features/user/userSlice";
+import AnimatedTick from "../animated-check";
+
+type State = {
+  isSended: boolean;
+  verified: boolean;
+  dialogOpen: boolean;
+  success: boolean;
+  expiryTime: string | number | null;
+};
+
+type Action = { type: "SET_STATE"; state: keyof State; value: any };
+
+const initialState: State = {
+  isSended: false,
+  verified: false,
+  dialogOpen: false,
+  success: false,
+  expiryTime: null,
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_STATE":
+      return { ...state, [action.state]: action.value };
+    default:
+      return state;
+  }
+}
 
 const FormSchema = z.object({
   pin: z
@@ -42,124 +67,75 @@ const FormSchema = z.object({
     .max(6, { message: "The verification code must be 6 digits." }),
 });
 
-export function VerifyAccountForm({
-  userEmail,
-  userId,
-}: {
-  userEmail: string;
-  userId: string;
-}) {
-  const [isSended, setIsSended] = useState<boolean>(false);
-  const [countDown, setCountDown] = useState<number>(0);
-  const [verified, setVerified] = useState<boolean>(false);
-  const router = useRouter();
+export function VerifyAccountForm() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const dispatchRedux = useDispatch();
+  const [userAccountVerify, { data, loading }] = userAccountVerification();
+
+  useEffect(() => {
+    const response = data?.userAccountVerify;
+    console.log(response);
+    if (response?.statusCode === 200 && response?.code === "OTP_SENDED") {
+      dispatch({
+        type: "SET_STATE",
+        state: "isSended",
+        value: true,
+      });
+      dispatch({
+        type: "SET_STATE",
+        state: "expiryTime",
+        value: response.data.OTP_Expires_On,
+      });
+    } else if (response?.statusCode === 200 && response?.code === "OTP_VALID") {
+      dispatchRedux(
+        updateUser({
+          isVerified: true,
+        })
+      );
+      dispatch({
+        type: "SET_STATE",
+        state: "verified",
+        value: true,
+      });
+
+      setTimeout(() => {
+        dispatch({ type: "SET_STATE", state: "dialogOpen", value: false });
+      }, 3000);
+    }
+  }, [data]);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      pin: "",
-    },
+    defaultValues: { pin: "" },
   });
 
-  useEffect(() => {
-    if (isSended) {
-      const timer = setInterval(() => {
-        setCountDown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setIsSended(false);
-            toast.info("OTP expired. Please resend the code.");
-            return 120;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      async function OTPHandle() {
-        await handleUserOTP({ userId, state: "delete" });
-      }
-
-      if (countDown <= 1 || !isSended) {
-        OTPHandle();
-      }
-
-      if (verified) {
-        return () => clearInterval(timer);
-      }
-
-      return () => clearInterval(timer);
-    }
-  }, [isSended, countDown, userId, verified]);
-
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function handleSubmit(data: z.infer<typeof FormSchema>) {
     const pin = data.pin;
-    if (
-      pin?.trim()?.length === 6 &&
-      typeof pin === "string" &&
-      countDown > 1 &&
-      isSended
-    ) {
-      const response: ActionResponseType | ActionErrorType =
-        await handleUserOTP({ userId, state: "get" });
-        console.log(response);
-      if (response.statusCode === 200) {
-        const verifi_code = response.data.verificationCode;
-        if (verifi_code === pin) {
-          const res: ActionResponseType | ActionErrorType = await handleUserOTP(
-            {
-              userId,
-              state: "verified",
-            }
-          );
-
-          if (res.statusCode === 200 || res?.data?.isVerified === true) {
-            toast.success("Account Verified Successfully");
-            setVerified(true);
-            router.push(ROUTES.PAGES_ROUTES.ACCOUNT);
-            return;
-          }
-        }
-      }
+    if (pin?.trim()?.length === 6 && typeof pin === "string") {
+      userAccountVerify({
+        variables: {
+          state: "verify",
+          u_OTP: pin,
+        },
+      });
     }
-
-    toast.error("Invalid Email or OTP Expired");
-    return;
-  }
-
-  function OTPCountdown() {
-    let time = 120;
-
-    const timer = setInterval(() => {
-      if (time > 0) {
-        time = time - 1;
-        setCountDown(time);
-      } else {
-        clearInterval(timer);
-      }
-    }, 1000);
   }
 
   async function handleSendOTP() {
-    try {
-      const response = await SendVerificationCode({ userEmail, userId });
-      if (response.status && response.statusCode === 200) {
-        toast.success("One-time passcode sent to your email");
-        OTPCountdown();
-        setIsSended(true);
-        setCountDown(120);
-      } else {
-        setIsSended(false);
-        toast.error(response.message || "Failed to send OTP");
-      }
-    } catch (error) {
-      console.log(error);
-      setIsSended(false);
-      toast.error("Error sending OTP. Please try again.");
-    }
+    userAccountVerify({
+      variables: {
+        state: "store",
+      },
+    });
   }
 
   return (
-    <Dialog>
+    <Dialog
+      open={state.dialogOpen}
+      onOpenChange={(open) =>
+        dispatch({ type: "SET_STATE", state: "dialogOpen", value: open })
+      }
+    >
       <DialogTrigger asChild>
         <Button className="p-0 m-0 bg-transparent hover:bg-transparent cursor-pointer text-sm font-medium text-sky-600 hover:text-sky-700 transition-colors duration-200">
           Verify
@@ -168,7 +144,7 @@ export function VerifyAccountForm({
       <DialogContent className="w-full md:min-w-[600px] h-fit">
         <DialogHeader>
           <DialogTitle>Verify Your Account</DialogTitle>
-          {isSended ? (
+          {state.isSended ? (
             <DialogDescription>
               A 6-digit verification code has been sent to your email address.
               Please enter the code below to complete the verification process.
@@ -182,58 +158,73 @@ export function VerifyAccountForm({
         </DialogHeader>
 
         <div className="grid pt-6 w-full">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="pin"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex gap-2 items-center ">
-                      <FormLabel className="text-md font-semibold">
-                        Verification Code
-                      </FormLabel>
-                      {isSended ? (
-                        <span className="text-sm text-blue-400">
-                          {countDown}
-                        </span>
-                      ) : (
-                        <Button
-                          className="text-sm text-blue-400 cursor-pointer px-0 bg-transparent hover:bg-transparent hover:text-blue-500"
-                          onClick={handleSendOTP}
-                          type="button"
-                        >
-                          resend code
-                        </Button>
-                      )}
-                    </div>
-                    <FormControl>
-                      <InputOTP maxLength={6} {...field}>
-                        <InputOTPGroup>
-                          <InputOTPSlot index={0} />
-                          <InputOTPSlot index={1} />
-                          <InputOTPSlot index={2} />
-                          <InputOTPSlot index={3} />
-                          <InputOTPSlot index={4} />
-                          <InputOTPSlot index={5} />
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </FormControl>
-                    <FormDescription>
-                      Enter the 6-digit code you received via email.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
+            <FormField
+              control={form.control}
+              name="pin"
+              render={({ field }) => (
+                <FormItem>
+                  <div className={`flex gap-2 items-center`}>
+                    <FormLabel className="text-md font-semibold">
+                      Verification Code
+                    </FormLabel>
+
+                    {loading ? (
+                      <Loader2 className="animate-spin" size={20} />
+                    ) : state.isSended === true ? (
+                      <span className="text-sm text-yellow-500">
+                        OTP Expires On: {state.expiryTime}
+                      </span>
+                    ) : (
+                      <Button
+                        onClick={handleSendOTP}
+                        type="button"
+                        className="text-sm text-blue-400 px-0 bg-transparent hover:text-blue-500 hover:bg-transparent cursor-pointer"
+                      >
+                        Resend code
+                      </Button>
+                    )}
+                  </div>
+                  <FormControl>
+                    <InputOTP maxLength={6} {...field}>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </FormControl>
+                  {state.isSended === true && (
+                    <span className="text-sm text-red-400">
+                      Try again one hour later
+                    </span>
+                  )}
+                  <FormDescription>
+                    Enter the 6-digit code you received via email.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {loading && state.isSended === true ? (
+              <Loader2 className="animate-spin justify-center" size={28} />
+            ) : state.verified === true ? (
+              <AnimatedTick />
+            ) : (
               <Button
                 type="submit"
                 className="w-full bg-blue-500 text-white hover:bg-blue-600 cursor-pointer rounded-2xl"
               >
                 Verify Account
               </Button>
-            </form>
-          </Form>
+            )}
+          </form>
         </div>
       </DialogContent>
     </Dialog>

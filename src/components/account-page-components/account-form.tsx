@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { Button } from "../ui/button";
 import EditButton from "../edit-button";
 import { userUpdateSchema } from "@/schemas/userUpdateSchema";
@@ -13,8 +13,97 @@ import { updateUser, useUser } from "@/store/features/user/userSlice";
 import { useUserAccountUpdate } from "@/hooks/useUser";
 import { useDispatch } from "react-redux";
 
+type State = {
+  firstName: string;
+  lastName: string;
+  userName: string;
+  email: string;
+  phoneNumber: string;
+  country: string;
+  editableFields: Record<string, boolean>;
+  isBtnDisabled: boolean;
+  errors: Record<string, string[] | undefined>;
+};
+
+type Action =
+  | { type: "SET_FIELD"; field: keyof State; value: any }
+  | { type: "TOGGLE_EDITABLE"; field: string }
+  | { type: "SET_ERRORS"; errors: Partial<State["errors"]> }
+  | { type: "RESET_ERRORS" }
+  | { type: "SET_BTN_DISABLED"; value: boolean }
+  | { type: "RESET_EDITABLE_FIELDS" };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "TOGGLE_EDITABLE":
+      return {
+        ...state,
+        editableFields: {
+          ...state.editableFields,
+          [action.field]: !state.editableFields[action.field],
+        },
+      };
+    case "SET_ERRORS":
+      return {
+        ...state,
+        errors: { ...state.errors, ...action.errors },
+      };
+    case "RESET_ERRORS":
+      return {
+        ...state,
+        errors: {
+          firstName: undefined,
+          lastName: undefined,
+          phoneNumber: undefined,
+          country: undefined,
+        },
+      };
+    case "SET_BTN_DISABLED":
+      return { ...state, isBtnDisabled: action.value };
+    case "RESET_EDITABLE_FIELDS":
+      return {
+        ...state,
+        editableFields: {
+          firstName: false,
+          lastName: false,
+          phoneNumber: false,
+          country: false,
+        },
+      };
+    default:
+      return state;
+  }
+}
+
 const AccountForm = () => {
   const initialData = useUser();
+  const dispatchRedux = useDispatch();
+
+  const [userAccountUpdate, { loading, data }] = useUserAccountUpdate();
+
+  const [state, dispatch] = useReducer(reducer, {
+    firstName: initialData?.firstName || "",
+    lastName: initialData?.lastName || "",
+    userName: initialData?.userName || "",
+    email: initialData?.email || "",
+    phoneNumber: initialData?.phoneNumber || "",
+    country: initialData?.country || "",
+    editableFields: {
+      firstName: false,
+      lastName: false,
+      phoneNumber: false,
+      country: false,
+    },
+    isBtnDisabled: false,
+    errors: {
+      firstName: undefined,
+      lastName: undefined,
+      phoneNumber: undefined,
+      country: undefined,
+    },
+  });
 
   if (!initialData) {
     return (
@@ -22,107 +111,76 @@ const AccountForm = () => {
     );
   }
 
-  const [firstName, setFirstName] = useState<string>(
-    initialData.firstName || ""
-  );
-  const [lastName, setLastName] = useState<string>(initialData.lastName || "");
-  const [userName] = useState<string>(initialData.userName || "");
-  const [email] = useState<string>(initialData.email || "");
-  const [phoneNumber, setPhoneNumber] = useState<string>(
-    initialData.phoneNumber || ""
-  );
-  const [country, setCountry] = useState<string>(initialData.country || "");
-  const [editableFields, setEditableFields] = useState<Record<string, boolean>>(
-    {
-      firstName: false,
-      lastName: false,
-      phoneNumber: false,
-      country: false,
-    }
-  );
-  const [isBtnDisabled, setIsBtnDisabled] = useState<boolean>(false);
-  const [errors, setErrors] = useState<Record<string, string[] | undefined>>({
-    firstName: undefined,
-    lastName: undefined,
-    phoneNumber: undefined,
-    country: undefined,
-  });
-  const dispatch = useDispatch();
-
   const toggleEditableField = (fieldName: string) => {
-    setEditableFields((prev) => ({
-      ...prev,
-      [fieldName]: !prev[fieldName],
-    }));
+    dispatch({ type: "TOGGLE_EDITABLE", field: fieldName });
   };
 
   useEffect(() => {
     const isChanged =
-      firstName !== (initialData.firstName || "") ||
-      lastName !== (initialData.lastName || "") ||
-      phoneNumber !== (initialData.phoneNumber || "") ||
-      country !== (initialData.country || "");
+      state.firstName !== (initialData.firstName || "") ||
+      state.lastName !== (initialData.lastName || "") ||
+      state.phoneNumber !== (initialData.phoneNumber || "") ||
+      state.country !== (initialData.country || "");
 
-    setIsBtnDisabled(isChanged);
-  }, [firstName, lastName, phoneNumber, country, initialData]);
+    dispatch({ type: "SET_BTN_DISABLED", value: isChanged });
+  }, [
+    state.firstName,
+    state.lastName,
+    state.phoneNumber,
+    state.country,
+    initialData,
+  ]);
 
-  const [userAccountUpdate, { loading, data }] = useUserAccountUpdate();
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
+  async function handleSubmit() {
     const userData = {
-      firstName,
-      lastName,
-      phoneNumber,
-      country,
+      firstName: state.firstName,
+      lastName: state.lastName,
+      phoneNumber: state.phoneNumber,
+      country: state.country,
     };
 
     const result = userUpdateSchema.safeParse(userData);
 
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors((prev) => ({
-        ...prev,
-        firstName: fieldErrors.firstName,
-        lastName: fieldErrors.lastName,
-        country: fieldErrors.country,
-      }));
+      dispatch({
+        type: "SET_ERRORS",
+        errors: {
+          firstName: fieldErrors.firstName,
+          lastName: fieldErrors.lastName,
+          country: fieldErrors.country,
+        },
+      });
       toast.error("Please enter valid values in the fields.", {
         duration: 3000,
       });
       return;
     }
 
-    if (phoneNumber.trim()) {
-      const phoneResult = phoneNumberSchema.safeParse(phoneNumber);
+    if (state.phoneNumber.trim()) {
+      const phoneResult = phoneNumberSchema.safeParse(state.phoneNumber);
       if (!phoneResult.success) {
         const phoneErrors = phoneResult.error.flatten().fieldErrors as {
           phoneNumber?: string[];
         };
 
-        setErrors((prev) => ({
-          ...prev,
-          phoneNumber: phoneErrors.phoneNumber,
-        }));
+        dispatch({
+          type: "SET_ERRORS",
+          errors: { phoneNumber: phoneErrors.phoneNumber },
+        });
 
         return;
       }
     }
 
-    setErrors({
-      firstName: undefined,
-      lastName: undefined,
-      phoneNumber: undefined,
-      country: undefined,
-    });
+    dispatch({ type: "RESET_ERRORS" });
 
     userAccountUpdate({
       variables: {
-        firstName,
-        lastName,
-        phoneNumber,
-        country,
+        firstName: state.firstName,
+        lastName: state.lastName,
+        phoneNumber: state.phoneNumber,
+        country: state.country,
       },
     });
   }
@@ -131,21 +189,16 @@ const AccountForm = () => {
     const status = data?.userAccountUpdate?.statusCode;
     const success = data?.userAccountUpdate?.success;
     if (status === 200 || success === true) {
-      dispatch(
+      dispatchRedux(
         updateUser({
-          firstName,
-          lastName,
-          phoneNumber,
-          country,
+          firstName: state.firstName,
+          lastName: state.lastName,
+          phoneNumber: state.phoneNumber,
+          country: state.country,
         })
       );
-      setEditableFields({
-        firstName: false,
-        lastName: false,
-        phoneNumber: false,
-        country: false,
-      });
-      setIsBtnDisabled(false);
+      dispatch({ type: "RESET_EDITABLE_FIELDS" });
+      dispatch({ type: "SET_BTN_DISABLED", value: false });
     }
   }, [data]);
 
@@ -156,20 +209,27 @@ const AccountForm = () => {
       </h1>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
         className="grid grid-cols-1 gap-6 lg:grid-cols-2"
       >
         <InputField
           label="First Name"
           htmlFor="firstName"
           name="firstName"
-          editable={editableFields.firstName}
+          editable={state.editableFields.firstName}
           className="w-full"
-          validationError={errors?.firstName?.[0]}
-          inputValue={firstName}
+          validationError={state.errors?.firstName?.[0]}
+          inputValue={state.firstName}
           onChange={(e) => {
-            setErrors((prev) => ({ ...prev, firstName: undefined }));
-            setFirstName(e.target.value);
+            dispatch({
+              type: "SET_FIELD",
+              field: "firstName",
+              value: e.target.value,
+            });
+            dispatch({ type: "SET_ERRORS", errors: { firstName: undefined } });
           }}
           rightElement={
             <EditButton
@@ -182,13 +242,17 @@ const AccountForm = () => {
           label="Last Name"
           htmlFor="lastName"
           name="lastName"
-          editable={editableFields.lastName}
+          editable={state.editableFields.lastName}
           className="w-full"
-          validationError={errors?.lastName?.[0]}
-          inputValue={lastName}
+          validationError={state.errors?.lastName?.[0]}
+          inputValue={state.lastName}
           onChange={(e) => {
-            setErrors((prev) => ({ ...prev, lastName: undefined }));
-            setLastName(e.target.value);
+            dispatch({
+              type: "SET_FIELD",
+              field: "lastName",
+              value: e.target.value,
+            });
+            dispatch({ type: "SET_ERRORS", errors: { lastName: undefined } });
           }}
           rightElement={
             <EditButton
@@ -204,7 +268,7 @@ const AccountForm = () => {
           editable={false}
           className="w-full"
           disabled
-          inputValue={userName}
+          inputValue={state.userName}
         />
         <InputField
           label="Email"
@@ -213,7 +277,7 @@ const AccountForm = () => {
           editable={false}
           className="w-full"
           disabled
-          inputValue={email}
+          inputValue={state.email}
           isVerified={Boolean(initialData?.isVerified)}
           userId={initialData?._id?.toString()}
         />
@@ -221,14 +285,21 @@ const AccountForm = () => {
           label="Phone Number"
           htmlFor="phoneNumber"
           name="phoneNumber"
-          editable={editableFields.phoneNumber}
+          editable={state.editableFields.phoneNumber}
           className="w-full"
-          validationError={errors?.phoneNumber?.[0]}
-          inputValue={phoneNumber}
+          validationError={state.errors?.phoneNumber?.[0]}
+          inputValue={state.phoneNumber}
           type="tel"
           onChange={(e) => {
-            setErrors((prev) => ({ ...prev, phoneNumber: undefined }));
-            setPhoneNumber(e.target.value);
+            dispatch({
+              type: "SET_FIELD",
+              field: "phoneNumber",
+              value: e.target.value,
+            });
+            dispatch({
+              type: "SET_ERRORS",
+              errors: { phoneNumber: undefined },
+            });
           }}
           rightElement={
             <EditButton
@@ -241,13 +312,17 @@ const AccountForm = () => {
           label="Country"
           htmlFor="country"
           name="country"
-          editable={editableFields.country}
+          editable={state.editableFields.country}
           className="w-full"
-          validationError={errors?.country?.[0]}
-          inputValue={country}
+          validationError={state.errors?.country?.[0]}
+          inputValue={state.country}
           onChange={(e) => {
-            setErrors((prev) => ({ ...prev, country: undefined }));
-            setCountry(e.target.value);
+            dispatch({
+              type: "SET_FIELD",
+              field: "country",
+              value: e.target.value,
+            });
+            dispatch({ type: "SET_ERRORS", errors: { country: undefined } });
           }}
           rightElement={
             <EditButton
@@ -263,7 +338,7 @@ const AccountForm = () => {
           ) : (
             <Button
               type="submit"
-              disabled={!isBtnDisabled}
+              disabled={!state.isBtnDisabled}
               className="w-full max-w-xs cursor-pointer dark:bg-blue-300 dark:hover:bg-blue-400 text-md font-semibold"
             >
               Update Account

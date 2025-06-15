@@ -5,14 +5,13 @@ export async function getUserOTPFromRedis({
 }: {
   userId: string;
 }) {
-  if (!userId) return false;
+  if (!userId) return null;
 
   try {
     const redis = await connectRedis();
-
-    return await redis.get(`app:OTP:${userId}`);
+    return await redis.hget(`app:OTP:${userId}`, "verificationCode");
   } catch (error) {
     console.error("Redis storage error:", error);
-    return false;
+    return null;
   }
 }

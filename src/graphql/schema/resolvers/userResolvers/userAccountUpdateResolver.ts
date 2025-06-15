@@ -5,6 +5,7 @@ import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
 import { userUpdateSchema } from "@/schemas/userUpdateSchema";
 import { GraphQLError } from "graphql";
 import { extendType, stringArg } from "nexus";
+import mongoose from "mongoose";
 
 export const UserAccountUpdate = extendType({
   type: "Mutation",
@@ -20,7 +21,11 @@ export const UserAccountUpdate = extendType({
       resolve: async (_parnt, args, ctx) => {
         try {
           const { user: authUser } = ctx;
-          if (!authUser || !authUser._id) {
+          if (
+            !authUser ||
+            !authUser._id ||
+            !mongoose.isValidObjectId(authUser._id)
+          ) {
             ApiError({
               statusCode: 401,
               success: false,
@@ -33,7 +38,7 @@ export const UserAccountUpdate = extendType({
           const { firstName, lastName, country, phoneNumber } = args;
           const data = { firstName, lastName, country };
           const result = userUpdateSchema.safeParse(data);
-          
+
           if (!result.success) {
             const fieldError = result.error.flatten().fieldErrors;
             ApiError({

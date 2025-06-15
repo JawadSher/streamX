@@ -8,6 +8,7 @@ type Mutation {
   signUpUser(email: String!, firstName: String!, lastName: String!, password: String!, userName: String!): UserSignupResponse
   userAccountDel: UserAccountDeleteResponse
   userAccountUpdate(country: String, firstName: String, lastName: String, phoneNumber: String): UserAccountUpdateResponse
+  userAccountVerify(state: String, u_OTP: String): UserAccountVerification
 }
 
 type Query {
@@ -39,6 +40,20 @@ type UserAccountUpdateResponse {
   message: String
   statusCode: Int
   success: Boolean
+}
+
+type UserAccountVerification {
+  code: String
+  data: UserAccountVerifyData
+  message: String
+  statusCode: Int
+  success: Boolean
+}
+
+type UserAccountVerifyData {
+  OTP_Expires_On: String
+  error: String
+  null: String
 }
 
 type UserData {

@@ -3,11 +3,10 @@ import { ROUTES } from "@/lib/api/ApiRoutes";
 import { persistPurge } from "@/lib/persistPurge";
 import {
   userAccountPasswdUpdate,
-  userAccountUpdate,
   userAssetsUpdate,
 } from "@/services/userServices";
 import { clearUser, updateUser } from "@/store/features/user/userSlice";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";

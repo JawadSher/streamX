@@ -4,6 +4,7 @@ import { ApiResponse } from "@/lib/api/ApiResponse";
 import { connectRedis } from "@/lib/redis";
 import { GraphQLError } from "graphql";
 import { extendType } from "nexus";
+import mongoose from "mongoose";
 
 export const UserLogoutMutation = extendType({
   type: "Mutation",
@@ -13,7 +14,12 @@ export const UserLogoutMutation = extendType({
       resolve: async (_parnt, _args, ctx) => {
         try {
           const { user: authUser } = ctx;
-          if (!authUser) {
+
+          if (
+            !authUser ||
+            !authUser._id ||
+            !mongoose.isValidObjectId(authUser._id)
+          ) {
             ApiError({
               statusCode: 401,
               success: false,

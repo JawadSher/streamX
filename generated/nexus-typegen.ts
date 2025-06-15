@@ -52,6 +52,18 @@ export interface NexusGenObjects {
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
   }
+  UserAccountVerification: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['UserAccountVerifyData'] | null; // UserAccountVerifyData
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
+  UserAccountVerifyData: { // root type
+    OTP_Expires_On?: string | null; // String
+    error?: string | null; // String
+    null?: string | null; // String
+  }
   UserData: { // root type
     _id?: string | null; // String
     accountStatus?: string | null; // String
@@ -137,6 +149,7 @@ export interface NexusGenFieldTypes {
     signUpUser: NexusGenRootTypes['UserSignupResponse'] | null; // UserSignupResponse
     userAccountDel: NexusGenRootTypes['UserAccountDeleteResponse'] | null; // UserAccountDeleteResponse
     userAccountUpdate: NexusGenRootTypes['UserAccountUpdateResponse'] | null; // UserAccountUpdateResponse
+    userAccountVerify: NexusGenRootTypes['UserAccountVerification'] | null; // UserAccountVerification
   }
   Query: { // field return type
     checkUserName: NexusGenRootTypes['UserNameCheckResponse'] | null; // UserNameCheckResponse
@@ -163,6 +176,18 @@ export interface NexusGenFieldTypes {
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
+  }
+  UserAccountVerification: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['UserAccountVerifyData'] | null; // UserAccountVerifyData
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
+  UserAccountVerifyData: { // field return type
+    OTP_Expires_On: string | null; // String
+    error: string | null; // String
+    null: string | null; // String
   }
   UserData: { // field return type
     _id: string | null; // String
@@ -239,6 +264,7 @@ export interface NexusGenFieldTypeNames {
     signUpUser: 'UserSignupResponse'
     userAccountDel: 'UserAccountDeleteResponse'
     userAccountUpdate: 'UserAccountUpdateResponse'
+    userAccountVerify: 'UserAccountVerification'
   }
   Query: { // field return type name
     checkUserName: 'UserNameCheckResponse'
@@ -265,6 +291,18 @@ export interface NexusGenFieldTypeNames {
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
+  }
+  UserAccountVerification: { // field return type name
+    code: 'String'
+    data: 'UserAccountVerifyData'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
+  UserAccountVerifyData: { // field return type name
+    OTP_Expires_On: 'String'
+    error: 'String'
+    null: 'String'
   }
   UserData: { // field return type name
     _id: 'String'
@@ -352,6 +390,10 @@ export interface NexusGenArgTypes {
       firstName?: string | null; // String
       lastName?: string | null; // String
       phoneNumber?: string | null; // String
+    }
+    userAccountVerify: { // args
+      state?: string | null; // String
+      u_OTP?: string | null; // String
     }
   }
   Query: {

@@ -1,82 +1,26 @@
+import { USER_ACCOUNT_VERIFY } from "@/graphql/mutations/user/userAccountVerify";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import axiosInstance from "@/lib/axios";
+import { extractGraphQLError } from "@/lib/extractGraphqlError";
+import { useMutation } from "@apollo/client";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
 
-export const fetchUserData = () => {
-  return axiosInstance.get(ROUTES.API_ROUTES.USER_DATA_FETCH, {
-    headers: {
-      "Content-Type": "application/json",
+export const userAccountVerification = () => {
+  return useMutation(USER_ACCOUNT_VERIFY, {
+    onCompleted: async (res) => {
+      toast.success(res.userAccountVerify.message, {
+        duration: 3000,
+      });
+    },
+    onError: (err: any) => {
+      console.log(err);
+      const { message } = extractGraphQLError(err);
+      toast.error(message, {
+        duration: 3000,
+      });
     },
   });
-};
-
-export const logoutUser = () => {
-  return axiosInstance.post(ROUTES.API_ROUTES.USER_AUTH_SIGN_OUT, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
-
-export const signInUser = (data: { email: string; password: string }) => {
-  return axiosInstance.post(
-    ROUTES.API_ROUTES.USER_AUTH_SIGN_IN,
-    { data },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-};
-
-export const signUpUser = (data: {
-  firstName: string;
-  lastName: string;
-  userName: string;
-  email: string;
-  password: string;
-}) => {
-  return axiosInstance.post(
-    ROUTES.API_ROUTES.USER_AUTH_SIGN_UP,
-    { data },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-};
-
-export const checkUserName = (data: {
-  userName: string;
-  isAuthentic?: boolean;
-}) => {
-  return axiosInstance.post(
-    ROUTES.API_ROUTES.USER_NAME_CHECK,
-    { data },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-};
-
-export const userAccountUpdate = (data: {
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  country?: string;
-}) => {
-  return axiosInstance.patch(
-    ROUTES.API_ROUTES.USER_ACCNT_UPDATE,
-    { data },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
 };
 
 export const userAccountPasswdUpdate = (data: { password?: string }) => {
@@ -91,14 +35,6 @@ export const userAccountPasswdUpdate = (data: { password?: string }) => {
       },
     }
   );
-};
-
-export const userAccountDeletion = () => {
-  return axiosInstance.delete(ROUTES.API_ROUTES.USER_ACCNT_DELETE, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
 };
 
 export const userAssetsUpdate = (formData: FormData) => {

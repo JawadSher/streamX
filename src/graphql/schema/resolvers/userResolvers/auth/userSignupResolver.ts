@@ -9,6 +9,7 @@ import { ApiResponse } from "@/lib/api/ApiResponse";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { validateUserCredentials } from "@/lib/validateUserCredentials";
 import { GraphQLError } from "graphql";
+import { getSession } from "next-auth/react";
 
 export interface IUserData {
   firstName?: string;
@@ -130,6 +131,9 @@ export const UserSignupMutation = extendType({
             password: result?.data?.password,
             redirect: false,
           });
+
+          const session = await getSession();
+          console.log(session);
 
           return ApiResponse({
             statusCode: 201,

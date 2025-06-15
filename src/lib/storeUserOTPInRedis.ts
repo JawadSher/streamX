@@ -12,10 +12,8 @@ export async function storeUserOTPInRedis({
   try {
     const redis = await connectRedis();
 
-    console.log(code, userId);
-
-    await redis.set(`app:OTP:${userId}`, {
-      "verificationCode": code
+    await redis.hset(`app:OTP:${userId}`, {
+      verificationCode: code,
     });
 
     await redis.expire(`app:OTP:${userId}`, 120);

@@ -5,3 +5,4 @@ export { UserLoginMutation } from "./userResolvers/auth/userLoginResolver";
 export { UserSignupMutation } from "./userResolvers/auth/userSignupResolver";
 export { UserAccountDelete } from "./userResolvers/userAccountDelResolver";
 export { UserAccountUpdate } from "./userResolvers/userAccountUpdateResolver";
+export { UserAccountVerify } from "./userResolvers/userAccountVerifyResolver";

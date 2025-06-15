@@ -5,6 +5,7 @@ import { connectRedis } from "@/lib/redis";
 import { signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { GraphQLError } from "graphql";
+import mongoose from "mongoose";
 
 export const UserAccountDelete = extendType({
   type: "Mutation",
@@ -14,7 +15,11 @@ export const UserAccountDelete = extendType({
       resolve: async (_parnt, _args, ctx) => {
         try {
           const { user: authUser } = ctx;
-          if (!authUser || !authUser._id) {
+          if (
+            !authUser ||
+            !authUser._id ||
+            !mongoose.isValidObjectId(authUser._id)
+          ) {
             ApiError({
               statusCode: 401,
               success: false,

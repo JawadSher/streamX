@@ -4,39 +4,96 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 import { Loader2 } from "lucide-react";
 import { signupSchema } from "@/schemas/signupSchema";
 import confPassSchema from "@/schemas/confirmPasswdSchema";
 import Link from "next/link";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
-import { debounce } from "lodash";
+import { debounce, first } from "lodash";
 import { useCheckUserName, useSignUpUser } from "@/hooks/useUser";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
+
+type State = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  userName: string;
+  password: string;
+  confirmPasswd: string;
+  userNameAvailable: string;
+  errors: Record<string, string[] | undefined>;
+};
+
+type Action =
+  | { type: "SET_FIELD"; field: keyof State; value: any }
+  | { type: "SET_FIELDS_EMPTY"; values: Partial<State> }
+  | { type: "SET_ERRORS"; errors: Partial<State["errors"]> }
+  | { type: "RESET_ERRORS" };
+
+const initialState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  userName: "",
+  password: "",
+  confirmPasswd: "",
+  userNameAvailable: "",
+  errors: {
+    firstName: undefined,
+    lastName: undefined,
+    email: undefined,
+    password: undefined,
+    confirmPasswd: undefined,
+    userName: undefined,
+  },
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_FIELD":
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+    case "SET_FIELDS_EMPTY":
+      return {
+        ...state,
+        ...action.values,
+      };
+    case "SET_ERRORS":
+      return {
+        ...state,
+        errors: {
+          ...state.errors,
+          ...action.errors,
+        },
+      };
+    case "RESET_ERRORS":
+      return {
+        ...state,
+        errors: {
+          firstName: undefined,
+          lastName: undefined,
+          email: undefined,
+          userName: undefined,
+          password: undefined,
+          confirmPasswd: undefined,
+        },
+      };
+    default:
+      return state;
+  }
+}
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
-  const [errors, setErrors] = useState<{
-    firstName?: string;
-    lastName?: string;
-    userName?: string;
-    email?: string;
-    password?: string;
-    confirmPasswd?: string;
-  } | null>(null);
-
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPasswd, setConfirmPasswd] = useState("");
-  const [userName, setUserName] = useState<string>("");
-  const [userNameAvailable, setUsernameAvailable] = useState("");
-
+  const [state, dispatch] = useReducer(reducer, initialState);
   const [signUp, { loading, data: signUpData, error }] = useSignUpUser();
+
   const handleSubmit = async (formData: FormData) => {
     const data = {
       firstName: formData.get("firstName"),
@@ -50,12 +107,15 @@ export function SignupForm({
     const result = signupSchema.safeParse(data);
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors({
-        firstName: fieldErrors.firstName?.[0],
-        lastName: fieldErrors.lastName?.[0],
-        userName: fieldErrors.userName?.[0],
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
+      dispatch({
+        type: "SET_ERRORS",
+        errors: {
+          firstName: fieldErrors.firstName,
+          lastName: fieldErrors.lastName,
+          userName: fieldErrors.userName,
+          email: fieldErrors.email,
+          password: fieldErrors.password,
+        },
       });
       return;
     }
@@ -68,51 +128,61 @@ export function SignupForm({
     const passwdResult = confPassSchema.safeParse(passwdData);
     if (!passwdResult.success) {
       const fieldErrors = passwdResult.error.flatten().fieldErrors;
-      setErrors({
-        confirmPasswd: fieldErrors.confPasswd?.[0],
+      dispatch({
+        type: "SET_ERRORS",
+        errors: {
+          confirmPasswd: fieldErrors.confPasswd,
+        },
       });
       return;
     }
 
     signUp({
       variables: {
-        firstName,
-        lastName,
-        email,
-        userName,
-        password,
+        firstName: result.data.firstName,
+        lastName: result.data.lastName,
+        email: result.data.email,
+        userName: result.data.userName,
+        password: result.data.password,
       },
     });
   };
 
   useEffect(() => {
-    if (signUpData) {
-      const status = signUpData.signUpUser.statusCode;
+    if (!signUpData) return;
 
-      if (status === 200 || status === 201) {
-        setErrors(null);
-        setFirstName("");
-        setLastName("");
-        setUserName("");
-        setEmail("");
-        setPassword("");
-        setConfirmPasswd("");
-        setUsernameAvailable("");
-      } else if (error) {
-        const { data, message } = extractGraphQLError(error);
-        setErrors({
-          firstName: data?.firstName?.[0],
-          lastName: data?.lastName?.[0],
-          userName: data?.userName?.[0],
-          email: data?.email?.[0],
-          password: data?.password?.[0],
-        });
-        toast.error(message, {
-          duration: 3000,
-        });
-      }
+    const status = signUpData.signUpUser.statusCode;
+
+    if (status === 200 || status === 201) {
+      dispatch({ type: "RESET_ERRORS" });
+      dispatch({
+        type: "SET_FIELDS_EMPTY",
+        values: initialState,
+      });
+      toast.success("Signup successful!");
     }
-  }, [signUpData, error]);
+  }, [signUpData]);
+
+  useEffect(() => {
+    if (!error) return;
+
+    const { data, message } = extractGraphQLError(error);
+    dispatch({
+      type: "SET_ERRORS",
+      errors: {
+        firstName: data?.firstName?.[0],
+        lastName: data?.lastName?.[0],
+        userName: data?.userName?.[0],
+        email: data?.email?.[0],
+        password: data?.password?.[0],
+      },
+    });
+    toast.error(message, {
+      duration: 3000,
+    });
+  }, [error]);
+
+  console.log(state.errors);
 
   const [checkUserName] = useCheckUserName();
   const debouncedCheck = useCallback(
@@ -122,22 +192,46 @@ export function SignupForm({
           variables: { userName: value, isAuthentic: true },
           fetchPolicy: "no-cache",
           onCompleted: (res) => {
-            setErrors((prev) => ({ ...prev, userName: "" }));
-            setUsernameAvailable(res.checkUserName.message);
+            dispatch({
+              type: "SET_ERRORS",
+              errors: {
+                userName: undefined,
+              },
+            });
+            dispatch({
+              type: "SET_FIELD",
+              field: "userNameAvailable",
+              value: res.checkUserName.message,
+            });
           },
           onError: (err: any) => {
             const { message, statusCode, data } = extractGraphQLError(err);
 
             const isAvailable = data?.available;
             if ([422, 400, 500].includes(statusCode)) {
-              setErrors((prev) => ({
-                ...prev,
-                userName: data.validationError,
-              }));
-              setUsernameAvailable("");
+              dispatch({
+                type: "SET_ERRORS",
+                errors: {
+                  userName: data.validationError,
+                },
+              });
+              dispatch({
+                type: "SET_FIELD",
+                field: "userNameAvailable",
+                value: "",
+              });
             } else if (statusCode === 409 || isAvailable === false) {
-              setErrors((prev) => ({ ...prev, userName: message }));
-              setUsernameAvailable("");
+              dispatch({
+                type: "SET_ERRORS",
+                errors: {
+                  userName: message,
+                },
+              });
+              dispatch({
+                type: "SET_FIELD",
+                field: "userNameAvailable",
+                value: "",
+              });
             }
           },
         });
@@ -147,22 +241,35 @@ export function SignupForm({
   );
 
   useEffect(() => {
-    debouncedCheck(userName);
+    debouncedCheck(state.userName);
 
-    if (userName.length === 0) {
-      setErrors((prev) => ({ ...prev, userName: "" }));
-      setUsernameAvailable("");
+    if (state.userName.length === 0) {
+      dispatch({
+        type: "SET_ERRORS",
+        errors: {
+          userName: undefined,
+        },
+      });
+      dispatch({
+        type: "SET_FIELD",
+        field: "userNameAvailable",
+        value: "",
+      });
     }
 
     return () => debouncedCheck.cancel();
-  }, [userName, debouncedCheck]);
+  }, [state.userName, debouncedCheck]);
 
   return (
     <div className="flex flex-col gap-4">
       <form
         className={cn("flex flex-col gap-6", className)}
         {...props}
-        action={handleSubmit}
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
+          handleSubmit(formData);
+        }}
       >
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-2xl font-bold">Create new account</h1>
@@ -179,12 +286,20 @@ export function SignupForm({
               name="firstName"
               placeholder="First name"
               required
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              aria-invalid={!!errors?.firstName}
+              value={state.firstName}
+              onChange={(e) => {
+                dispatch({
+                  type: "SET_FIELD",
+                  field: "firstName",
+                  value: e.target.value,
+                });
+              }}
+              aria-invalid={!!state.errors?.firstName}
             />
-            {errors?.firstName && (
-              <p className="text-sm text-destructive">{errors?.firstName}</p>
+            {state.errors?.firstName && (
+              <p className="text-sm text-destructive">
+                {state.errors?.firstName}
+              </p>
             )}
           </div>
           <div className="grid gap-2">
@@ -195,12 +310,20 @@ export function SignupForm({
               name="lastName"
               placeholder="Last name"
               required
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              aria-invalid={!!errors?.lastName}
+              value={state.lastName}
+              onChange={(e) => {
+                dispatch({
+                  type: "SET_FIELD",
+                  field: "lastName",
+                  value: e.target.value,
+                });
+              }}
+              aria-invalid={!!state.errors?.lastName}
             />
-            {errors?.lastName && (
-              <p className="text-sm text-destructive">{errors?.lastName}</p>
+            {state.errors?.lastName && (
+              <p className="text-sm text-destructive">
+                {state.errors?.lastName}
+              </p>
             )}
           </div>
           <div className="grid gap-2">
@@ -211,15 +334,25 @@ export function SignupForm({
               name="userName"
               placeholder="@username"
               required
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              aria-invalid={!!errors?.userName}
+              value={state.userName}
+              onChange={(e) => {
+                dispatch({
+                  type: "SET_FIELD",
+                  field: "userName",
+                  value: e.target.value,
+                });
+              }}
+              aria-invalid={!!state.errors?.userName}
             />
-            {userNameAvailable && (
-              <p className="text-sm text-green-400">{userNameAvailable}</p>
+            {state.userNameAvailable && (
+              <p className="text-sm text-green-400">
+                {state.userNameAvailable}
+              </p>
             )}
-            {errors?.userName && (
-              <p className="text-sm text-destructive">{errors?.userName}</p>
+            {state.errors?.userName && (
+              <p className="text-sm text-destructive">
+                {state.errors?.userName}
+              </p>
             )}
           </div>
           <div className="grid gap-2">
@@ -230,12 +363,18 @@ export function SignupForm({
               name="email"
               placeholder="m@example.com"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-invalid={!!errors?.email}
+              value={state.email}
+              onChange={(e) => {
+                dispatch({
+                  type: "SET_FIELD",
+                  field: "email",
+                  value: e.target.value,
+                });
+              }}
+              aria-invalid={!!state.errors?.email}
             />
-            {errors?.email && (
-              <p className="text-sm text-destructive">{errors?.email}</p>
+            {state.errors?.email && (
+              <p className="text-sm text-destructive">{state.errors?.email}</p>
             )}
           </div>
           <div className="grid gap-2">
@@ -245,12 +384,20 @@ export function SignupForm({
               type="password"
               name="password"
               required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              aria-invalid={!!errors?.password}
+              value={state.password}
+              onChange={(e) => {
+                dispatch({
+                  type: "SET_FIELD",
+                  field: "password",
+                  value: e.target.value,
+                });
+              }}
+              aria-invalid={!!state.errors?.password}
             />
-            {errors?.password && (
-              <p className="text-sm text-destructive">{errors?.password}</p>
+            {state.errors?.password && (
+              <p className="text-sm text-destructive">
+                {state.errors?.password}
+              </p>
             )}
           </div>
           <div className="grid gap-2">
@@ -260,13 +407,19 @@ export function SignupForm({
               type="password"
               name="confirmPasswd"
               required
-              value={confirmPasswd}
-              onChange={(e) => setConfirmPasswd(e.target.value)}
-              aria-invalid={!!errors?.confirmPasswd}
+              value={state.confirmPasswd}
+              onChange={(e) => {
+                dispatch({
+                  type: "SET_FIELD",
+                  field: "confirmPasswd",
+                  value: e.target.value,
+                });
+              }}
+              aria-invalid={!!state.errors?.confirmPasswd}
             />
-            {errors?.confirmPasswd && (
+            {state.errors?.confirmPasswd && (
               <p className="text-sm text-destructive">
-                {errors?.confirmPasswd}
+                {state.errors?.confirmPasswd}
               </p>
             )}
           </div>
@@ -275,14 +428,14 @@ export function SignupForm({
             className="w-full cursor-pointer"
             disabled={
               loading ||
-              !firstName ||
-              !lastName ||
-              !userName ||
-              !email ||
-              !password ||
-              !confirmPasswd ||
-              !!errors?.userName ||
-              confirmPasswd !== password
+              !state.firstName ||
+              !state.lastName ||
+              !state.userName ||
+              !state.email ||
+              !state.password ||
+              !state.confirmPasswd ||
+              !!state.errors?.userName ||
+              state.confirmPasswd !== state.password
             }
           >
             {loading ? <Loader2 className="animate-spin ml-2" /> : "Sign up"}
