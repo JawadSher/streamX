@@ -14,7 +14,6 @@ export const userAccountVerification = () => {
       });
     },
     onError: (err: any) => {
-      console.log(err);
       const { message } = extractGraphQLError(err);
       toast.error(message, {
         duration: 3000,

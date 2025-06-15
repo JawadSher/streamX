@@ -74,7 +74,6 @@ export function VerifyAccountForm() {
 
   useEffect(() => {
     const response = data?.userAccountVerify;
-    console.log(response);
     if (response?.statusCode === 200 && response?.code === "OTP_SENDED") {
       dispatch({
         type: "SET_STATE",
@@ -151,80 +150,85 @@ export function VerifyAccountForm() {
             </DialogDescription>
           ) : (
             <DialogDescription>
-              Please click on bellow resend code button to send the 6 digit
+              Please click on the resend code button below to send the 6-digit
               verification code.
             </DialogDescription>
           )}
         </DialogHeader>
 
         <div className="grid pt-6 w-full">
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
-            <FormField
-              control={form.control}
-              name="pin"
-              render={({ field }) => (
-                <FormItem>
-                  <div className={`flex gap-2 items-center`}>
-                    <FormLabel className="text-md font-semibold">
-                      Verification Code
-                    </FormLabel>
+          <Form {...form}>
+            <form
+              onSubmit={(e) => {
+                e.stopPropagation();
+                form.handleSubmit(handleSubmit)(e);
+              }}
+              className="space-y-6"
+            >
+              <FormField
+                control={form.control}
+                name="pin"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className={`flex gap-2 items-center`}>
+                      <FormLabel className="text-md font-semibold">
+                        Verification Code
+                      </FormLabel>
 
-                    {loading ? (
-                      <Loader2 className="animate-spin" size={20} />
-                    ) : state.isSended === true ? (
-                      <span className="text-sm text-yellow-500">
-                        OTP Expires On: {state.expiryTime}
+                      {loading && !state.isSended ? (
+                        <Loader2 className="animate-spin" size={20} />
+                      ) : state.isSended === true ? (
+                        <span className="text-sm text-yellow-500">
+                          OTP Expires On: {state.expiryTime}
+                        </span>
+                      ) : (
+                        <Button
+                          onClick={handleSendOTP}
+                          type="button"
+                          className="text-sm text-blue-400 px-0 bg-transparent hover:text-blue-500 hover:bg-transparent cursor-pointer"
+                        >
+                          Resend code
+                        </Button>
+                      )}
+                    </div>
+                    <FormControl>
+                      <InputOTP maxLength={6} {...field}>
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </FormControl>
+                    {state.isSended === true && (
+                      <span className="text-sm text-red-400">
+                        Try again one hour later
                       </span>
-                    ) : (
-                      <Button
-                        onClick={handleSendOTP}
-                        type="button"
-                        className="text-sm text-blue-400 px-0 bg-transparent hover:text-blue-500 hover:bg-transparent cursor-pointer"
-                      >
-                        Resend code
-                      </Button>
                     )}
-                  </div>
-                  <FormControl>
-                    <InputOTP maxLength={6} {...field}>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </FormControl>
-                  {state.isSended === true && (
-                    <span className="text-sm text-red-400">
-                      Try again one hour later
-                    </span>
-                  )}
-                  <FormDescription>
-                    Enter the 6-digit code you received via email.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+                    <FormDescription>
+                      Enter the 6-digit code you received via email.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {loading && state.isSended ? (
+                <Loader2 className="animate-spin justify-center" size={28} />
+              ) : state.verified === true ? (
+                <AnimatedTick />
+              ) : (
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-500 text-white hover:bg-blue-600 cursor-pointer rounded-2xl"
+                >
+                  Verify Account
+                </Button>
               )}
-            />
-            {loading && state.isSended === true ? (
-              <Loader2 className="animate-spin justify-center" size={28} />
-            ) : state.verified === true ? (
-              <AnimatedTick />
-            ) : (
-              <Button
-                type="submit"
-                className="w-full bg-blue-500 text-white hover:bg-blue-600 cursor-pointer rounded-2xl"
-              >
-                Verify Account
-              </Button>
-            )}
-          </form>
+            </form>
+          </Form>
         </div>
       </DialogContent>
     </Dialog>

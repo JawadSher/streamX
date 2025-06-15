@@ -100,7 +100,6 @@ export const UserAccountVerify = extendType({
               const { OTP, expiryTime } = await generateOTP();
 
               const response = await storeOTP(OTP, userId);
-              console.log(response);
               if (response === false) {
                 ApiError({
                   statusCode: 500,
@@ -118,7 +117,6 @@ export const UserAccountVerify = extendType({
                 expiryTime,
               });
 
-              console.log(sendResponse);
               if (sendResponse.success === false) {
                 const delResponse = await deleteOTP(userId);
                 if (delResponse === false) {
@@ -181,7 +179,7 @@ export const UserAccountVerify = extendType({
               const OTP_valid_res = await OTP_Schema.safeParse(
                 u_OTP.toString()
               );
-              console.log("---> OTP Validation :", OTP_valid_res);
+
               if (!OTP_valid_res.success) {
                 const error = OTP_valid_res.error.flatten().fieldErrors;
                 ApiError({
