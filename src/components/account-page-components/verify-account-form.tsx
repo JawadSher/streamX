@@ -29,15 +29,18 @@ import {
 import { useEffect, useReducer } from "react";
 import { Loader2 } from "lucide-react";
 import { userAccountVerification } from "@/services";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "@/store/features/user/userSlice";
 import AnimatedTick from "../animated-check";
+import { RootState } from "@/store/store";
 
 type State = {
   isSended: boolean;
   verified: boolean;
   dialogOpen: boolean;
   success: boolean;
+  coolDown: boolean;
+  coolDownTimeValue: Date | string | number | null;
   expiryTime: string | number | null;
 };
 
@@ -49,6 +52,8 @@ const initialState: State = {
   dialogOpen: false,
   success: false,
   expiryTime: null,
+  coolDown: false,
+  coolDownTimeValue: null,
 };
 
 function reducer(state: State, action: Action): State {
@@ -68,40 +73,85 @@ const FormSchema = z.object({
 });
 
 export function VerifyAccountForm() {
+  const coolDownTime = useSelector(
+    (state: RootState) => state.user.userData?.coolDownData?.coolDownTime
+  );
+
+  console.log("---------->", coolDownTime);
   const [state, dispatch] = useReducer(reducer, initialState);
   const dispatchRedux = useDispatch();
   const [userAccountVerify, { data, loading }] = userAccountVerification();
 
   useEffect(() => {
+    if (coolDownTime) {
+      const coolDownAsDate = new Date(Number(coolDownTime));
+      const now = new Date();
+      if (coolDownAsDate > now) {
+        dispatch({
+          type: "SET_STATE",
+          state: "coolDown",
+          value: true,
+        });
+        dispatch({
+          type: "SET_STATE",
+          state: "coolDownTimeValue",
+          value: coolDownAsDate,
+        });
+
+        // Remove cooldown after it's expired
+        const timeoutId = setTimeout(() => {
+          dispatch({ type: "SET_STATE", state: "coolDown", value: false });
+          dispatch({
+            type: "SET_STATE",
+            state: "coolDownTimeValue",
+            value: null,
+          });
+        }, coolDownAsDate.getTime() - now.getTime());
+
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [coolDownTime]);
+
+  useEffect(() => {
     const response = data?.userAccountVerify;
+    if (!response) return;
+
     if (response?.statusCode === 200 && response?.code === "OTP_SENDED") {
       dispatch({
         type: "SET_STATE",
         state: "isSended",
         value: true,
       });
+
       dispatch({
         type: "SET_STATE",
         state: "expiryTime",
         value: response.data.OTP_Expires_On,
       });
-    } else if (response?.statusCode === 200 && response?.code === "OTP_VALID") {
+
+      const cooldownRaw = response.data.coolDownTime;
       dispatchRedux(
         updateUser({
-          isVerified: true,
+          coolDownData: {
+            coolDownTime: cooldownRaw,
+            success: true,
+          },
         })
       );
-      dispatch({
-        type: "SET_STATE",
-        state: "verified",
-        value: true,
-      });
+    } else if (response?.statusCode === 200 && response?.code === "OTP_VALID") {
+      dispatchRedux(updateUser({ isVerified: true }));
+      dispatch({ type: "SET_STATE", state: "verified", value: true });
+
+      dispatchRedux(
+        updateUser({ coolDownData: { coolDownTime: null, success: true } })
+      );
 
       setTimeout(() => {
         dispatch({ type: "SET_STATE", state: "dialogOpen", value: false });
       }, 3000);
     }
-  }, [data]);
+  }, [data, dispatchRedux]);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -121,6 +171,7 @@ export function VerifyAccountForm() {
   }
 
   async function handleSendOTP() {
+    dispatch({ type: "SET_STATE", state: "coolDown", value: true });
     userAccountVerify({
       variables: {
         state: "store",
@@ -150,7 +201,7 @@ export function VerifyAccountForm() {
             </DialogDescription>
           ) : (
             <DialogDescription>
-              Please click on the resend code button below to send the 6-digit
+              Please click on the send code button below to send the 6-digit
               verification code.
             </DialogDescription>
           )}
@@ -177,19 +228,15 @@ export function VerifyAccountForm() {
 
                       {loading && !state.isSended ? (
                         <Loader2 className="animate-spin" size={20} />
-                      ) : state.isSended === true ? (
-                        <span className="text-sm text-yellow-500">
-                          OTP Expires On: {state.expiryTime}
-                        </span>
-                      ) : (
+                      ) : !state.coolDown ? (
                         <Button
                           onClick={handleSendOTP}
                           type="button"
                           className="text-sm text-blue-400 px-0 bg-transparent hover:text-blue-500 hover:bg-transparent cursor-pointer"
                         >
-                          Resend code
+                          {state.isSended ? "Resend code" : "Send code"}
                         </Button>
-                      )}
+                      ) : null}
                     </div>
                     <FormControl>
                       <InputOTP maxLength={6} {...field}>
@@ -203,11 +250,19 @@ export function VerifyAccountForm() {
                         </InputOTPGroup>
                       </InputOTP>
                     </FormControl>
-                    {state.isSended === true && (
-                      <span className="text-sm text-red-400">
-                        Try again one hour later
+                    {state.coolDown && (
+                      <span className="text-sm text-yellow-500">
+                        Please wait until{" "}
+                        {new Date(
+                          state.coolDownTimeValue as number
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        to resend the code.
                       </span>
                     )}
+
                     <FormDescription>
                       Enter the 6-digit code you received via email.
                     </FormDescription>
@@ -217,7 +272,7 @@ export function VerifyAccountForm() {
               />
               {loading && state.isSended ? (
                 <Loader2 className="animate-spin justify-center" size={28} />
-              ) : state.verified === true ? (
+              ) : state.verified ? (
                 <AnimatedTick />
               ) : (
                 <Button

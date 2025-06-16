@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { GraphQLError } from "graphql";
 import mongoose from "mongoose";
+import { getOTPCoolDown } from "@/lib/getOTPCoolDownRedis";
 
 export const UserQuery = extendType({
   type: "Query",
@@ -32,6 +33,17 @@ export const UserQuery = extendType({
 
           const userId = authUser._id;
           let user = await getUserFromRedis(userId);
+          const OTPCoolDown = await getOTPCoolDown(userId);
+          console.log(OTPCoolDown);
+          if (!OTPCoolDown.success) {
+            ApiError({
+              statusCode: 500,
+              success: false,
+              code: "OTP_COOLDOWN_FETCH_ERROR",
+              message: "Something went wrong. Try again later",
+              data: null,
+            });
+          }
 
           if (!user) {
             user = await fetchUserFromMongoDB({ userId });
@@ -54,6 +66,7 @@ export const UserQuery = extendType({
             code: "USER_FETCHED",
             message: "User fetched successfully",
             data: {
+              coolDownData: OTPCoolDown,
               ...user,
               _id: user?._id?.toString(),
             },

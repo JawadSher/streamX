@@ -27,6 +27,10 @@ export const GET_USER = gql`
         watchLater
         likedVideos
         disLikedVideos
+        coolDownData {
+          success
+          coolDownTime
+        }
       }
     }
   }

@@ -61,6 +61,7 @@ export interface NexusGenObjects {
   }
   UserAccountVerifyData: { // root type
     OTP_Expires_On?: string | null; // String
+    coolDownTime?: string | null; // String
     error?: string | null; // String
     null?: string | null; // String
   }
@@ -71,6 +72,7 @@ export interface NexusGenObjects {
     bannerURL?: string | null; // String
     bio?: string | null; // String
     channelName?: string | null; // String
+    coolDownData?: NexusGenRootTypes['coolDown'] | null; // coolDown
     country?: string | null; // String
     createdAt?: string | null; // String
     disLikedVideos?: Array<string | null> | null; // [String]
@@ -121,6 +123,10 @@ export interface NexusGenObjects {
     data?: NexusGenRootTypes['resDat'] | null; // resDat
     message?: string | null; // String
     statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
+  coolDown: { // root type
+    coolDownTime?: string | null; // String
     success?: boolean | null; // Boolean
   }
   data: { // root type
@@ -186,6 +192,7 @@ export interface NexusGenFieldTypes {
   }
   UserAccountVerifyData: { // field return type
     OTP_Expires_On: string | null; // String
+    coolDownTime: string | null; // String
     error: string | null; // String
     null: string | null; // String
   }
@@ -196,6 +203,7 @@ export interface NexusGenFieldTypes {
     bannerURL: string | null; // String
     bio: string | null; // String
     channelName: string | null; // String
+    coolDownData: NexusGenRootTypes['coolDown'] | null; // coolDown
     country: string | null; // String
     createdAt: string | null; // String
     disLikedVideos: Array<string | null> | null; // [String]
@@ -246,6 +254,10 @@ export interface NexusGenFieldTypes {
     data: NexusGenRootTypes['resDat'] | null; // resDat
     message: string | null; // String
     statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
+  coolDown: { // field return type
+    coolDownTime: string | null; // String
     success: boolean | null; // Boolean
   }
   data: { // field return type
@@ -301,6 +313,7 @@ export interface NexusGenFieldTypeNames {
   }
   UserAccountVerifyData: { // field return type name
     OTP_Expires_On: 'String'
+    coolDownTime: 'String'
     error: 'String'
     null: 'String'
   }
@@ -311,6 +324,7 @@ export interface NexusGenFieldTypeNames {
     bannerURL: 'String'
     bio: 'String'
     channelName: 'String'
+    coolDownData: 'coolDown'
     country: 'String'
     createdAt: 'String'
     disLikedVideos: 'String'
@@ -361,6 +375,10 @@ export interface NexusGenFieldTypeNames {
     data: 'resDat'
     message: 'String'
     statusCode: 'Int'
+    success: 'Boolean'
+  }
+  coolDown: { // field return type name
+    coolDownTime: 'String'
     success: 'Boolean'
   }
   data: { // field return type name

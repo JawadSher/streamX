@@ -12,6 +12,9 @@ import { connectRedis } from "@/lib/redis";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { z } from "zod";
 import { GraphQLError } from "graphql";
+import { storeOTPresendCoolDown } from "@/lib/storeOTPresendCoolDown";
+import { removeOTPCoolDown } from "@/lib/removeOTPcoolDown";
+import { getOTPCoolDown } from "@/lib/getOTPCoolDownRedis";
 
 const allowedStates = ["store", "verify"] as const;
 type StateType = (typeof allowedStates)[number];
@@ -36,6 +39,7 @@ async function deleteOTP({
 
 async function verifiedUser(userId: string) {
   await deleteOTP({ userId, state: "verify" });
+  await removeOTPCoolDown(userId);
   await connectDB();
   await User.findByIdAndUpdate(userId, {
     $set: {
@@ -89,6 +93,29 @@ export const UserAccountVerify = extendType({
 
           switch (state) {
             case "store":
+              const coolDownExists = await getOTPCoolDown(userId);
+              if (!coolDownExists.success) {
+                ApiError({
+                  statusCode: 500,
+                  success: false,
+                  code: "OTP_COOLDOWN_FETCH_ERROR",
+                  message: "Something went wrong. Try again later",
+                  data: null,
+                });
+                break;
+              }
+
+              if (coolDownExists.coolDownTime !== null) {
+                ApiError({
+                  statusCode: 400,
+                  success: false,
+                  code: "OTP_RESEND_RATE_LIMIT",
+                  message: `Please verify your account after ${coolDownExists.coolDownTime}`,
+                  data: null,
+                });
+                break;
+              }
+
               const redis = await connectRedis();
               const result = await redis.hmget(
                 `app:user:${userId}`,
@@ -99,8 +126,8 @@ export const UserAccountVerify = extendType({
               const firstName: string = result?.firstName as string;
               const { OTP, expiryTime } = await generateOTP();
 
-              const response = await storeOTP(OTP, userId);
-              if (response === false) {
+              const storeOTPRes = await storeOTP(OTP, userId);
+              if (storeOTPRes === false) {
                 ApiError({
                   statusCode: 500,
                   success: false,
@@ -110,6 +137,20 @@ export const UserAccountVerify = extendType({
                 });
                 break;
               }
+
+              const coolDownRes = await storeOTPresendCoolDown(userId);
+              if (!coolDownRes.success) {
+                await deleteOTP(userId);
+                ApiError({
+                  statusCode: 500,
+                  success: false,
+                  code: "OTP_COOLDOWN_ERROR",
+                  message: "Something went wrong. Try again later",
+                  data: null,
+                });
+                break;
+              }
+
               const sendResponse = await SendVerificationCode({
                 firstName,
                 userEmail,
@@ -118,6 +159,7 @@ export const UserAccountVerify = extendType({
               });
 
               if (sendResponse.success === false) {
+                await removeOTPCoolDown(userId);
                 const delResponse = await deleteOTP(userId);
                 if (delResponse === false) {
                   ApiError({
@@ -148,6 +190,7 @@ export const UserAccountVerify = extendType({
                 message: "Verification code send to your email successfully",
                 data: {
                   OTP_Expires_On: expiryTime,
+                  coolDownTime: coolDownRes.time,
                 },
               });
 

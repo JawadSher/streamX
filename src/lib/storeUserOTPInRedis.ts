@@ -16,7 +16,7 @@ export async function storeUserOTPInRedis({
       verificationCode: code,
     });
 
-    await redis.expire(`app:OTP:${userId}`, 120);
+    await redis.expire(`app:OTP:${userId}`, 600);
     return true;
   } catch (error) {
     console.error("Redis storage error:", error);

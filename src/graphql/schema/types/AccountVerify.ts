@@ -11,6 +11,7 @@ export const AccountVerify = objectType({
       type: objectType({
         name: "UserAccountVerifyData",
         definition(t) {
+          t.string("coolDownTime");
           t.string("OTP_Expires_On");
           t.string("error");
           t.string("null");

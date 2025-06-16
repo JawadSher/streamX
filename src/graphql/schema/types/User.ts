@@ -30,6 +30,15 @@ export const User = objectType({
           t.nullable.string("userName");
           t.nullable.string("createdAt");
           t.nullable.string("updatedAt");
+          t.field("coolDownData", {
+            type: objectType({
+              name: "coolDown",
+              definition(t){
+                t.boolean("success");
+                t.nullable.string("coolDownTime")
+              }
+            })
+          })
         },
       }),
     });

@@ -11,6 +11,7 @@ export const USER_ACCOUNT_VERIFY = gql`
         error
         null
         OTP_Expires_On
+        coolDownTime
       }
     }
   }
