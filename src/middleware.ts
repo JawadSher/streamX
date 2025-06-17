@@ -15,12 +15,23 @@ export async function middleware(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse;
 
   const token = await verifyAuth(request);
+
   const isAuthenticated = !!token;
 
   if (isAuthenticated && pathname === "/sign-in") {
     return NextResponse.redirect(
       new URL(ROUTES.PAGES_ROUTES.HOME, request.url)
     );
+  }
+
+  if (
+    request.nextUrl.pathname === "/api/graphql" &&
+    request.method === "POST"
+  ) {
+    const token = await verifyAuth(request);
+    if (!token) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
   }
 
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
@@ -36,11 +47,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
     "/feed/:path*",
     "/profile/:path*",
     "/sign-in",
     "/account",
     "/account/:path*",
+    "/api/graphql",
   ],
 };

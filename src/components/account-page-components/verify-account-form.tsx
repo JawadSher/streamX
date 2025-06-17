@@ -77,7 +77,6 @@ export function VerifyAccountForm() {
     (state: RootState) => state.user.userData?.coolDownData?.coolDownTime
   );
 
-  console.log("---------->", coolDownTime);
   const [state, dispatch] = useReducer(reducer, initialState);
   const dispatchRedux = useDispatch();
   const [userAccountVerify, { data, loading }] = userAccountVerification();
@@ -98,7 +97,6 @@ export function VerifyAccountForm() {
           value: coolDownAsDate,
         });
 
-        // Remove cooldown after it's expired
         const timeoutId = setTimeout(() => {
           dispatch({ type: "SET_STATE", state: "coolDown", value: false });
           dispatch({
@@ -250,7 +248,7 @@ export function VerifyAccountForm() {
                         </InputOTPGroup>
                       </InputOTP>
                     </FormControl>
-                    {state.coolDown && (
+                    {state.coolDown && state.coolDownTimeValue && (
                       <span className="text-sm text-yellow-500">
                         Please wait until{" "}
                         {new Date(

@@ -11,6 +11,9 @@ import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import notifyKakfa from "@/lib/notifyKafka";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 
+const authConfigs = await initAuthConfigs();
+const handler = NextAuth(authConfigs);
+
 export async function initAuthConfigs() {
   const authConfigs: NextAuthConfig = {
     providers: [
@@ -142,5 +145,4 @@ export async function initAuthConfigs() {
   return authConfigs;
 }
 
-const authConfigs = await initAuthConfigs();
-export const { handlers, signIn, signOut, auth } = NextAuth(authConfigs);
+export const { handlers, signIn, signOut, auth } = handler;

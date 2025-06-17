@@ -34,7 +34,6 @@ export const UserQuery = extendType({
           const userId = authUser._id;
           let user = await getUserFromRedis(userId);
           const OTPCoolDown = await getOTPCoolDown(userId);
-          console.log(OTPCoolDown);
           if (!OTPCoolDown.success) {
             ApiError({
               statusCode: 500,
