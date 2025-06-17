@@ -6,7 +6,7 @@ import { Separator } from "../ui/separator";
 import { useCallback, useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
-import { useUserAccountDeletion } from "@/hooks/useUser";
+import { useUserAccountDeletion } from "@/hooks/apollo";
 
 function AccountDelete() {
   const [isAccDelBtnDisabled, setIsAccBtnDisabled] = useState<boolean>(true);

@@ -12,8 +12,8 @@ import Link from "next/link";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
 import { debounce, first } from "lodash";
-import { useCheckUserName, useSignUpUser } from "@/hooks/useUser";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
+import { useCheckUserName, useSignUpUser } from "@/hooks/apollo";
 
 type State = {
   firstName: string;
@@ -191,7 +191,7 @@ export function SignupForm({
         checkUserName({
           variables: { userName: value, isAuthentic: true },
           fetchPolicy: "no-cache",
-          onCompleted: (res) => {
+          onCompleted: (res: any) => {
             dispatch({
               type: "SET_ERRORS",
               errors: {

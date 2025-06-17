@@ -11,8 +11,8 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin.action";
 import { Toaster } from "sonner";
-import { useSignInUser } from "@/hooks/useUser";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
+import { useSignInUser } from "@/hooks/apollo";
 
 type State = {
   email: string;

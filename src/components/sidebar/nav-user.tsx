@@ -27,9 +27,8 @@ import {
 import Image from "next/legacy/image";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
-import { toast } from "sonner";
-import { useLogoutUser } from "@/hooks/useUser";
-import { useEffect } from "react";
+import { useLogoutUser } from "@/hooks/apollo";
+
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -40,8 +39,7 @@ interface INavUserProps {
 
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
-  const [logoutUser, { loading }] =
-    useLogoutUser();
+  const [logoutUser, { loading }] = useLogoutUser();
   
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

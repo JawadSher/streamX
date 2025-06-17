@@ -10,7 +10,7 @@ import { useActionState, useCallback, useEffect, useState } from "react";
 import InputField from "../input-field";
 import { Button } from "../ui/button";
 import Form from "next/form";
-import { useUserAccountPasswdUpdate } from "@/hooks/useUser";
+import { useUserAccountPasswdUpdate } from "@/hooks/apollo/useUser";
 
 function PasswordUpdate() {
   const [password, setPassword] = useState<string>("");

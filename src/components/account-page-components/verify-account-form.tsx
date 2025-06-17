@@ -28,11 +28,11 @@ import {
 } from "@/components/ui/input-otp";
 import { useEffect, useReducer } from "react";
 import { Loader2 } from "lucide-react";
-import { userAccountVerification } from "@/services";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "@/store/features/user/userSlice";
 import AnimatedTick from "../animated-check";
 import { RootState } from "@/store/store";
+import { userAccountVerification } from "@/hooks/apollo";
 
 type State = {
   isSended: boolean;
