@@ -73,7 +73,9 @@ export function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [loginUser, { loading, error }] = useSignInUser();
+  const [loginUser, { loading, error, data }] = useSignInUser();
+
+  console.log(error, data)
 
   useEffect(() => {
     if (error) {
