@@ -41,6 +41,17 @@ export interface NexusGenObjects {
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
   }
+  UserAccountPasswdUpdateData: { // root type
+    error?: string | null; // String
+    null?: string | null; // String
+  }
+  UserAccountPasswdUpdateResponse: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['UserAccountPasswdUpdateData'] | null; // UserAccountPasswdUpdateData
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
   UserAccountUpdateData: { // root type
     error?: string | null; // String
     null?: string | null; // String
@@ -154,6 +165,7 @@ export interface NexusGenFieldTypes {
     logoutUser: NexusGenRootTypes['UserLogoutResponse'] | null; // UserLogoutResponse
     signUpUser: NexusGenRootTypes['UserSignupResponse'] | null; // UserSignupResponse
     userAccountDel: NexusGenRootTypes['UserAccountDeleteResponse'] | null; // UserAccountDeleteResponse
+    userAccountPasswdUpdate: NexusGenRootTypes['UserAccountPasswdUpdateResponse'] | null; // UserAccountPasswdUpdateResponse
     userAccountUpdate: NexusGenRootTypes['UserAccountUpdateResponse'] | null; // UserAccountUpdateResponse
     userAccountVerify: NexusGenRootTypes['UserAccountVerification'] | null; // UserAccountVerification
   }
@@ -168,6 +180,17 @@ export interface NexusGenFieldTypes {
   UserAccountDeleteResponse: { // field return type
     code: string | null; // String
     data: NexusGenRootTypes['UserAccountData'] | null; // UserAccountData
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
+  UserAccountPasswdUpdateData: { // field return type
+    error: string | null; // String
+    null: string | null; // String
+  }
+  UserAccountPasswdUpdateResponse: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['UserAccountPasswdUpdateData'] | null; // UserAccountPasswdUpdateData
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
@@ -275,6 +298,7 @@ export interface NexusGenFieldTypeNames {
     logoutUser: 'UserLogoutResponse'
     signUpUser: 'UserSignupResponse'
     userAccountDel: 'UserAccountDeleteResponse'
+    userAccountPasswdUpdate: 'UserAccountPasswdUpdateResponse'
     userAccountUpdate: 'UserAccountUpdateResponse'
     userAccountVerify: 'UserAccountVerification'
   }
@@ -289,6 +313,17 @@ export interface NexusGenFieldTypeNames {
   UserAccountDeleteResponse: { // field return type name
     code: 'String'
     data: 'UserAccountData'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
+  UserAccountPasswdUpdateData: { // field return type name
+    error: 'String'
+    null: 'String'
+  }
+  UserAccountPasswdUpdateResponse: { // field return type name
+    code: 'String'
+    data: 'UserAccountPasswdUpdateData'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
@@ -402,6 +437,9 @@ export interface NexusGenArgTypes {
       lastName: string; // String!
       password: string; // String!
       userName: string; // String!
+    }
+    userAccountPasswdUpdate: { // args
+      password: string; // String!
     }
     userAccountUpdate: { // args
       country?: string | null; // String
