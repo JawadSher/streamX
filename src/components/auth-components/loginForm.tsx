@@ -229,7 +229,7 @@ export function LoginForm({
 
       <div className="flex flex-col gap-3">
         <Form action={authProviderSignIn}>
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full cursor-pointer">
             <svg
               className="mr-2 h-5 w-5"
               xmlns="http://www.w3.org/2000/svg"
