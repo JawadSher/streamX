@@ -18,5 +18,3 @@ export const useCheckUserName = () => {
     fetchPolicy: "cache-and-network",
   });
 };
-
-

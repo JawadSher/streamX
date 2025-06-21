@@ -32,20 +32,4 @@ export const useUserAssetsUpdate = () => {
   });
 };
 
-export const useUserAccountPasswdUpdate = () => {
-  return useMutation({
-    mutationKey: ["userAccountPasswdUpdate"],
-    mutationFn: userAccountPasswdUpdate,
-    onSuccess: (data) => {
-      toast.success(data.data.message, {
-        duration: 3000,
-      });
-    },
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || "Something went wrong";
-      toast.error(message, {
-        duration: 3000,
-      });
-    },
-  });
-};
+

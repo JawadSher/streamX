@@ -1,6 +1,7 @@
 import { USER_ACCNT_DELETE } from "@/graphql/mutations/user/userAccountDel";
+import { USER_ACCNT_PASSWD_UPDATE } from "@/graphql/mutations/user/userAccountPasswdUpdate";
 import { USER_ACCNT_UPDATE } from "@/graphql/mutations/user/userAccountUpdate";
-import { USER_ACCOUNT_VERIFY } from "@/graphql/mutations/user/userAccountVerify";
+import { USER_ACCNT_VERIFY } from "@/graphql/mutations/user/userAccountVerify";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { persistPurge } from "@/lib/persistPurge";
@@ -27,7 +28,7 @@ export const useUserAccountUpdate = () => {
 };
 
 export const userAccountVerification = () => {
-  return useMutation(USER_ACCOUNT_VERIFY, {
+  return useMutation(USER_ACCNT_VERIFY, {
     onCompleted: async (res) => {
       toast.success(res.userAccountVerify.message, {
         duration: 3000,
@@ -57,6 +58,22 @@ export const useUserAccountDeletion = () => {
       const message = res.userAccountDel.message;
       toast.success("Account Deletion", {
         description: message,
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      const { message } = extractGraphQLError(error);
+      toast.error(message, {
+        duration: 3000,
+      });
+    },
+  });
+};
+
+export const useUserAccountPasswdUpdate = () => {
+  return useMutation(USER_ACCNT_PASSWD_UPDATE, {
+    onCompleted: (res) => {
+      toast.success(res.userAccountPasswdUpdate.message, {
         duration: 3000,
       });
     },

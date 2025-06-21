@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-export const USER_ACCOUNT_VERIFY = gql`
+export const USER_ACCNT_VERIFY = gql`
   mutation UserAccountVerify($state: String!, $u_OTP: String) {
     userAccountVerify(state: $state, u_OTP: $u_OTP) {
       statusCode
