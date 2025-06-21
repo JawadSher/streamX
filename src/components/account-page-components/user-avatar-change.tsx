@@ -20,7 +20,7 @@ import getCroppedImg from "@/lib/cropImage";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import AnimatedTick from "../animated-check";
-import { useUserAssetsUpdate } from "@/hooks/useUser";
+import { useUserAssetsUpdate } from "@/hooks/apollo/useUser";
 
 function UserAvatarChange({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement | null>(null);

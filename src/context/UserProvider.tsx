@@ -1,6 +1,6 @@
 "use client";
 
-import { useFetchUserData } from "@/hooks/useUser";
+import { useUserData } from "@/hooks/apollo";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { setError, setLoading, setUser } from "@/store/features/user/userSlice";
 import { NetworkStatus } from "@apollo/client";
@@ -14,7 +14,7 @@ export const UserProvider = () => {
   const dispatch = useDispatch();
 
   const [enabled, setEnabled] = useState(false);
-  const { data, error, loading, networkStatus } = useFetchUserData(enabled);
+  const { data, error, loading, networkStatus } = useUserData(enabled);
 
   useEffect(() => {
     setEnabled(status === "authenticated");

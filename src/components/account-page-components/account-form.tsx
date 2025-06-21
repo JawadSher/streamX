@@ -10,8 +10,8 @@ import { Loader2 } from "lucide-react";
 import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
 import InputField from "../input-field";
 import { updateUser, useUser } from "@/store/features/user/userSlice";
-import { useUserAccountUpdate } from "@/hooks/useUser";
 import { useDispatch } from "react-redux";
+import { useUserAccountUpdate } from "@/hooks/apollo";
 
 type State = {
   firstName: string;

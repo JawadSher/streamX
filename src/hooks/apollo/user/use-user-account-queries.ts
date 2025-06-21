@@ -1,0 +1,70 @@
+import { USER_ACCNT_DELETE } from "@/graphql/mutations/user/userAccountDel";
+import { USER_ACCNT_UPDATE } from "@/graphql/mutations/user/userAccountUpdate";
+import { USER_ACCOUNT_VERIFY } from "@/graphql/mutations/user/userAccountVerify";
+import { ROUTES } from "@/lib/api/ApiRoutes";
+import { extractGraphQLError } from "@/lib/extractGraphqlError";
+import { persistPurge } from "@/lib/persistPurge";
+import { clearUser } from "@/store/features/user/userSlice";
+import { useMutation } from "@apollo/client";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+
+export const useUserAccountUpdate = () => {
+  return useMutation(USER_ACCNT_UPDATE, {
+    onCompleted: (res) => {
+      toast.success(res.userAccountUpdate.message, {
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      const { message } = extractGraphQLError(error);
+      toast.error(message, {
+        duration: 3000,
+      });
+    },
+  });
+};
+
+export const userAccountVerification = () => {
+  return useMutation(USER_ACCOUNT_VERIFY, {
+    onCompleted: async (res) => {
+      toast.success(res.userAccountVerify.message, {
+        duration: 3000,
+      });
+    },
+    onError: (err: any) => {
+      const { message } = extractGraphQLError(err);
+      toast.error(message, {
+        duration: 3000,
+      });
+    },
+  });
+};
+
+export const useUserAccountDeletion = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  return useMutation(USER_ACCNT_DELETE, {
+    onCompleted: (res) => {
+      dispatch(clearUser());
+      async function purge() {
+        await persistPurge();
+      }
+      purge();
+      router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
+      const message = res.userAccountDel.message;
+      toast.success("Account Deletion", {
+        description: message,
+        duration: 3000,
+      });
+    },
+    onError: (error: any) => {
+      const { message } = extractGraphQLError(error);
+      toast.error(message, {
+        duration: 3000,
+      });
+    },
+  });
+};
