@@ -12,6 +12,8 @@ import { Toaster } from "sonner";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { useSignInUser } from "@/hooks/apollo";
 import { GoogleProviderBtn } from "./authProviderBtns";
+import { ROUTES } from "@/lib/api/ApiRoutes";
+import { useRouter } from "next/navigation";
 
 type State = {
   email: string;
@@ -71,10 +73,9 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
+  const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [loginUser, { loading, error }] = useSignInUser();
-
-  console.log(error);
 
   useEffect(() => {
     if (error) {
@@ -89,6 +90,11 @@ export function LoginForm({
         });
       } else if (statusCode === 401 || statusCode === 500) {
         dispatch({ type: "RESET_ERRORS" });
+      } else if (statusCode === 409) {
+        dispatch({ type: "RESET_ERRORS" });
+        setTimeout(() => {
+          router.push(ROUTES.PAGES_ROUTES.HOME);
+        }, 2000);
       }
     }
   }, [error]);

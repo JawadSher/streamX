@@ -8,17 +8,19 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LOGIN_USER } from "@/graphql/mutations/user-auth-mutations/userLogin";
 import { SIGNUP_USER } from "@/graphql/mutations/user-auth-mutations/userSignup";
+import { useSession } from "next-auth/react";
 
 export const useSignInUser = () => {
   const router = useRouter();
+  const { update } = useSession();
   return useMutation(LOGIN_USER, {
-    onCompleted: (res) => {
+    onCompleted: async (res) => {
       toast.success(res.loginUser.message, {
         duration: 3000,
       });
-      setTimeout(() => {
-        router.push(ROUTES.PAGES_ROUTES.HOME);
-      }, 1500);
+
+      await update();
+      router.push(ROUTES.PAGES_ROUTES.HOME);
     },
     onError: (error: any) => {
       const { message } = extractGraphQLError(error);

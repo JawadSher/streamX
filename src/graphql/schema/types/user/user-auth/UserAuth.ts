@@ -9,13 +9,12 @@ export const UserLogout = objectType({
     t.string("code");
     t.field("data", {
       type: objectType({
-        name: "data",
-        definition(t){
-          t.string("error"),
-          t.string("null")
-        }
-      })
-    })
+        name: "userLogoutData",
+        definition(t) {
+          t.string("error"), t.string("null");
+        },
+      }),
+    });
   },
 });
 
@@ -26,6 +25,15 @@ export const UserLogin = objectType({
     t.string("message");
     t.boolean("success");
     t.string("code");
+    t.field("data", {
+      type: objectType({
+        name: "userLoginData",
+        definition(t) {
+          t.string("error");
+          t.string("null");
+        },
+      }),
+    });
   },
 });
 
@@ -38,7 +46,7 @@ export const UserSignUp = objectType({
     t.string("code");
     t.field("data", {
       type: objectType({
-        name: "resDat",
+        name: "userSignUpData",
         definition(t) {
           t.string("error");
         },

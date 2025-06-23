@@ -196,7 +196,6 @@ export function SignupForm({
         userNameCheck({
           variables: { userName: value, isAuthentic: true },
           onCompleted: (res: any) => {
-            console.log(res);
             dispatch({
               type: "SET_MULTI_STATE",
               payload: {

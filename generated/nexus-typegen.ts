@@ -100,13 +100,14 @@ export interface NexusGenObjects {
   }
   UserLoginResponse: { // root type
     code?: string | null; // String
+    data?: NexusGenRootTypes['userLoginData'] | null; // userLoginData
     message?: string | null; // String
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
   }
   UserLogoutResponse: { // root type
     code?: string | null; // String
-    data?: NexusGenRootTypes['data'] | null; // data
+    data?: NexusGenRootTypes['userLogoutData'] | null; // userLogoutData
     message?: string | null; // String
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
@@ -131,7 +132,7 @@ export interface NexusGenObjects {
   }
   UserSignupResponse: { // root type
     code?: string | null; // String
-    data?: NexusGenRootTypes['resDat'] | null; // resDat
+    data?: NexusGenRootTypes['userSignUpData'] | null; // userSignUpData
     message?: string | null; // String
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
@@ -140,11 +141,15 @@ export interface NexusGenObjects {
     coolDownTime?: string | null; // String
     success?: boolean | null; // Boolean
   }
-  data: { // root type
+  userLoginData: { // root type
     error?: string | null; // String
     null?: string | null; // String
   }
-  resDat: { // root type
+  userLogoutData: { // root type
+    error?: string | null; // String
+    null?: string | null; // String
+  }
+  userSignUpData: { // root type
     error?: string | null; // String
   }
 }
@@ -243,13 +248,14 @@ export interface NexusGenFieldTypes {
   }
   UserLoginResponse: { // field return type
     code: string | null; // String
+    data: NexusGenRootTypes['userLoginData'] | null; // userLoginData
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
   }
   UserLogoutResponse: { // field return type
     code: string | null; // String
-    data: NexusGenRootTypes['data'] | null; // data
+    data: NexusGenRootTypes['userLogoutData'] | null; // userLogoutData
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
@@ -274,7 +280,7 @@ export interface NexusGenFieldTypes {
   }
   UserSignupResponse: { // field return type
     code: string | null; // String
-    data: NexusGenRootTypes['resDat'] | null; // resDat
+    data: NexusGenRootTypes['userSignUpData'] | null; // userSignUpData
     message: string | null; // String
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
@@ -283,11 +289,15 @@ export interface NexusGenFieldTypes {
     coolDownTime: string | null; // String
     success: boolean | null; // Boolean
   }
-  data: { // field return type
+  userLoginData: { // field return type
     error: string | null; // String
     null: string | null; // String
   }
-  resDat: { // field return type
+  userLogoutData: { // field return type
+    error: string | null; // String
+    null: string | null; // String
+  }
+  userSignUpData: { // field return type
     error: string | null; // String
   }
 }
@@ -376,13 +386,14 @@ export interface NexusGenFieldTypeNames {
   }
   UserLoginResponse: { // field return type name
     code: 'String'
+    data: 'userLoginData'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
   }
   UserLogoutResponse: { // field return type name
     code: 'String'
-    data: 'data'
+    data: 'userLogoutData'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
@@ -407,7 +418,7 @@ export interface NexusGenFieldTypeNames {
   }
   UserSignupResponse: { // field return type name
     code: 'String'
-    data: 'resDat'
+    data: 'userSignUpData'
     message: 'String'
     statusCode: 'Int'
     success: 'Boolean'
@@ -416,11 +427,15 @@ export interface NexusGenFieldTypeNames {
     coolDownTime: 'String'
     success: 'Boolean'
   }
-  data: { // field return type name
+  userLoginData: { // field return type name
     error: 'String'
     null: 'String'
   }
-  resDat: { // field return type name
+  userLogoutData: { // field return type name
+    error: 'String'
+    null: 'String'
+  }
+  userSignUpData: { // field return type name
     error: 'String'
   }
 }

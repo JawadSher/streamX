@@ -20,8 +20,8 @@ export const UserLoginMutation = extendType({
         try {
           const { user: authUser } = ctx;
           if (
-            authUser ||
-            authUser._id ||
+            authUser !== null &&
+            authUser._id &&
             mongoose.isValidObjectId(authUser._id)
           ) {
             ApiError({
@@ -71,8 +71,6 @@ export const UserLoginMutation = extendType({
               message: "Invalid email or password",
               data: null,
             });
-
-            return;
           }
 
           await signIn("credentials", {

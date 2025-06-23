@@ -96,6 +96,7 @@ type UserData {
 
 type UserLoginResponse {
   code: String
+  data: userLoginData
   message: String
   statusCode: Int
   success: Boolean
@@ -103,7 +104,7 @@ type UserLoginResponse {
 
 type UserLogoutResponse {
   code: String
-  data: data
+  data: userLogoutData
   message: String
   statusCode: Int
   success: Boolean
@@ -132,7 +133,7 @@ type UserResponse {
 
 type UserSignupResponse {
   code: String
-  data: resDat
+  data: userSignUpData
   message: String
   statusCode: Int
   success: Boolean
@@ -143,11 +144,16 @@ type coolDown {
   success: Boolean
 }
 
-type data {
+type userLoginData {
   error: String
   null: String
 }
 
-type resDat {
+type userLogoutData {
+  error: String
+  null: String
+}
+
+type userSignUpData {
   error: String
 }

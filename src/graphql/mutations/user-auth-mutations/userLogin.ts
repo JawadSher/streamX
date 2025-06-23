@@ -7,6 +7,10 @@ export const LOGIN_USER = gql`
       code
       message
       success
+      data {
+        error
+        null
+      }
     }
   }
 `;
