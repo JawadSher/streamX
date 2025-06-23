@@ -1,7 +1,7 @@
-import { USER_ACCNT_DELETE } from "@/graphql/mutations/user/userAccountDel";
-import { USER_ACCNT_PASSWD_UPDATE } from "@/graphql/mutations/user/userAccountPasswdUpdate";
-import { USER_ACCNT_UPDATE } from "@/graphql/mutations/user/userAccountUpdate";
-import { USER_ACCNT_VERIFY } from "@/graphql/mutations/user/userAccountVerify";
+import { USER_ACCNT_DELETE } from "@/graphql/mutations/user-account-mutations/userAccountDel";
+import { USER_ACCNT_PASSWD_UPDATE } from "@/graphql/mutations/user-account-mutations/userAccountPasswdUpdate";
+import { USER_ACCNT_UPDATE } from "@/graphql/mutations/user-account-mutations/userAccountUpdate";
+import { USER_ACCNT_VERIFY } from "@/graphql/mutations/user-account-mutations/userAccountVerify";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { persistPurge } from "@/lib/persistPurge";

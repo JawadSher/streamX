@@ -1,9 +1,9 @@
-export { UserNameCheckQuery } from "./userResolvers/userNameCheckResolver";
+export { UserNameCheckQuery } from "./userResolvers/user-account-resolvers/userNameCheckResolver";
 export { UserQuery } from "./userResolvers/userResolver";
-export { UserLogoutMutation } from "./userResolvers/auth/userLogoutResolver";
-export { UserLoginMutation } from "./userResolvers/auth/userLoginResolver";
-export { UserSignupMutation } from "./userResolvers/auth/userSignupResolver";
-export { UserAccountDelete } from "./userResolvers/userAccountDelResolver";
-export { UserAccountUpdate } from "./userResolvers/userAccountUpdateResolver";
-export { UserAccountVerify } from "./userResolvers/userAccountVerifyResolver";
-export { UserAccountPasswdUpdate } from "./userResolvers/userAccountPasswdUpdateResolver";
+export { UserLogoutMutation } from "./userResolvers/user-auth-resolvers/userLogoutResolver";
+export { UserLoginMutation } from "./userResolvers/user-auth-resolvers/userLoginResolver";
+export { UserSignupMutation } from "./userResolvers/user-auth-resolvers/userSignupResolver";
+export { UserAccountDeleteMutation } from "./userResolvers/user-account-resolvers/userAccountDelResolver";
+export { UserAccountUpdateMutation } from "./userResolvers/user-account-resolvers/userAccountUpdateResolver";
+export { UserAccountVerifyMutation } from "./userResolvers/user-account-resolvers/userAccountVerifyResolver";
+export { UserAccountPasswdUpdateMutation } from "./userResolvers/user-account-resolvers/userAccountPasswdUpdateResolver";

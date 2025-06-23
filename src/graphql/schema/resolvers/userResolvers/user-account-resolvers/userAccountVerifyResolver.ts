@@ -54,7 +54,7 @@ const OTP_Schema = z
   .max(6, "OTP should be max 6 digit long")
   .min(6, "OTP should be min 6 digit long");
 
-export const UserAccountVerify = extendType({
+export const UserAccountVerifyMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("userAccountVerify", {

@@ -7,7 +7,7 @@ export const CHECK_USER_NAME = gql`
       message
       success
       code
-       data {
+      data {
         available
         validationError
       }

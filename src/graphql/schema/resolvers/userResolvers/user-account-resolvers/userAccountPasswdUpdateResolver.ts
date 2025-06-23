@@ -17,7 +17,7 @@ const passwdSchema = z
     "Password must contain a lowercase, an uppercase, a number, and a special character (!@#$%^&*_,.-)"
   );
 
-export const UserAccountPasswdUpdate = extendType({
+export const UserAccountPasswdUpdateMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("userAccountPasswdUpdate", {

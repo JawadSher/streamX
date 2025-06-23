@@ -1,4 +1,4 @@
-import { LOGOUT_USER } from "@/graphql/mutations/auth/userLogout";
+import { LOGOUT_USER } from "@/graphql/mutations/user-auth-mutations/userLogout";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { persistPurge } from "@/lib/persistPurge";
@@ -6,8 +6,8 @@ import { LogoutUserResponse } from "@/reseponseTypes/LogoutUserResponse";
 import { useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { LOGIN_USER } from "@/graphql/mutations/auth/userLogin";
-import { SIGNUP_USER } from "@/graphql/mutations/auth/userSignup";
+import { LOGIN_USER } from "@/graphql/mutations/user-auth-mutations/userLogin";
+import { SIGNUP_USER } from "@/graphql/mutations/user-auth-mutations/userSignup";
 
 export const useSignInUser = () => {
   const router = useRouter();

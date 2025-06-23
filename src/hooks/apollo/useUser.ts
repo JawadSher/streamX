@@ -1,12 +1,8 @@
-import {
-  userAccountPasswdUpdate,
-  userAssetsUpdate,
-} from "@/services/userServices";
-import {  updateUser } from "@/store/features/user/userSlice";
+import { userAssetsUpdate } from "@/services/userServices";
+import { updateUser } from "@/store/features/user/userSlice";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-
 
 export const useUserAssetsUpdate = () => {
   const dispatch = useDispatch();
@@ -31,5 +27,3 @@ export const useUserAssetsUpdate = () => {
     },
   });
 };
-
-

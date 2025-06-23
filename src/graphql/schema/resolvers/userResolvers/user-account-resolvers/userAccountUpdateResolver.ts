@@ -7,7 +7,7 @@ import { GraphQLError } from "graphql";
 import { extendType, stringArg } from "nexus";
 import mongoose from "mongoose";
 
-export const UserAccountUpdate = extendType({
+export const UserAccountUpdateMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("userAccountUpdate", {

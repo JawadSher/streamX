@@ -7,6 +7,7 @@ import { createContext } from "@/graphql/context";
 
 const server = new ApolloServer({
   schema,
+  introspection: process.env.NODE_ENV !== "production",
 });
 
 const handler = startServerAndCreateNextHandler(server, {

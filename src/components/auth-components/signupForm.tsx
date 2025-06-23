@@ -9,11 +9,12 @@ import { Loader2 } from "lucide-react";
 import { signupSchema } from "@/schemas/signupSchema";
 import confPassSchema from "@/schemas/confirmPasswdSchema";
 import Link from "next/link";
-import { GoogleProviderBtn } from "./authProviderBtns";
 import { toast, Toaster } from "sonner";
-import { debounce, first } from "lodash";
+import { debounce } from "lodash";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
-import { useCheckUserName, useSignUpUser } from "@/hooks/apollo";
+import { useSignUpUser } from "@/hooks/apollo";
+import { GoogleProviderBtn } from "./authProviderBtns";
+import { useCheckUserName } from "@/hooks/apollo/user/user-account/use-user-account-queries";
 
 type State = {
   firstName: string;
@@ -30,7 +31,8 @@ type Action =
   | { type: "SET_FIELD"; field: keyof State; value: any }
   | { type: "SET_FIELDS_EMPTY"; values: Partial<State> }
   | { type: "SET_ERRORS"; errors: Partial<State["errors"]> }
-  | { type: "RESET_ERRORS" };
+  | { type: "RESET_ERRORS" }
+  | { type: "SET_MULTI_STATE"; payload: Partial<State> };
 
 const initialState = {
   firstName: "",
@@ -81,6 +83,11 @@ function reducer(state: State, action: Action): State {
           password: undefined,
           confirmPasswd: undefined,
         },
+      };
+    case "SET_MULTI_STATE":
+      return {
+        ...state,
+        ...action.payload,
       };
     default:
       return state;
@@ -182,55 +189,46 @@ export function SignupForm({
     });
   }, [error]);
 
-  console.log(state.errors);
-
-  const [checkUserName] = useCheckUserName();
+  const [userNameCheck] = useCheckUserName();
   const debouncedCheck = useCallback(
     debounce(async (value: string) => {
       if (value) {
-        checkUserName({
+        userNameCheck({
           variables: { userName: value, isAuthentic: true },
-          fetchPolicy: "no-cache",
           onCompleted: (res: any) => {
+            console.log(res);
             dispatch({
-              type: "SET_ERRORS",
-              errors: {
-                userName: undefined,
+              type: "SET_MULTI_STATE",
+              payload: {
+                userNameAvailable: res.checkUserName.message,
+                errors: {
+                  userName: undefined,
+                },
               },
-            });
-            dispatch({
-              type: "SET_FIELD",
-              field: "userNameAvailable",
-              value: res.checkUserName.message,
             });
           },
           onError: (err: any) => {
             const { message, statusCode, data } = extractGraphQLError(err);
-
             const isAvailable = data?.available;
             if ([422, 400, 500].includes(statusCode)) {
               dispatch({
-                type: "SET_ERRORS",
-                errors: {
-                  userName: data.validationError,
+                type: "SET_MULTI_STATE",
+                payload: {
+                  userNameAvailable: "",
+                  errors: {
+                    userName: data.validationError,
+                  },
                 },
-              });
-              dispatch({
-                type: "SET_FIELD",
-                field: "userNameAvailable",
-                value: "",
               });
             } else if (statusCode === 409 || isAvailable === false) {
               dispatch({
-                type: "SET_ERRORS",
-                errors: {
-                  userName: message,
+                type: "SET_MULTI_STATE",
+                payload: {
+                  userNameAvailable: "",
+                  errors: {
+                    userName: message,
+                  },
                 },
-              });
-              dispatch({
-                type: "SET_FIELD",
-                field: "userNameAvailable",
-                value: "",
               });
             }
           },
@@ -245,15 +243,13 @@ export function SignupForm({
 
     if (state.userName.length === 0) {
       dispatch({
-        type: "SET_ERRORS",
-        errors: {
-          userName: undefined,
+        type: "SET_MULTI_STATE",
+        payload: {
+          userNameAvailable: "",
+          errors: {
+            userName: undefined,
+          },
         },
-      });
-      dispatch({
-        type: "SET_FIELD",
-        field: "userNameAvailable",
-        value: "",
       });
     }
 

@@ -1,8 +1,6 @@
-import { GET_USER } from "@/graphql/queries/user";
+import { GET_USER } from "@/graphql/queries/user/user";
 import { UserResponse } from "@/reseponseTypes/UserResponse";
-import { useQuery, useLazyQuery } from "@apollo/client";
-import { CHECK_USER_NAME } from "@/graphql/queries/checkUserName";
-import { UserNameResponse } from "@/reseponseTypes/UserNameCheckResponse";
+import { useQuery } from "@apollo/client";
 
 export const useUserData = (enabled: boolean) => {
   return useQuery<UserResponse>(GET_USER, {
@@ -13,8 +11,3 @@ export const useUserData = (enabled: boolean) => {
   });
 };
 
-export const useCheckUserName = () => {
-  return useLazyQuery<UserNameResponse>(CHECK_USER_NAME, {
-    fetchPolicy: "cache-and-network",
-  });
-};

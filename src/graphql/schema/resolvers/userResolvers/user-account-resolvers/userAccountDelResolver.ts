@@ -7,7 +7,7 @@ import { ApiResponse } from "@/lib/api/ApiResponse";
 import { GraphQLError } from "graphql";
 import mongoose from "mongoose";
 
-export const UserAccountDelete = extendType({
+export const UserAccountDeleteMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.field("userAccountDel", {

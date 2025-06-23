@@ -29,7 +29,6 @@ import { ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
 import { useLogoutUser } from "@/hooks/apollo";
 
-
 interface INavUserProps {
   fullName: string | null | undefined;
   email: string | null | undefined;
@@ -40,11 +39,6 @@ interface INavUserProps {
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
   const [logoutUser, { loading }] = useLogoutUser();
-  
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    logoutUser();
-  };
 
   return (
     <SidebarMenu>
@@ -128,7 +122,13 @@ export function NavUser({ user }: { user: INavUserProps }) {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <form onSubmit={handleSubmit} className="w-full">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    logoutUser();
+                  }}
+                  className="w-full"
+                >
                   <button
                     type="submit"
                     className="m-0 p-0 bg-transparent h-full w-full dark:text-gray-100 font-normal flex justify-start hover:bg-transparent cursor-pointer gap-2"

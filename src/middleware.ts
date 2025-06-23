@@ -24,12 +24,14 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  if (!isAuthenticated && pathname === "/sign-up") return NextResponse.next();
+
   if (
     request.nextUrl.pathname === "/api/graphql" &&
     request.method === "POST"
   ) {
     const token = await verifyAuth(request);
-    if (!token) {
+    if (!token && pathname === "/sign-up") {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
   }
