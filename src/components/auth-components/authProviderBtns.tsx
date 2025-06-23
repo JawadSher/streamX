@@ -1,18 +1,17 @@
 "use client";
-import { authProviderSignIn } from "@/app/actions/auth-actions/authSignin.action";
+
+import { ROUTES } from "@/lib/api/ApiRoutes";
 import { Button } from "../ui/button";
 import { signIn } from "next-auth/react";
-
-const handleSignIn = () => {
-  signIn("google", { callbackUrl: "/" });
-};
 
 const GoogleProviderBtn = () => {
   return (
     <Button
       variant="outline"
       className="w-full cursor-pointer"
-      onClick={handleSignIn}
+      onClick={async () => {
+        await signIn("google", { callbackUrl: ROUTES.PAGES_ROUTES.HOME });
+      }}
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path
