@@ -1,7 +1,5 @@
 export { UserNameCheckQuery } from "./userResolvers/user-account-resolvers/userNameCheckResolver";
 export { UserQuery } from "./userResolvers/userResolver";
-export { UserLogoutMutation } from "./userResolvers/user-auth-resolvers/userLogoutResolver";
-export { UserLoginMutation } from "./userResolvers/user-auth-resolvers/userLoginResolver";
 export { UserSignupMutation } from "./userResolvers/user-auth-resolvers/userSignupResolver";
 export { UserAccountDeleteMutation } from "./userResolvers/user-account-resolvers/userAccountDelResolver";
 export { UserAccountUpdateMutation } from "./userResolvers/user-account-resolvers/userAccountUpdateResolver";

@@ -98,20 +98,6 @@ export interface NexusGenObjects {
     watchHistory?: Array<string | null> | null; // [String]
     watchLater?: Array<string | null> | null; // [String]
   }
-  UserLoginResponse: { // root type
-    code?: string | null; // String
-    data?: NexusGenRootTypes['userLoginData'] | null; // userLoginData
-    message?: string | null; // String
-    statusCode?: number | null; // Int
-    success?: boolean | null; // Boolean
-  }
-  UserLogoutResponse: { // root type
-    code?: string | null; // String
-    data?: NexusGenRootTypes['userLogoutData'] | null; // userLogoutData
-    message?: string | null; // String
-    statusCode?: number | null; // Int
-    success?: boolean | null; // Boolean
-  }
   UserNameAvailabilityData: { // root type
     available?: boolean | null; // Boolean
     validationError?: string | null; // String
@@ -141,14 +127,6 @@ export interface NexusGenObjects {
     coolDownTime?: string | null; // String
     success?: boolean | null; // Boolean
   }
-  userLoginData: { // root type
-    error?: string | null; // String
-    null?: string | null; // String
-  }
-  userLogoutData: { // root type
-    error?: string | null; // String
-    null?: string | null; // String
-  }
   userSignUpData: { // root type
     error?: string | null; // String
   }
@@ -166,8 +144,6 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
   Mutation: { // field return type
-    loginUser: NexusGenRootTypes['UserLoginResponse'] | null; // UserLoginResponse
-    logoutUser: NexusGenRootTypes['UserLogoutResponse'] | null; // UserLogoutResponse
     signUpUser: NexusGenRootTypes['UserSignupResponse'] | null; // UserSignupResponse
     userAccountDel: NexusGenRootTypes['UserAccountDeleteResponse'] | null; // UserAccountDeleteResponse
     userAccountPasswdUpdate: NexusGenRootTypes['UserAccountPasswdUpdateResponse'] | null; // UserAccountPasswdUpdateResponse
@@ -246,20 +222,6 @@ export interface NexusGenFieldTypes {
     watchHistory: Array<string | null> | null; // [String]
     watchLater: Array<string | null> | null; // [String]
   }
-  UserLoginResponse: { // field return type
-    code: string | null; // String
-    data: NexusGenRootTypes['userLoginData'] | null; // userLoginData
-    message: string | null; // String
-    statusCode: number | null; // Int
-    success: boolean | null; // Boolean
-  }
-  UserLogoutResponse: { // field return type
-    code: string | null; // String
-    data: NexusGenRootTypes['userLogoutData'] | null; // userLogoutData
-    message: string | null; // String
-    statusCode: number | null; // Int
-    success: boolean | null; // Boolean
-  }
   UserNameAvailabilityData: { // field return type
     available: boolean | null; // Boolean
     validationError: string | null; // String
@@ -289,14 +251,6 @@ export interface NexusGenFieldTypes {
     coolDownTime: string | null; // String
     success: boolean | null; // Boolean
   }
-  userLoginData: { // field return type
-    error: string | null; // String
-    null: string | null; // String
-  }
-  userLogoutData: { // field return type
-    error: string | null; // String
-    null: string | null; // String
-  }
   userSignUpData: { // field return type
     error: string | null; // String
   }
@@ -304,8 +258,6 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
-    loginUser: 'UserLoginResponse'
-    logoutUser: 'UserLogoutResponse'
     signUpUser: 'UserSignupResponse'
     userAccountDel: 'UserAccountDeleteResponse'
     userAccountPasswdUpdate: 'UserAccountPasswdUpdateResponse'
@@ -384,20 +336,6 @@ export interface NexusGenFieldTypeNames {
     watchHistory: 'String'
     watchLater: 'String'
   }
-  UserLoginResponse: { // field return type name
-    code: 'String'
-    data: 'userLoginData'
-    message: 'String'
-    statusCode: 'Int'
-    success: 'Boolean'
-  }
-  UserLogoutResponse: { // field return type name
-    code: 'String'
-    data: 'userLogoutData'
-    message: 'String'
-    statusCode: 'Int'
-    success: 'Boolean'
-  }
   UserNameAvailabilityData: { // field return type name
     available: 'Boolean'
     validationError: 'String'
@@ -427,14 +365,6 @@ export interface NexusGenFieldTypeNames {
     coolDownTime: 'String'
     success: 'Boolean'
   }
-  userLoginData: { // field return type name
-    error: 'String'
-    null: 'String'
-  }
-  userLogoutData: { // field return type name
-    error: 'String'
-    null: 'String'
-  }
   userSignUpData: { // field return type name
     error: 'String'
   }
@@ -442,10 +372,6 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
-    loginUser: { // args
-      email: string; // String!
-      password: string; // String!
-    }
     signUpUser: { // args
       email: string; // String!
       firstName: string; // String!

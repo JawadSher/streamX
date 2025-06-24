@@ -3,8 +3,6 @@
 
 
 type Mutation {
-  loginUser(email: String!, password: String!): UserLoginResponse
-  logoutUser: UserLogoutResponse
   signUpUser(email: String!, firstName: String!, lastName: String!, password: String!, userName: String!): UserSignupResponse
   userAccountDel: UserAccountDeleteResponse
   userAccountPasswdUpdate(password: String!): UserAccountPasswdUpdateResponse
@@ -94,22 +92,6 @@ type UserData {
   watchLater: [String]
 }
 
-type UserLoginResponse {
-  code: String
-  data: userLoginData
-  message: String
-  statusCode: Int
-  success: Boolean
-}
-
-type UserLogoutResponse {
-  code: String
-  data: userLogoutData
-  message: String
-  statusCode: Int
-  success: Boolean
-}
-
 type UserNameAvailabilityData {
   available: Boolean
   validationError: String
@@ -142,16 +124,6 @@ type UserSignupResponse {
 type coolDown {
   coolDownTime: String
   success: Boolean
-}
-
-type userLoginData {
-  error: String
-  null: String
-}
-
-type userLogoutData {
-  error: String
-  null: String
 }
 
 type userSignUpData {

@@ -5,25 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import loginSchema from "@/schemas/loginSchema";
-import { useEffect, useReducer } from "react";
+import { useReducer, useState } from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Toaster } from "sonner";
-import { extractGraphQLError } from "@/lib/extractGraphqlError";
-import { useSignInUser } from "@/hooks/apollo";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import { useRouter } from "next/navigation";
+import { signinHandler } from "@/auth-handlers/signinHandler";
+import { useSession } from "next-auth/react";
 
 type State = {
   email: string;
   password: string;
   errors: Record<string, string[] | undefined>;
+  error: string[] | null;
 };
 
 type Action =
   | { type: "SET_FIELD"; field: keyof State; value: any }
   | { type: "SET_ERRORS"; errors: Partial<State["errors"]> }
+  | { type: "SET_ERROR"; error: string[] | null }
   | { type: "RESET_ERRORS" }
   | { type: "SET_FIELD_EMPTY"; values: Partial<State> };
 
@@ -34,6 +36,7 @@ const initialState = {
     email: undefined,
     password: undefined,
   },
+  error: null,
 };
 
 function reducer(state: State, action: Action): State {
@@ -51,6 +54,11 @@ function reducer(state: State, action: Action): State {
           ...action.errors,
         },
       };
+    case "SET_ERROR":
+      return {
+        ...state,
+        error: action.error,
+      };
     case "RESET_ERRORS":
       return {
         ...state,
@@ -58,6 +66,7 @@ function reducer(state: State, action: Action): State {
           email: undefined,
           password: undefined,
         },
+        error: null,
       };
     case "SET_FIELD_EMPTY":
       return {
@@ -75,29 +84,8 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"form">) {
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [loginUser, { loading, error }] = useSignInUser();
-
-  useEffect(() => {
-    if (error) {
-      const { statusCode, data } = extractGraphQLError(error);
-      if (statusCode === 400) {
-        dispatch({
-          type: "SET_ERRORS",
-          errors: {
-            email: data?.email?.[0] ?? "",
-            password: data?.password?.[0] ?? "",
-          },
-        });
-      } else if (statusCode === 401 || statusCode === 500) {
-        dispatch({ type: "RESET_ERRORS" });
-      } else if (statusCode === 409) {
-        dispatch({ type: "RESET_ERRORS" });
-        setTimeout(() => {
-          router.push(ROUTES.PAGES_ROUTES.HOME);
-        }, 2000);
-      }
-    }
-  }, [error]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const session = useSession();
 
   const handleSubmit = async (formData: FormData) => {
     const data = {
@@ -119,12 +107,26 @@ export function LoginForm({
       return;
     }
 
-    loginUser({
-      variables: {
-        email: result.data.email,
-        password: result.data.password,
-      },
-    });
+    const credentials = {
+      email: result.data.email!,
+      password: result.data.password!,
+    };
+
+    const response = await signinHandler(session, credentials, setLoading);
+
+    if (response === true) {
+      dispatch({
+        type: "RESET_ERRORS",
+      });
+      router.push(ROUTES.PAGES_ROUTES.HOME);
+    } else {
+      dispatch({
+        type: "SET_ERROR",
+        error: ["Invalid credentials"],
+      });
+    }
+
+    return;
   };
 
   return (
@@ -144,6 +146,12 @@ export function LoginForm({
             Enter your email below to login to your account
           </p>
         </div>
+
+        {state.error && (
+          <div className=" border-red-400 rounded-md w-full px-2 py-1 bg-red-900 text-red-100 flex-grow ">
+            {state.error}
+          </div>
+        )}
 
         <div className="grid gap-6">
           <div className="grid gap-2">

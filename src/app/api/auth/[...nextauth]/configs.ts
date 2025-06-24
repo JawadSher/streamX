@@ -1,15 +1,15 @@
-import NextAuth, { NextAuthConfig, Session, User } from "next-auth";
-import { connectDB } from "@/lib/database";
+import NextAuth, { AuthError, NextAuthConfig, Session, User } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
-import loginSchema from "@/schemas/loginSchema";
 import * as bcrypt from "bcryptjs";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import notifyKakfa from "@/lib/notifyKafka";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
+import loginSchema from "@/schemas/loginSchema";
+import { validateUserCredentials } from "@/lib/validateUserCredentials";
 
 const authConfigs = await initAuthConfigs();
 const handler = NextAuth(authConfigs);
@@ -23,13 +23,42 @@ export async function initAuthConfigs() {
           password: { label: "Password", type: "password" },
         },
         authorize: async (credentials) => {
-          const email = credentials?.email as string;
-          const userInfo = await fetchUserFromMongoDB({ email });
-          await storeUserInRedis(userInfo as IRedisDBUser);
+          try {
+            if (!credentials?.email || !credentials?.password) {
+              throw new Error("Email & Password is required");
+            }
 
-          return {
-            _id: userInfo._id.toString(),
-          };
+            const result = loginSchema.safeParse({
+              email: credentials.email,
+              password: credentials.password,
+            });
+
+            if (!result.success) {
+              const fieldErrors = result.error.flatten().fieldErrors;
+              const message = Object.values(fieldErrors).flat().join(" | ");
+
+              throw new Error(message);
+            }
+
+            const { success } = await validateUserCredentials(
+              credentials.email?.toString(),
+              credentials.password?.toString()
+            );
+
+            if (!success) {
+              throw new Error("Invalid credentials");
+            }
+
+            const email = credentials?.email as string;
+            const userInfo = await fetchUserFromMongoDB({ email });
+            await storeUserInRedis(userInfo as IRedisDBUser);
+
+            return {
+              _id: userInfo._id.toString(),
+            };
+          } catch (error: any) {
+            throw new Error(error.message);
+          }
         },
       }),
       GoogleProvider({

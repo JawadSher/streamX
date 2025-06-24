@@ -27,7 +27,10 @@ import {
 import Image from "next/legacy/image";
 import { ROUTES } from "@/lib/api/ApiRoutes";
 import Link from "next/link";
-import { useLogoutUser } from "@/hooks/apollo";
+import { useState } from "react";
+import { logoutHandler } from "@/auth-handlers/logoutHandler";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface INavUserProps {
   fullName: string | null | undefined;
@@ -38,7 +41,16 @@ interface INavUserProps {
 
 export function NavUser({ user }: { user: INavUserProps }) {
   const { isMobile } = useSidebar();
-  const [logoutUser, { loading }] = useLogoutUser();
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+  const session = useSession();
+
+  async function handleSubmit() {
+    const response = await logoutHandler(session.data, setLoading);
+    if (response) {
+      router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -125,7 +137,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    logoutUser();
+                    handleSubmit();
                   }}
                   className="w-full"
                 >
