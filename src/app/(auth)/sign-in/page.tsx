@@ -1,6 +1,6 @@
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import { LoginForm } from "@/components/auth-components/loginForm";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { Home } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";

@@ -2,7 +2,7 @@
 
 import { signupSchema } from "@/schemas/signupSchema";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { AuthError } from "next-auth";
 import { signUpHelper } from "./signUpHelper.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";

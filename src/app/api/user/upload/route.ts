@@ -10,6 +10,8 @@ import { verifyAuth } from "@/lib/verifyAuth";
 import { ApiError } from "@/lib/api/ApiError";
 import { ApiResponse } from "@/lib/api/ApiResponse";
 import { uploadToLocalServer } from "./uploadToLocalServer";
+import { isValidObjectId } from "mongoose";
+import { PlainObject } from "nexus/dist/typeHelpersInternal";
 
 export interface IUserAsset {
   userAsset?: File | null;
@@ -17,10 +19,19 @@ export interface IUserAsset {
   assetMemeType?: "image" | "video" | "audio" | undefined;
 }
 
-export async function PATCH(request: NextRequest): Promise<NextResponse> {
+export async function PATCH(
+  request: NextRequest
+): Promise<NextResponse | PlainObject> {
   const token = await verifyAuth(request);
-  if (!token?._id || !token) {
-    return ApiError(400, "Unauthorized request", null);
+  if (!token?._id || !token || !isValidObjectId(token._id)) {
+    return ApiError({
+      statusCode: 400,
+      code: "UNAUTHORIZED",
+      success: false,
+      isGraphql: false,
+      message: "Unauthorized request",
+      data: null,
+    });
   }
 
   let filePath = null;
@@ -31,31 +42,66 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     const assetMemeType = formData.get("assetMemeType");
 
     if (!userAsset || !(userAsset instanceof File)) {
-      return ApiError(400, "User asset is required and must be a file", null);
+      return ApiError({
+        statusCode: 400,
+        success: false,
+        isGraphql: false,
+        code: "ASSET_REQUIRED",
+        message: "User asset is required and must be a file",
+        data: null,
+      });
     }
 
     if (
       typeof assetType !== "string" ||
       !["avatar", "thumbnail", "banner", "video", "audio"].includes(assetType)
     ) {
-      return ApiError(400, "Invalid or missing assetType", null);
+      return ApiError({
+        statusCode: 400,
+        success: false,
+        isGraphql: false,
+        code: "INVALID_ASSET_TYPE",
+        message: "Invalid or missing assetType",
+        data: null,
+      });
     }
 
     if (
       typeof assetMemeType !== "string" ||
       !["image", "video", "audio"].includes(assetMemeType)
     ) {
-      return ApiError(400, "Invalid or missing assetMemeType", null);
+      return ApiError({
+        statusCode: 400,
+        success: false,
+        isGraphql: false,
+        code: "INVALID_ASSET_MEME_TYPE",
+        message: "Invalid or missing assetMemeType",
+        data: null,
+      });
     }
 
     const localResponse = await uploadToLocalServer(userAsset);
     if (localResponse.statusCode !== 200 || !localResponse.status) {
-      return ApiError(localResponse.statusCode, localResponse?.message, null);
+      return ApiError({
+        statusCode: localResponse.statusCode,
+        success: false,
+        isGraphql: false,
+        code: "LOCAL_SERVER_RESPONSE",
+        message: localResponse?.message,
+        data: null,
+      });
     }
 
     filePath = localResponse.filePath;
     if (!filePath) {
-      return ApiError(400, "File is lost is the local server", null);
+      return ApiError({
+        statusCode: 400,
+        success: false,
+        isGraphql: false,
+        code: "FILE_LOST_ON_SERVER",
+        message: "File is lost is the local server",
+        data: null,
+      });
     }
 
     let isFileValid = null;
@@ -67,7 +113,14 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       isFileValid = await imageFileTypeChecker(filePath);
 
       if (!isFileValid) {
-        return ApiError(400, "Invalid file format", null);
+        return ApiError({
+          statusCode: 400,
+          success: false,
+          isGraphql: false,
+          code: "INVALID_FILE_FORMATE",
+          message: "Invalid file format",
+          data: null,
+        });
       }
     }
 
@@ -77,10 +130,25 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       assetMemeType: assetMemeType as IUserAsset["assetMemeType"],
     });
 
-    if (result.statusCode === 400) return ApiError(400, result.message, null);
+    if (result.statusCode === 400)
+      return ApiError({
+        statusCode: 400,
+        success: false,
+        isGraphql: false,
+        code: "ASSET_CHECKS_FAIL",
+        message: result.message,
+        data: null,
+      });
     const cloudinaryResponse = await uploadOnCloudinary(filePath);
     if (cloudinaryResponse.statusCode !== 200) {
-      return ApiError(400, cloudinaryResponse.message, null);
+      return ApiError({
+        statusCode: 400,
+        success: false,
+        isGraphql: false,
+        code: "CLOUDINARY_ERROR",
+        message: cloudinaryResponse.message,
+        data: null,
+      });
     }
 
     const data: IUserAssetsUpdate = {
@@ -98,11 +166,25 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       userData: data,
     });
 
-    return ApiResponse(200, `${capitalize(assetType!)} uploaded successfully`, {
-      avatar: cloudinaryResponse?.body?.secure_url
+    return ApiResponse({
+      statusCode: 200,
+      success: true,
+      code: "FILE_UPLOADED",
+      message: `${capitalize(assetType!)} uploaded successfully`,
+      isGraphql: false,
+      data: {
+        avatar: cloudinaryResponse?.body?.secure_url,
+      },
     });
   } catch (error: any) {
-    return ApiError(400, error.message, null);
+    return ApiError({
+      statusCode: 400,
+      success: false,
+      isGraphql: false,
+      code: "INTERNAL_SERVER_ERROR",
+      message: error.message,
+      data: null,
+    });
   } finally {
     await deleteFromLocalServer(filePath!);
   }

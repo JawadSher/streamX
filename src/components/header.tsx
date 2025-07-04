@@ -23,7 +23,7 @@ import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import Link from "next/link";
 import TopHeader from "./account-page-components/top-header";
 import useWindowWidth from "@/hooks/useWindowWidth";

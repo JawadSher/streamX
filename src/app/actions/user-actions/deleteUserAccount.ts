@@ -6,7 +6,7 @@ import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import notifyKakfa from "@/lib/notifyKafka";
 import { authSignOut } from "../auth-actions/authSignOut.action";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { redirect } from "next/navigation";
 
 export async function deleteUserAccount() {

@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Toaster } from "sonner";
 import { GoogleProviderBtn } from "./authProviderBtns";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { useRouter } from "next/navigation";
 import { signinHandler } from "@/auth-handlers/signinHandler";
 import { useSession } from "next-auth/react";

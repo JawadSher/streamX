@@ -2,7 +2,7 @@ import { USER_ACCNT_DELETE } from "@/graphql/mutations/user-account-mutations/us
 import { USER_ACCNT_PASSWD_UPDATE } from "@/graphql/mutations/user-account-mutations/userAccountPasswdUpdate";
 import { USER_ACCNT_UPDATE } from "@/graphql/mutations/user-account-mutations/userAccountUpdate";
 import { USER_ACCNT_VERIFY } from "@/graphql/mutations/user-account-mutations/userAccountVerify";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { persistPurge } from "@/lib/persistPurge";
 import { clearUser } from "@/store/features/user/userSlice";

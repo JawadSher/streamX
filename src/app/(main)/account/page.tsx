@@ -3,7 +3,7 @@ import React, { Suspense } from "react";
 import AccountForm from "@/components/account-page-components/account-form";
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import { redirect } from "next/navigation";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 
 export const revalidate = 60;
 

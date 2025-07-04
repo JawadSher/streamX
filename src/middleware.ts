@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ROUTES } from "./lib/api/ApiRoutes";
+import { ROUTES } from "./constants/ApiRoutes";
 import { verifyAuth } from "./lib/verifyAuth";
 import { tokenLimiter } from "./lib/tokenLimiter";
 

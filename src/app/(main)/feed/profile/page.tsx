@@ -6,7 +6,7 @@ import LikedVideos from "@/components/profile-page-components/liked-videos";
 import Playlists from "@/components/profile-page-components/playlists";
 import UserProfile from "@/components/profile-page-components/user-profile";
 import WatchLater from "@/components/profile-page-components/watch-later";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { fullname } from "@/lib/fullname";
 import { imagePaths } from "@/lib/ImagePaths";
 import { updateUser } from "@/store/features/user/userSlice";

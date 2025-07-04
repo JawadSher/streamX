@@ -2,7 +2,7 @@
 
 import { loginSchema } from "@/schemas/loginSchema";
 import { signIn, signOut } from "@/app/api/auth/[...nextauth]/configs";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";

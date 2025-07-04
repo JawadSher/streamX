@@ -3,7 +3,7 @@
 import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import Link from "next/link";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { usePathname } from "next/navigation";
 
 const TopHeader = () => {

@@ -3,7 +3,7 @@
 import { auth, signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { actionError } from "@/lib/actions-templates/ActionError";
 import { actionResponse } from "@/lib/actions-templates/ActionResponse";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { connectRedis } from "@/lib/redis";
 import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import { redirect } from "next/navigation";

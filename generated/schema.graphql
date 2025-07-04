@@ -15,6 +15,9 @@ type Query {
   getUser: UserResponse
 }
 
+"""A file upload scalar"""
+scalar Upload
+
 type UserAccountData {
   error: String
   null: String
@@ -67,6 +70,19 @@ type UserAccountVerifyData {
   coolDownTime: String
   error: String
   null: String
+}
+
+type UserAssetsUploadData {
+  error: String
+  null: String
+}
+
+type UserAssetsUploadResponse {
+  code: String
+  data: UserAssetsUploadData
+  message: String
+  statusCode: Int
+  success: Boolean
 }
 
 type UserData {

@@ -3,7 +3,7 @@
 import { Toaster } from "../ui/sonner";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import PasswordUpdate from "./password-update";
 import AccountDelete from "./account-delete";
 

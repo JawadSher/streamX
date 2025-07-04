@@ -1,7 +1,7 @@
 import Container from "./container";
 import VideoCard from "../video-card/video-card";
 import Link from "next/link";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { API_ROUTES } from "@/constants/ApiRoutes";
 
 
 const DisLikedVideos = ({ disLikedVideos }: { disLikedVideos: string[]}) => {

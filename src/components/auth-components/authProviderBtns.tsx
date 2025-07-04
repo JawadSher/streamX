@@ -1,6 +1,6 @@
 "use client";
 
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { Button } from "../ui/button";
 import { signIn } from "next-auth/react";
 

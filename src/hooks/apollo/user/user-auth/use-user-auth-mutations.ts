@@ -1,4 +1,4 @@
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";

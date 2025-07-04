@@ -5,7 +5,7 @@ import {
     SidebarHeader,
   } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 
 const SideBarTop = ({state}: {state: string}) => {
   return (

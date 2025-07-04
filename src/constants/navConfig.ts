@@ -1,4 +1,4 @@
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 
 export const mediaSectionItems = [
   {

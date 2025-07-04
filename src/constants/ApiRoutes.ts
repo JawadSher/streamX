@@ -22,7 +22,7 @@ export const ROUTES = {
   },
   API_ROUTES: {
     USER_DATA_FETCH: "/api/user",
-    USER_ASSETS_UPLOAD: "/api/user/assets",
+    USER_ASSETS_UPLOAD: "/api/user/upload",
     USER_AUTH_SIGN_IN: "/api/user/auth/sign-in",
     USER_AUTH_SIGN_OUT: "/api/user/auth/sign-out",
     USER_AUTH_SIGN_UP: "/api/user/auth/sign-up",

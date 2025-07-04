@@ -1,8 +1,8 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
+import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
 const httpLink = createHttpLink({
-  uri: `/api/graphql`,
+  uri: "/api/graphql",
   credentials: "include",
 });
 
@@ -20,6 +20,7 @@ export const apolloClient = new ApolloClient({
   defaultOptions: {
     watchQuery: {
       errorPolicy: "all",
+      fetchPolicy: "cache-and-network",
     },
     query: {
       errorPolicy: "all",

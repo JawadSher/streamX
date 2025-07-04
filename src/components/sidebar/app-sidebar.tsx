@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import SideBarTop from "./sidebar-header";
 import { Separator } from "../ui/separator";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import SidebarBottom from "./sidebar-footer";
 import { Suspense } from "react";
 import UserSkeleton from "../skeletons/user-skeleton";

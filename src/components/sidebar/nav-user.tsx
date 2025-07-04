@@ -25,7 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Image from "next/legacy/image";
-import { ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import Link from "next/link";
 import { useState } from "react";
 import { logoutHandler } from "@/auth-handlers/logoutHandler";
