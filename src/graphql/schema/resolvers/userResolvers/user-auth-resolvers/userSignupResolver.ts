@@ -74,7 +74,7 @@ export const UserSignupMutation = extendType({
         email: nonNull(stringArg()),
         password: nonNull(stringArg()),
       },
-      resolve: async (_parnt, args, _ctx) => {
+      resolve: async (_parnt, args, _) => {
         try {
           const { firstName, lastName, userName, email, password } = args;
 

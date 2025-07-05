@@ -1,5 +1,4 @@
 import { useAppSelector } from "@/hooks/redux.hooks";
-import { IGetUserProfile } from "@/interfaces/IGetUserProfile";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { RootState } from "@/store/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";

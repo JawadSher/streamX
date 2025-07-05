@@ -12,7 +12,7 @@ export const UserAccountDeleteMutation = extendType({
   definition(t) {
     t.field("userAccountDel", {
       type: "UserAccountDeleteResponse",
-      resolve: async (_parnt, _args, ctx) => {
+      resolve: async (_parnt, _, ctx) => {
         try {
           const { user: authUser } = ctx;
           if (

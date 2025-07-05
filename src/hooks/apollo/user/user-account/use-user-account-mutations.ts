@@ -27,7 +27,7 @@ export const useUserAccountUpdate = () => {
   });
 };
 
-export const userAccountVerification = () => {
+export const useUserAccountVerification = () => {
   return useMutation(USER_ACCNT_VERIFY, {
     onCompleted: async (res) => {
       toast.success(res.userAccountVerify.message, {

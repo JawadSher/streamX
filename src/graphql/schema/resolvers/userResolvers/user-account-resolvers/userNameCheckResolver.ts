@@ -25,7 +25,7 @@ export const UserNameCheckQuery = extendType({
         userName: stringArg(),
         isAuthentic: booleanArg(),
       },
-      resolve: async (_parnt, args, _ctx) => {
+      resolve: async (_parnt, args, _) => {
         try {
           const { userName, isAuthentic } = args;
           if (!isAuthentic) {

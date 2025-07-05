@@ -21,6 +21,7 @@ import DislikedVideos from "@/components/profile-page-components/disliked-videos
 import { useRouter } from "next/navigation";
 
 const Profile = () => {
+  const { data, loading, error } = useUserProfile();
   const dispatch = useDispatch();
   const { data: session, status } = useSession();
   const [userProfileData, setUserProfileData] = useState<any>(null);
@@ -30,7 +31,6 @@ const Profile = () => {
     return router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
   }
 
-  const { data, loading, error } = useUserProfile();
   useEffect(() => {
     if (error) {
       toast.error(error.message || "Failed to fetch user profile", {

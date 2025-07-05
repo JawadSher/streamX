@@ -32,7 +32,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "@/store/features/user/userSlice";
 import AnimatedTick from "../animated-check";
 import { RootState } from "@/store/store";
-import { userAccountVerification } from "@/hooks/apollo";
+import { useUserAccountVerification } from "@/hooks/apollo";
 
 type State = {
   isSended: boolean;
@@ -79,7 +79,7 @@ export function VerifyAccountForm() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const dispatchRedux = useDispatch();
-  const [userAccountVerify, { data, loading }] = userAccountVerification();
+  const [userAccountVerify, { data, loading }] = useUserAccountVerification();
 
   useEffect(() => {
     if (coolDownTime) {

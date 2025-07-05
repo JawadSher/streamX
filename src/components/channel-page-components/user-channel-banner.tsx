@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/legacy/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { imagePaths } from "@/lib/ImagePaths";
 import SelectBannerImage from "./select-Banner-Image";
 
@@ -12,7 +12,7 @@ function UserChannelBanner({
   className?: string;
   bannerImage?: string;
 }) {
-  const [bannerImg, setBannerImg] = useState<string | null>(
+  const [bannerImg, _setBannerImg] = useState<string | null>(
     bannerImage || imagePaths.defaultBanner
   );
 

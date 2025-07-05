@@ -14,7 +14,7 @@ export const imageFileTypeChecker = async (filePath: string): Promise<boolean> =
     const normalizedExt = detected.ext === "jpeg" ? "jpg" : detected.ext;
 
     return imageFileConfigs.ALLOWED_FILE_TYPES.includes(normalizedExt as any);
-  } catch (err: any) {
+  } catch (_) {
     return false;
   }
 };

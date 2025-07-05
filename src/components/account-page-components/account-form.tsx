@@ -105,22 +105,16 @@ const AccountForm = () => {
     },
   });
 
-  if (!initialData) {
-    return (
-      <div className="text-red-500 text-center">No user data available.</div>
-    );
-  }
-
   const toggleEditableField = (fieldName: string) => {
     dispatch({ type: "TOGGLE_EDITABLE", field: fieldName });
   };
 
   useEffect(() => {
     const isChanged =
-      state.firstName !== (initialData.firstName || "") ||
-      state.lastName !== (initialData.lastName || "") ||
-      state.phoneNumber !== (initialData.phoneNumber || "") ||
-      state.country !== (initialData.country || "");
+      state.firstName !== (initialData?.firstName || "") ||
+      state.lastName !== (initialData?.lastName || "") ||
+      state.phoneNumber !== (initialData?.phoneNumber || "") ||
+      state.country !== (initialData?.country || "");
 
     dispatch({ type: "SET_BTN_DISABLED", value: isChanged });
   }, [
@@ -201,6 +195,12 @@ const AccountForm = () => {
       dispatch({ type: "SET_BTN_DISABLED", value: false });
     }
   }, [data]);
+
+  if (!initialData) {
+    return (
+      <div className="text-red-500 text-center">No user data available.</div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto p-6 md:border-1 md:rounded-2xl">

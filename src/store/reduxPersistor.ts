@@ -3,13 +3,11 @@ import { combineReducers } from '@reduxjs/toolkit';
 import type { Storage } from 'redux-persist';
 
 let persistReducerFn: typeof import('redux-persist').persistReducer;
-let persistStoreFn: typeof import('redux-persist').persistStore;
 let storage: Storage;
 
 export async function setupPersist() {
   const persist = await import('redux-persist');
   persistReducerFn = persist.persistReducer;
-  persistStoreFn = persist.persistStore;
 
   storage = {
     getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),

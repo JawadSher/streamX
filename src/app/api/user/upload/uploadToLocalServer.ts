@@ -36,7 +36,7 @@ export const uploadToLocalServer = async (file: File) => {
      return ({
       statusCode: 400,
       status: false, 
-      message: "Failed to upload file.",
+      message: error.message || "Failed to upload file.",
     });
   }
 };
