@@ -18,6 +18,7 @@ import MainSidebarContent from "./sidebar-content";
 import AccountSidebarContent from "../account-page-components/account-sidebar-content";
 import { mediaSectionItems, userSectionItems } from "@/constants/navConfig";
 import { useUser } from "@/store/features/user/userSlice";
+import { useSession } from "next-auth/react";
 
 const navItems = {
   mediaItems: mediaSectionItems,
@@ -25,18 +26,14 @@ const navItems = {
 
   subscriptionItems: [
     { title: "XYZ", url: `${ROUTES.PAGES_ROUTES.CHANNEL}`, avatar: "" },
-    
   ],
 };
 
-export function AppSidebar({
-  status
-}: {
-  status: string;
-}) {
+export function AppSidebar() {
   const { state } = useSidebar();
   const path = usePathname();
   const userData = useUser();
+  const { status } = useSession();
 
   return (
     <Sidebar

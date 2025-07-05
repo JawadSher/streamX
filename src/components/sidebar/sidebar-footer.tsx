@@ -1,4 +1,3 @@
-import React from "react";
 import { NavUser } from "./nav-user";
 import Image from "next/legacy/image";
 import Link from "next/link";

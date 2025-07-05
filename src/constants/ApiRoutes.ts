@@ -21,16 +21,7 @@ export const ROUTES = {
     USER_UPDATE: "/user-update",
   },
   API_ROUTES: {
-    USER_DATA_FETCH: "/api/user",
     USER_ASSETS_UPLOAD: "/api/user/upload",
-    USER_AUTH_SIGN_IN: "/api/user/auth/sign-in",
-    USER_AUTH_SIGN_OUT: "/api/user/auth/sign-out",
-    USER_AUTH_SIGN_UP: "/api/user/auth/sign-up",
-    USER_NAME_CHECK: "/api/user/check-username",
-    USER_ACCNT_DELETE: "/api/user/delete-account",
     USER_PROFILE_FETCH: "/api/user/profile",
-    USER_ACCNT_UPDATE: "/api/user/update",
-    USER_ACCNT_PASSWD_UPDATE: "/api/user/update/passwd",
-    USER_ACCNT_VERIFY: "/api/user/verify",
   },
 };
