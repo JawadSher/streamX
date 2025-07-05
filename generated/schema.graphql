@@ -12,11 +12,9 @@ type Mutation {
 
 type Query {
   checkUserName(isAuthentic: Boolean, userName: String): UserNameCheckResponse
+  getProfile: UserProfileResponse
   getUser: UserResponse
 }
-
-"""A file upload scalar"""
-scalar Upload
 
 type UserAccountData {
   error: String
@@ -72,19 +70,6 @@ type UserAccountVerifyData {
   null: String
 }
 
-type UserAssetsUploadData {
-  error: String
-  null: String
-}
-
-type UserAssetsUploadResponse {
-  code: String
-  data: UserAssetsUploadData
-  message: String
-  statusCode: Int
-  success: Boolean
-}
-
 type UserData {
   _id: String
   accountStatus: String
@@ -121,6 +106,14 @@ type UserNameCheckResponse {
   success: Boolean
 }
 
+type UserProfileResponse {
+  code: String
+  data: userProfileData
+  message: String
+  statusCode: Int
+  success: Boolean
+}
+
 type UserResponse {
   code: String
   data: UserData
@@ -140,6 +133,13 @@ type UserSignupResponse {
 type coolDown {
   coolDownTime: String
   success: Boolean
+}
+
+type userProfileData {
+  disLikedVideos: [String]
+  likedVideos: [String]
+  watchHistory: [String]
+  watchLater: [String]
 }
 
 type userSignUpData {

@@ -1,46 +1,83 @@
 "use client";
 
-import DislikedVideos from "@/components/profile-page-components/disliked-videos";
-import History from "@/components/profile-page-components/history";
-import LikedVideos from "@/components/profile-page-components/liked-videos";
-import Playlists from "@/components/profile-page-components/playlists";
-import UserProfile from "@/components/profile-page-components/user-profile";
-import WatchLater from "@/components/profile-page-components/watch-later";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
 import { ROUTES } from "@/constants/ApiRoutes";
+import { useUserProfile } from "@/hooks/apollo/user/user-profile/use-user-profile-queries";
+import { setUserProfile } from "@/store/features/user/userSlice";
+import { RootState } from "@/store/store";
 import { fullname } from "@/lib/fullname";
 import { imagePaths } from "@/lib/ImagePaths";
-import { updateUser } from "@/store/features/user/userSlice";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { useDispatch } from "react-redux";
+
+import UserProfile from "@/components/profile-page-components/user-profile";
+import History from "@/components/profile-page-components/history";
+import Playlists from "@/components/profile-page-components/playlists";
+import WatchLater from "@/components/profile-page-components/watch-later";
+import LikedVideos from "@/components/profile-page-components/liked-videos";
+import DislikedVideos from "@/components/profile-page-components/disliked-videos";
+import { useRouter } from "next/navigation";
 
 const Profile = () => {
-  const {data:session} = useSession();
-  if (!session?.user?._id) return redirect(ROUTES.PAGES_ROUTES.SIGN_IN);
+  const dispatch = useDispatch();
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  
-  let fullName = "";
-  // if ("data" in response && response.statusCode === 200) {
-  //   const userData = response.data;
-  //   fullName = fullname({
-  //     firstName: userData.firstName,
-  //     lastName: userData.lastName,
-  //     userName: userData.userName,
-  //   });
-  // }
+  if (!session?.user?._id || status !== "authenticated") {
+    return router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
+  }
+
+  const { data, loading, error } = useUserProfile();
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || "Failed to fetch user profile", {
+        duration: 3000,
+      });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (data?.getProfile?.statusCode === 200 || data?.getProfile?.success) {
+      dispatch(setUserProfile(data.getProfile.data));
+    }
+  }, [data, dispatch]);
+
+  const userData = useSelector((state: RootState) => state.user.userData);
+  const profileData = useSelector(
+    (state: RootState) => state.user.userProfileData
+  );
+
+  const fullName = fullname({
+    firstName: userData?.firstName,
+    lastName: userData?.lastName,
+    userName: userData?.userName,
+  });
+
+  const avatarURL = userData?.avatarURL || imagePaths.defaultUserLogo;
+
+  if (loading || !profileData) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="animate-spin" size={28} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full h-full flex-grow gap-3">
-      {/* <UserProfile
+      <UserProfile
         fullName={fullName}
-        userName={response.data.userName}
-        avatarURL={response.data?.avatar || imagePaths.defaultUserLogo}
+        userName={userData?.userName}
+        avatarURL={avatarURL}
       />
-      <History watchHistory={response.data.watchHistory} />
+      <History watchHistory={profileData.watchHistory || []} />
       <Playlists />
-      <WatchLater watchLater={response.data.watchLater} />
-      <LikedVideos likedVideos={response.data.likedVideos} />
-      <DislikedVideos disLikedVideos={response.data.disLikedVideos} /> */}
+      <WatchLater watchLater={profileData.watchLater || []} />
+      <LikedVideos likedVideos={profileData.likedVideos || []} />
+      <DislikedVideos disLikedVideos={profileData.disLikedVideos || []} />
     </div>
   );
 };

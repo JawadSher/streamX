@@ -5,5 +5,4 @@ export * from "@/graphql/schema/types/user/user-account/AccountUpdate";
 export * from "@/graphql/schema/types/user/user-account/AccountVerify";
 export * from "@/graphql/schema/types/user/user-account/AccountPasswdUpdate";
 export * from "@/graphql/schema/types/user/user-account/Username";
-export * from "@/graphql/schema/types/user/user-asset/userAssetsUpload";
-export * from "@/graphql/schema/types/user/user-asset/upload";
+export * from "@/graphql/schema/types/user/user-profile/userProfile";

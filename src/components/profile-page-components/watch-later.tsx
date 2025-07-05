@@ -1,11 +1,11 @@
 import Container from "./container";
 import VideoCard from "../video-card/video-card";
 import Link from "next/link";
-import { API_ROUTES } from "@/constants/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 
 
-const WatchLater = ({ watchLater }: { watchLater: string[]}) => {
-  const isEmpty = watchLater.length === 0 ? true : false;
+const WatchLater = ({ watchLater }: { watchLater: string[] | null | undefined}) => {
+  const isEmpty = watchLater && watchLater.length === 0 ? true : false;
 
   return (
     <Container className="flex flex-col gap-2">
@@ -13,7 +13,7 @@ const WatchLater = ({ watchLater }: { watchLater: string[]}) => {
         <h1 className="text-xl font-semibold">Watch later</h1>
         <p className="text-[14px] text-zinc-400">
           Want to revisit your saved watched content?
-          <Link href={API_ROUTES.WATCH_LATER} className="text-blue-500 ml-1 hover:underline">
+          <Link href={ROUTES.PAGES_ROUTES.WATCH_LATER} className="text-blue-500 ml-1 hover:underline">
             click here
           </Link>
         </p>

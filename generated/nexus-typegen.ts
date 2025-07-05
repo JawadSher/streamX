@@ -5,23 +5,8 @@
 
 
 import type { Context } from "./../src/graphql/context"
-import type { core } from "nexus"
-declare global {
-  interface NexusGenCustomInputMethods<TypeName extends string> {
-    /**
-     * A file upload scalar
-     */
-    upload<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "Upload";
-  }
-}
-declare global {
-  interface NexusGenCustomOutputMethods<TypeName extends string> {
-    /**
-     * A file upload scalar
-     */
-    upload<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "Upload";
-  }
-}
+
+
 
 
 declare global {
@@ -40,7 +25,6 @@ export interface NexusGenScalars {
   Float: number
   Boolean: boolean
   ID: string
-  Upload: any
 }
 
 export interface NexusGenObjects {
@@ -92,17 +76,6 @@ export interface NexusGenObjects {
     error?: string | null; // String
     null?: string | null; // String
   }
-  UserAssetsUploadData: { // root type
-    error?: string | null; // String
-    null?: string | null; // String
-  }
-  UserAssetsUploadResponse: { // root type
-    code?: string | null; // String
-    data?: NexusGenRootTypes['UserAssetsUploadData'] | null; // UserAssetsUploadData
-    message?: string | null; // String
-    statusCode?: number | null; // Int
-    success?: boolean | null; // Boolean
-  }
   UserData: { // root type
     _id?: string | null; // String
     accountStatus?: string | null; // String
@@ -136,6 +109,13 @@ export interface NexusGenObjects {
     statusCode?: number | null; // Int
     success?: boolean | null; // Boolean
   }
+  UserProfileResponse: { // root type
+    code?: string | null; // String
+    data?: NexusGenRootTypes['userProfileData'] | null; // userProfileData
+    message?: string | null; // String
+    statusCode?: number | null; // Int
+    success?: boolean | null; // Boolean
+  }
   UserResponse: { // root type
     code?: string | null; // String
     data?: NexusGenRootTypes['UserData'] | null; // UserData
@@ -153,6 +133,12 @@ export interface NexusGenObjects {
   coolDown: { // root type
     coolDownTime?: string | null; // String
     success?: boolean | null; // Boolean
+  }
+  userProfileData: { // root type
+    disLikedVideos?: Array<string | null> | null; // [String]
+    likedVideos?: Array<string | null> | null; // [String]
+    watchHistory?: Array<string | null> | null; // [String]
+    watchLater?: Array<string | null> | null; // [String]
   }
   userSignUpData: { // root type
     error?: string | null; // String
@@ -179,6 +165,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     checkUserName: NexusGenRootTypes['UserNameCheckResponse'] | null; // UserNameCheckResponse
+    getProfile: NexusGenRootTypes['UserProfileResponse'] | null; // UserProfileResponse
     getUser: NexusGenRootTypes['UserResponse'] | null; // UserResponse
   }
   UserAccountData: { // field return type
@@ -227,17 +214,6 @@ export interface NexusGenFieldTypes {
     error: string | null; // String
     null: string | null; // String
   }
-  UserAssetsUploadData: { // field return type
-    error: string | null; // String
-    null: string | null; // String
-  }
-  UserAssetsUploadResponse: { // field return type
-    code: string | null; // String
-    data: NexusGenRootTypes['UserAssetsUploadData'] | null; // UserAssetsUploadData
-    message: string | null; // String
-    statusCode: number | null; // Int
-    success: boolean | null; // Boolean
-  }
   UserData: { // field return type
     _id: string | null; // String
     accountStatus: string | null; // String
@@ -271,6 +247,13 @@ export interface NexusGenFieldTypes {
     statusCode: number | null; // Int
     success: boolean | null; // Boolean
   }
+  UserProfileResponse: { // field return type
+    code: string | null; // String
+    data: NexusGenRootTypes['userProfileData'] | null; // userProfileData
+    message: string | null; // String
+    statusCode: number | null; // Int
+    success: boolean | null; // Boolean
+  }
   UserResponse: { // field return type
     code: string | null; // String
     data: NexusGenRootTypes['UserData'] | null; // UserData
@@ -289,6 +272,12 @@ export interface NexusGenFieldTypes {
     coolDownTime: string | null; // String
     success: boolean | null; // Boolean
   }
+  userProfileData: { // field return type
+    disLikedVideos: Array<string | null> | null; // [String]
+    likedVideos: Array<string | null> | null; // [String]
+    watchHistory: Array<string | null> | null; // [String]
+    watchLater: Array<string | null> | null; // [String]
+  }
   userSignUpData: { // field return type
     error: string | null; // String
   }
@@ -304,6 +293,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     checkUserName: 'UserNameCheckResponse'
+    getProfile: 'UserProfileResponse'
     getUser: 'UserResponse'
   }
   UserAccountData: { // field return type name
@@ -352,17 +342,6 @@ export interface NexusGenFieldTypeNames {
     error: 'String'
     null: 'String'
   }
-  UserAssetsUploadData: { // field return type name
-    error: 'String'
-    null: 'String'
-  }
-  UserAssetsUploadResponse: { // field return type name
-    code: 'String'
-    data: 'UserAssetsUploadData'
-    message: 'String'
-    statusCode: 'Int'
-    success: 'Boolean'
-  }
   UserData: { // field return type name
     _id: 'String'
     accountStatus: 'String'
@@ -396,6 +375,13 @@ export interface NexusGenFieldTypeNames {
     statusCode: 'Int'
     success: 'Boolean'
   }
+  UserProfileResponse: { // field return type name
+    code: 'String'
+    data: 'userProfileData'
+    message: 'String'
+    statusCode: 'Int'
+    success: 'Boolean'
+  }
   UserResponse: { // field return type name
     code: 'String'
     data: 'UserData'
@@ -413,6 +399,12 @@ export interface NexusGenFieldTypeNames {
   coolDown: { // field return type name
     coolDownTime: 'String'
     success: 'Boolean'
+  }
+  userProfileData: { // field return type name
+    disLikedVideos: 'String'
+    likedVideos: 'String'
+    watchHistory: 'String'
+    watchLater: 'String'
   }
   userSignUpData: { // field return type name
     error: 'String'
