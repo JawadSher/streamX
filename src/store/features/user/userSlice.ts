@@ -6,14 +6,14 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface IUser {
   userData: IRedisDBUser | null;
-  userProfileData: IGetUserProfile | null;
+  // userProfileData: IGetUserProfile | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const initialState: IUser = {
   userData: null,
-  userProfileData: null,
+  // userProfileData: null,
   isLoading: false,
   error: null,
 };
@@ -42,12 +42,12 @@ export const userSlice = createSlice({
     clearUser: (state) => {
       state.userData = null;
     },
-    setUserProfile: (state, action: PayloadAction<IGetUserProfile>) => {
-      state.userProfileData = action.payload;
-    },
-    clearUserProfile: (state) => {
-      state.userProfileData = null;
-    },
+    // setUserProfile: (state, action: PayloadAction<IGetUserProfile>) => {
+    //   state.userProfileData = action.payload;
+    // },
+    // clearUserProfile: (state) => {
+    //   state.userProfileData = null;
+    // },
   },
 });
 
@@ -58,8 +58,8 @@ export const {
   setUser,
   updateUser,
   clearUser,
-  setUserProfile,
-  clearUserProfile,
+  // setUserProfile,
+  // clearUserProfile,
   setLoading,
   setError,
 } = userSlice.actions;

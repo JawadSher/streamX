@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -8,7 +8,6 @@ import { Loader2 } from "lucide-react";
 
 import { ROUTES } from "@/constants/ApiRoutes";
 import { useUserProfile } from "@/hooks/apollo/user/user-profile/use-user-profile-queries";
-import { setUserProfile } from "@/store/features/user/userSlice";
 import { RootState } from "@/store/store";
 import { fullname } from "@/lib/fullname";
 import { imagePaths } from "@/lib/ImagePaths";
@@ -24,6 +23,7 @@ import { useRouter } from "next/navigation";
 const Profile = () => {
   const dispatch = useDispatch();
   const { data: session, status } = useSession();
+  const [userProfileData, setUserProfileData] = useState<any>(null);
   const router = useRouter();
 
   if (!session?.user?._id || status !== "authenticated") {
@@ -41,14 +41,15 @@ const Profile = () => {
 
   useEffect(() => {
     if (data?.getProfile?.statusCode === 200 || data?.getProfile?.success) {
-      dispatch(setUserProfile(data.getProfile.data));
+      // dispatch(setUserProfile(data.getProfile.data));
+      setUserProfileData(data.getProfile.data);
     }
   }, [data, dispatch]);
 
   const userData = useSelector((state: RootState) => state.user.userData);
-  const profileData = useSelector(
-    (state: RootState) => state.user.userProfileData
-  );
+  // const profileData = useSelector(
+  //   (state: RootState) => state.user.userProfileData
+  // );
 
   const fullName = fullname({
     firstName: userData?.firstName,
@@ -58,7 +59,7 @@ const Profile = () => {
 
   const avatarURL = userData?.avatarURL || imagePaths.defaultUserLogo;
 
-  if (loading || !profileData) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="animate-spin" size={28} />
@@ -73,11 +74,11 @@ const Profile = () => {
         userName={userData?.userName}
         avatarURL={avatarURL}
       />
-      <History watchHistory={profileData.watchHistory || []} />
+      <History watchHistory={userProfileData.watchHistory || []} />
       <Playlists />
-      <WatchLater watchLater={profileData.watchLater || []} />
-      <LikedVideos likedVideos={profileData.likedVideos || []} />
-      <DislikedVideos disLikedVideos={profileData.disLikedVideos || []} />
+      <WatchLater watchLater={userProfileData.watchLater || []} />
+      <LikedVideos likedVideos={userProfileData.likedVideos || []} />
+      <DislikedVideos disLikedVideos={userProfileData.disLikedVideos || []} />
     </div>
   );
 };
