@@ -10,7 +10,7 @@ export const UserProfileQuery = extendType({
   definition(t) {
     t.field("getProfile", {
       type: "UserProfileResponse",
-      resolve: async (_parnt, _, ctx) => {
+      resolve: async (ctx) => {
         try {
           const { user: authUser } = ctx;
 

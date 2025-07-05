@@ -25,7 +25,7 @@ export const UserAccountPasswdUpdateMutation = extendType({
       args: {
         password: nonNull(stringArg()),
       },
-      resolve: async (_parent, args, ctx) => {
+      resolve: async (args, ctx) => {
         try {
           const { user: authUser } = ctx;
 

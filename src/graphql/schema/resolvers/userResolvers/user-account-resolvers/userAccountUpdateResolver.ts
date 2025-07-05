@@ -18,7 +18,7 @@ export const UserAccountUpdateMutation = extendType({
         country: stringArg(),
         phoneNumber: stringArg(),
       },
-      resolve: async (_parnt, args, ctx) => {
+      resolve: async (args, ctx) => {
         try {
           const { user: authUser } = ctx;
           if (

@@ -13,7 +13,7 @@ export const UserQuery = extendType({
   definition(t) {
     t.field("getUser", {
       type: "UserResponse",
-      resolve: async (_parnt, _, ctx) => {
+      resolve: async (ctx) => {
         try {
           const { user: authUser } = ctx;
 

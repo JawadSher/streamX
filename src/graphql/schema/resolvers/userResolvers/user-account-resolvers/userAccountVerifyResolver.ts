@@ -63,7 +63,7 @@ export const UserAccountVerifyMutation = extendType({
         state: stringArg(),
         u_OTP: nullable(stringArg()),
       },
-      resolve: async (_, args, ctx) => {
+      resolve: async (args, ctx) => {
         try {
           const { user: authUser } = ctx;
           const userId = authUser._id;
