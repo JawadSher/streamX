@@ -199,7 +199,7 @@ function UserAvatarChange({ className }: { className?: string }) {
         state: "croppedFile",
         value: file,
       });
-    } catch (_) {
+    } catch {
       dispatch({
         type: "SET_ERROR",
         error: {

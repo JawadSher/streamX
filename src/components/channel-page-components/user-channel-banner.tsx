@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/legacy/image";
-import { useState } from "react";
 import { imagePaths } from "@/lib/ImagePaths";
 import SelectBannerImage from "./select-Banner-Image";
 
@@ -12,9 +11,7 @@ function UserChannelBanner({
   className?: string;
   bannerImage?: string;
 }) {
-  const [bannerImg, _setBannerImg] = useState<string | null>(
-    bannerImage || imagePaths.defaultBanner
-  );
+  const bannerImg = bannerImage || imagePaths.defaultBanner;
 
   return (
     <div

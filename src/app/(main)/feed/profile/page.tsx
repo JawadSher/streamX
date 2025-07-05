@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -21,15 +21,26 @@ import DislikedVideos from "@/components/profile-page-components/disliked-videos
 import { useRouter } from "next/navigation";
 
 const Profile = () => {
-  const { data, loading, error } = useUserProfile();
-  const dispatch = useDispatch();
-  const { data: session, status } = useSession();
-  const [userProfileData, setUserProfileData] = useState<any>(null);
   const router = useRouter();
 
-  if (!session?.user?._id || status !== "authenticated") {
-    return router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
-  }
+  const { data: session, status } = useSession();
+  const { data, loading, error } = useUserProfile();
+  const [userProfileData, setUserProfileData] = useState<any>(null);
+  const userData = useSelector((state: RootState) => state.user.userData);
+
+  const fullName = fullname({
+    firstName: userData?.firstName,
+    lastName: userData?.lastName,
+    userName: userData?.userName,
+  });
+
+  const avatarURL = userData?.avatarURL || imagePaths.defaultUserLogo;
+
+  useEffect(() => {
+    if (!session?.user?._id && status !== "loading") {
+      router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
+    }
+  }, [session, status, router]);
 
   useEffect(() => {
     if (error) {
@@ -41,25 +52,11 @@ const Profile = () => {
 
   useEffect(() => {
     if (data?.getProfile?.statusCode === 200 || data?.getProfile?.success) {
-      // dispatch(setUserProfile(data.getProfile.data));
       setUserProfileData(data.getProfile.data);
     }
-  }, [data, dispatch]);
+  }, [data]);
 
-  const userData = useSelector((state: RootState) => state.user.userData);
-  // const profileData = useSelector(
-  //   (state: RootState) => state.user.userProfileData
-  // );
-
-  const fullName = fullname({
-    firstName: userData?.firstName,
-    lastName: userData?.lastName,
-    userName: userData?.userName,
-  });
-
-  const avatarURL = userData?.avatarURL || imagePaths.defaultUserLogo;
-
-  if (loading) {
+  if (status === "loading" || loading || !session?.user?._id) {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="animate-spin" size={28} />
@@ -74,11 +71,11 @@ const Profile = () => {
         userName={userData?.userName}
         avatarURL={avatarURL}
       />
-      <History watchHistory={userProfileData.watchHistory || []} />
+      <History watchHistory={userProfileData?.watchHistory || []} />
       <Playlists />
-      <WatchLater watchLater={userProfileData.watchLater || []} />
-      <LikedVideos likedVideos={userProfileData.likedVideos || []} />
-      <DislikedVideos disLikedVideos={userProfileData.disLikedVideos || []} />
+      <WatchLater watchLater={userProfileData?.watchLater || []} />
+      <LikedVideos likedVideos={userProfileData?.likedVideos || []} />
+      <DislikedVideos disLikedVideos={userProfileData?.disLikedVideos || []} />
     </div>
   );
 };
