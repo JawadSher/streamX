@@ -56,7 +56,7 @@ export async function getUserFromRedis(
       accountStatus: userData.accountStatus,
       bannerURL: userData.banner,
       avatarURL: userData.avatar,
-      isVerified: userData.isVerified,
+      isVerified: userData.isVerified === "true" ? true : false,
       bio: userData.bio,
       country: userData.country,
       phoneNumber: userData.phoneNumber,
