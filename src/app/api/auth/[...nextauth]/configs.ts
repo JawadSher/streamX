@@ -1,15 +1,18 @@
 import NextAuth, { NextAuthConfig, Session, User } from "next-auth";
-import { connectDB } from "@/lib/database";
 import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
-import loginSchema from "@/schemas/loginSchema";
 import * as bcrypt from "bcryptjs";
 import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import notifyKakfa from "@/lib/notifyKafka";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
+import loginSchema from "@/schemas/loginSchema";
+import { validateUserCredentials } from "@/lib/validateUserCredentials";
+
+const authConfigs = await initAuthConfigs();
+const handler = NextAuth(authConfigs);
 
 export async function initAuthConfigs() {
   const authConfigs: NextAuthConfig = {
@@ -20,41 +23,41 @@ export async function initAuthConfigs() {
           password: { label: "Password", type: "password" },
         },
         authorize: async (credentials) => {
-          if (!credentials?.email || !credentials?.password) return null;
-          const userData = {
-            email: credentials.email,
-            password: credentials.password,
-          };
-
           try {
-            const { email, password } = await loginSchema.parseAsync(userData);
-
-            await connectDB();
-            const existingUser = await UserModel.findOne({ email });
-
-            if (!existingUser) {
-              throw new Error("Invalid email or password");
+            if (!credentials?.email || !credentials?.password) {
+              throw new Error("Email & Password is required");
             }
 
-            const isPasswdCorrect = await existingUser.isPasswordCorrect(
-              password
+            const result = loginSchema.safeParse({
+              email: credentials.email,
+              password: credentials.password,
+            });
+
+            if (!result.success) {
+              const fieldErrors = result.error.flatten().fieldErrors;
+              const message = Object.values(fieldErrors).flat().join(" | ");
+
+              throw new Error(message);
+            }
+
+            const { success } = await validateUserCredentials(
+              credentials.email?.toString(),
+              credentials.password?.toString()
             );
 
-            if (!isPasswdCorrect) {
-              throw new Error("Invalid email or password");
+            if (!success) {
+              throw new Error("Invalid credentials");
             }
-            
+
+            const email = credentials?.email as string;
             const userInfo = await fetchUserFromMongoDB({ email });
-            await storeUserInRedis(userInfo);
+            await storeUserInRedis(userInfo as IRedisDBUser);
 
-            const user =  {
-              _id: existingUser._id.toString(),
+            return {
+              _id: userInfo._id.toString(),
             };
-
-            return user;
-          } catch (error) {
-            console.error("Authorization error: ", error);
-            return null;
+          } catch (error: any) {
+            throw new Error(error.message);
           }
         },
       }),
@@ -90,7 +93,7 @@ export async function initAuthConfigs() {
             const newUserData = {
               firstName: profile?.given_name || "",
               lastName: profile?.family_name || "",
-              userName: "@"+user.email?.split("@")[0].replace(".", ""),
+              userName: "@" + user.email?.split("@")[0].replace(".", ""),
               email: user.email,
               channelName: `${user.email?.split("@")[0]}-Channel`,
               isVerified: true,
@@ -101,46 +104,31 @@ export async function initAuthConfigs() {
             };
 
             try {
-              await notifyKakfa({userData: newUserData, action: "sign-up"});
+              await notifyKakfa({ userData: newUserData, action: "sign-up" });
               await new Promise((resolve) => setTimeout(resolve, 1500));
-
-              const newUser = await fetchUserFromMongoDB({
-                email: newUserData.email,
-              });
-
-              if (!newUser) {
-                throw new Error(
-                  "User creation via Kafka appears to have failed"
-                );
-              }
-
-              await storeUserInRedis(newUser);
-              user._id = newUser._id.toString();
-              return true;
             } catch (kafkaError) {
-              console.error(
-                "Error with Kafka flow, falling back to direct DB creation:",
+              console.warn(
+                "Kafka failed, falling back to DB flow:",
                 kafkaError
               );
-              try {
-                await connectDB();
-                const newUser = new UserModel(newUserData);
-                await newUser.save();
-
-                const userInfo = await fetchUserFromMongoDB({
-                  userId: newUser._id,
-                });
-                
-                await storeUserInRedis(userInfo as IRedisDBUser);
-                user._id = newUser._id.toString();
-                return true;
-              } catch (dbError) {
-                console.error("Direct DB user creation failed:", dbError);
-                return false;
-              }
             }
-          } catch (overallError) {
-            console.error("Overall Google auth error:", overallError);
+
+            let newUser = await fetchUserFromMongoDB({
+              email: newUserData.email,
+            });
+
+            if (!newUser) {
+              newUser = new UserModel({
+                ...newUserData,
+              });
+              await newUser.save();
+            }
+
+            await storeUserInRedis(newUser);
+            user._id = newUser._id.toString();
+            return true;
+          } catch (error) {
+            console.error("Overall Google auth error:", error);
             return false;
           }
         }
@@ -153,7 +141,7 @@ export async function initAuthConfigs() {
         }
         return token;
       },
-      
+
       async session({ session, token }: { session: Session; token: JWT }) {
         if (token) {
           session.user = {
@@ -186,5 +174,4 @@ export async function initAuthConfigs() {
   return authConfigs;
 }
 
-const authConfigs = await initAuthConfigs();
-export const { handlers, signIn, signOut, auth } = NextAuth(authConfigs);
+export const { handlers, signIn, signOut, auth } = handler;

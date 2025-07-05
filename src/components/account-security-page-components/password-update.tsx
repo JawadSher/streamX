@@ -1,136 +1,202 @@
 "use client";
 
-import { updateUserPasswd } from "@/app/actions/user-actions/updateUserPasswd";
-import { ActionErrorType, ActionResponseType } from "@/lib/Types";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { debounce } from "lodash";
 import confPassSchema from "@/schemas/confirmPasswdSchema";
-import { useActionState, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 import InputField from "../input-field";
 import { Button } from "../ui/button";
-import Form from "next/form";
+import { useUserAccountPasswdUpdate } from "@/hooks/apollo";
+
+type State = {
+  password: string | undefined;
+  confPasswd: string | undefined;
+  isBtnDisabled: boolean;
+  errors: {
+    password?: string[];
+    confPasswd?: string[];
+  };
+};
+
+type Action =
+  | { type: "SET_STATE"; state: keyof State; value: any }
+  | { type: "SET_MULTI_STATE"; payload: Partial<State> };
+
+const initialState = {
+  password: undefined,
+  confPasswd: undefined,
+  isBtnDisabled: true,
+  errors: {
+    password: undefined,
+    confPasswd: undefined,
+  },
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_STATE":
+      return { ...state, [action.state]: action.value };
+    case "SET_MULTI_STATE":
+      return { ...state, ...action.payload };
+    default:
+      return state;
+  }
+}
 
 function PasswordUpdate() {
-  const [password, setPassword] = useState<string>("");
-  const [confPasswd, setConfPasswd] = useState<string>("");
-  const [isBtnDisabled, setIsBtnDisabled] = useState<boolean>(true);
-  const [errors, setError] = useState<{
-    password: string[] | null;
-    confPasswd: string[] | null;
-  }>({
-    password: null,
-    confPasswd: null,
-  });
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const debounceInputChange = useCallback(
     debounce(async () => {
-      const result = await confPassSchema.safeParse({ password, confPasswd });
+      const result = await confPassSchema.safeParse({
+        password: state.password,
+        confPasswd: state.confPasswd,
+      });
+
       if (!result.success) {
         const fieldErrors = result.error.flatten().fieldErrors;
-        setError({
-          password: fieldErrors.password ?? null,
-          confPasswd: fieldErrors.confPasswd ?? null,
+        dispatch({
+          type: "SET_STATE",
+          state: "errors",
+          value: {
+            password: fieldErrors.password ?? undefined,
+            confPasswd: fieldErrors.confPasswd ?? undefined,
+          },
+        });
+
+        dispatch({
+          type: "SET_STATE",
+          state: "isBtnDisabled",
+          value: true,
         });
       } else {
-        setError({
-          password: null,
-          confPasswd: null,
+        dispatch({
+          type: "SET_STATE",
+          state: "errors",
+          value: {
+            password: undefined,
+            confPasswd: undefined,
+          },
         });
-        setIsBtnDisabled(false);
+
+        dispatch({
+          type: "SET_STATE",
+          state: "isBtnDisabled",
+          value: false,
+        });
       }
     }, 500),
-    [debounce, password, confPasswd]
+    [state.password, state.confPasswd]
   );
 
   useEffect(() => {
-    if (password.length > 0 || confPasswd.length > 0) {
+    if (
+      (typeof state.password === "string" && state.password.length > 0) ||
+      (typeof state.confPasswd === "string" && state.confPasswd.length > 0)
+    ) {
       debounceInputChange();
     }
 
     return () => {
-      setError({
-        password: null,
-        confPasswd: null,
+      dispatch({
+        type: "SET_STATE",
+        state: "errors",
+        value: {
+          password: undefined,
+          confPasswd: undefined,
+        },
       });
       debounceInputChange.cancel();
     };
-  }, [password, confPasswd, debounceInputChange]);
+  }, [state.password, state.confPasswd, debounceInputChange]);
 
-  async function handlePasswdSubmit(
-    state: ActionErrorType | ActionResponseType | null,
-    formData: FormData
-  ): Promise<ActionErrorType | ActionResponseType> {
+  const [userAccountPasswdUpdate, { loading, data }] =
+    useUserAccountPasswdUpdate();
+  async function handleSubmit(formData: FormData) {
     const password = formData.get("password")?.toString();
-    const response = await updateUserPasswd({ passwd: password });
-    return response;
+    userAccountPasswdUpdate({
+      variables: {
+        password,
+      },
+    });
   }
 
-  const [state, formAction, isPending] = useActionState(
-    handlePasswdSubmit,
-    null
-  );
-
   useEffect(() => {
-    if (state && state.message) {
-      if (state.statusCode === 200) {
-        toast.success(state.message);
-        setPassword("");
-        setConfPasswd("");
-        setIsBtnDisabled(true);
-      } else {
-        toast.error(state.message);
-      }
+    if (data && data.userAccountPasswdUpdate.success) {
+      dispatch({
+        type: "SET_MULTI_STATE",
+        payload: {
+          password: undefined,
+          confPasswd: undefined,
+          isBtnDisabled: true,
+        },
+      });
     }
-  }, [state]);
+  }, [data]);
 
   return (
     <div>
       <h1 className="font-semibold text-2xl mb-3">Update Your Password</h1>
       <div className="border-1 rounded-2xl py-5 mb-4 overflow-clip">
-        <Form
-          action={formAction}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            handleSubmit(formData);
+          }}
           className="flex flex-col gap-2 items-center justify-center px-2"
         >
           <InputField
             label="New Password"
-            inputValue={password}
-            onChange={(e) => setPassword(e.target.value)}
+            inputValue={state.password}
+            onChange={(e) => {
+              dispatch({
+                type: "SET_STATE",
+                state: "password",
+                value: e.target.value,
+              });
+            }}
             editable={true}
             type="password"
             name="password"
           />
-          {errors.password && (
+          {state.errors.password && (
             <p className="text-red-500 text-sm px-3">
-              {errors.password?.toString()}
+              {state.errors.password?.toString()}
             </p>
           )}
           <InputField
             label="Confirm New Password"
-            inputValue={confPasswd}
-            onChange={(e) => setConfPasswd(e.target.value)}
+            inputValue={state.confPasswd}
+            onChange={(e) => {
+              dispatch({
+                type: "SET_STATE",
+                state: "confPasswd",
+                value: e.target.value,
+              });
+            }}
             editable={true}
             type="password"
             name="confPasswd"
           />
-          {errors.confPasswd && (
+          {state.errors.confPasswd && (
             <p className="text-red-500 text-sm px-3">
-              {errors.confPasswd?.toString()}
+              {state.errors.confPasswd?.toString()}
             </p>
           )}
 
-          {isPending ? (
+          {loading ? (
             <Loader2 className="animate-spin" size={24} />
           ) : (
             <Button
               className="px-20 w-full mx-2 md:max-w-fit justify-self-center mt-4 cursor-pointer rounded-2xl bg-green-400 hover:bg-green-500 text-md"
-              disabled={isBtnDisabled}
+              disabled={state.isBtnDisabled}
               type="submit"
             >
               Change Password
             </Button>
           )}
-        </Form>
+        </form>
       </div>
     </div>
   );

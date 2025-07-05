@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,32 +19,98 @@ import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
-import Form from "next/form";
-import { uploadUserAssets } from "@/app/actions/user-assets-actions/uploadUserAssets.action";
-import { ActionErrorType, ActionResponseType } from "@/lib/Types";
-import { toast } from "sonner";
 import AnimatedTick from "../animated-check";
+import { useUserAssetsUpdate } from "@/hooks/useQuery/use-user-assets-mutation";
+
+type State = {
+  selectedImage: string | null;
+  error: Record<string, string[] | undefined>;
+  crop: {
+    x: number;
+    y: number;
+  };
+  zoom: number;
+  croppedAreaPixels: any;
+  cropping: boolean;
+  open: boolean;
+  croppedFile: File | null;
+};
+
+type Action =
+  | { type: "SET_STATE"; state: keyof State; value: any }
+  | { type: "SET_MULTI_STATE"; payload: Partial<State> }
+  | { type: "SET_ERROR"; error: Partial<State["error"]> }
+  | { type: "RESET_ERROR" };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_STATE":
+      return {
+        ...state,
+        [action.state]: action.value,
+      };
+    case "SET_MULTI_STATE":
+      return {
+        ...state,
+        ...action.payload,
+      };
+    case "SET_ERROR":
+      return {
+        ...state,
+        error: {
+          ...state.error,
+          ...action.error,
+        },
+      };
+    case "RESET_ERROR":
+      return {
+        ...state,
+        error: {},
+      };
+    default:
+      return state;
+  }
+}
+
+const initialState = {
+  selectedImage: null,
+  error: {},
+  crop: {
+    x: 0,
+    y: 0,
+  },
+  zoom: 1,
+  croppedAreaPixels: null,
+  cropping: false,
+  open: false,
+  croppedFile: null,
+};
 
 function UserAvatarChange({ className }: { className?: string }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
-  const [cropping, setCropping] = useState(false);
-  const [open, setOpen] = useState<boolean>(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
       const imageURL = URL.createObjectURL(file);
-      setSelectedImage(imageURL);
-      setCropping(true);
-      setError(null);
+
+      dispatch({
+        type: "SET_MULTI_STATE",
+        payload: {
+          selectedImage: imageURL,
+          cropping: true,
+          error: {},
+        },
+      });
     } else {
-      setError("Please select a valid image file");
+      dispatch({
+        type: "SET_ERROR",
+        error: {
+          error: ["Please select a valid image file"],
+        },
+      });
     }
   };
 
@@ -66,12 +132,20 @@ function UserAvatarChange({ className }: { className?: string }) {
   };
 
   const handleClearImage = async () => {
-    await setSelectedImage(null);
-    await setCropping(false);
-    await setCrop({ x: 0, y: 0 });
-    await setZoom(1);
-    await setCroppedAreaPixels(null);
-    await setError(null);
+    await dispatch({
+      type: "SET_MULTI_STATE",
+      payload: {
+        selectedImage: null,
+        cropping: false,
+        crop: {
+          x: 0,
+          y: 0,
+        },
+        zoom: 1,
+        croppedAreaPixels: null,
+        error: {},
+      },
+    });
     if (inputRef.current) {
       inputRef.current.value = "";
       inputRef.current.files = null;
@@ -79,45 +153,59 @@ function UserAvatarChange({ className }: { className?: string }) {
   };
 
   const handleApplyCrop = async () => {
-    if (!selectedImage || !croppedAreaPixels) {
-      setError("Cropping failed. Please try again.");
+    if (!state.selectedImage || !state.croppedAreaPixels) {
+      dispatch({
+        type: "SET_ERROR",
+        error: {
+          error: ["Cropping failed. Please try again."],
+        },
+      });
+
       return;
     }
 
     try {
       const croppedBlob: Blob = await getCroppedImg(
-        selectedImage,
-        croppedAreaPixels
+        state.selectedImage,
+        state.croppedAreaPixels
       );
 
       if (croppedBlob.size > MAX_FILE_SIZE) {
-        setError("Cropped image is too large. Please crop a smaller area.");
+        dispatch({
+          type: "SET_ERROR",
+          error: {
+            error: ["Cropped image is too large. Please crop a smaller area."],
+          },
+        });
+
         return;
       }
 
       const previewURL = URL.createObjectURL(croppedBlob);
-      setSelectedImage(previewURL);
-      setCropping(false);
+      dispatch({
+        type: "SET_MULTI_STATE",
+        payload: {
+          selectedImage: previewURL,
+          cropping: false,
+        },
+      });
 
-      if (inputRef.current) {
-        const croppedFile = new File(
-          [croppedBlob],
-          `cropped-avatar-${Date.now()}.jpg`,
-          {
-            type: croppedBlob.type || "image/jpeg",
-          }
-        );
+      const file = new File([croppedBlob], `cropped-avatar-${Date.now()}.jpg`, {
+        type: croppedBlob.type || "image/jpeg",
+      });
 
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(croppedFile);
-        inputRef.current.files = dataTransfer.files;
-      }
-    } catch (err: any) {
-      if(err instanceof Error){
-        setError("Failed to crop image");
-      }
-      setError("Failed to crop image");
-      return;
+      dispatch({
+        type: "SET_STATE",
+        state: "croppedFile",
+        value: file,
+      });
+    } catch {
+      dispatch({
+        type: "SET_ERROR",
+        error: {
+          error: ["Failed to crop image"],
+        },
+      });
     }
   };
 
@@ -125,48 +213,72 @@ function UserAvatarChange({ className }: { className?: string }) {
     if (!isOpen) {
       await handleClearImage();
     } else {
-      await setSelectedImage(null);
+      await dispatch({
+        type: "SET_STATE",
+        state: "selectedImage",
+        value: null,
+      });
     }
-    await setOpen(isOpen);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (selectedImage) {
-        URL.revokeObjectURL(selectedImage);
-      }
-    };
-  }, [selectedImage]);
-
-  const handleSubmit = async (
-    state: ActionResponseType | ActionErrorType | null,
-    formData: FormData
-  ): Promise<ActionResponseType | ActionErrorType | null> => {
-    const file = formData.get("file") as File;
-
-    return await uploadUserAssets({
-      userAsset: file,
-      assetType: "avatar",
-      assetMemeType: "image",
+    await dispatch({
+      type: "SET_STATE",
+      state: "open",
+      value: isOpen,
     });
   };
 
-  const [state, formAction, isPending] = useActionState(handleSubmit, null);
+  const handleCropChange = (crop: { x: number; y: number }) =>
+    dispatch({ type: "SET_STATE", state: "crop", value: crop });
+
+  const handleZoomChange = (zoom: number) =>
+    dispatch({ type: "SET_STATE", state: "zoom", value: zoom });
+
+  const handleCropComplete = (_: any, areaPixels: any) =>
+    dispatch({
+      type: "SET_STATE",
+      state: "croppedAreaPixels",
+      value: areaPixels,
+    });
 
   useEffect(() => {
-    if (state?.statusCode !== 200) {
-      toast.error(state?.message);
-    } else if (state?.statusCode === 200) {
-      toast.success(state.message);
+    return () => {
+      if (state.selectedImage) {
+        URL.revokeObjectURL(state.selectedImage);
+      }
+    };
+  }, [state.selectedImage]);
+
+  const { mutate, status, isPending } = useUserAssetsUpdate();
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!state.croppedFile) {
+      dispatch({
+        type: "SET_ERROR",
+        error: {
+          error: ["No file selected."],
+        },
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("userAsset", state.croppedFile);
+    formData.append("assetType", "avatar");
+    formData.append("assetMemeType", "image");
+
+    mutate(formData);
+  }
+
+  useEffect(() => {
+    if (status === "success") {
       setTimeout(async () => {
         await handleDialogOpenChange(false);
       }, 2000);
     }
-  }, [state]);
+  }, [status]);
 
   return (
     <div className={cn(className)}>
-      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      <Dialog open={state.open} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger
           asChild
           className="bg-gray-600 rounded-full p-[3px] hover:bg-gray-800"
@@ -174,6 +286,7 @@ function UserAvatarChange({ className }: { className?: string }) {
           <Camera
             className="cursor-pointer absolute right-1 bottom-5 transition"
             size={20}
+            color="white"
           />
         </DialogTrigger>
         <DialogContent className="sm:max-w-[480px] rounded-2xl dark:bg-[#18181B] border-none">
@@ -186,34 +299,38 @@ function UserAvatarChange({ className }: { className?: string }) {
             </DialogDescription>
           </DialogHeader>
 
-          {selectedImage && cropping && (
+          {state.selectedImage && state.cropping && (
             <div className="relative w-full h-[300px] rounded-xl overflow-hidden">
               <Cropper
-                image={selectedImage}
-                crop={crop}
-                zoom={zoom}
+                image={state.selectedImage}
+                crop={state.crop}
+                zoom={state.zoom}
                 aspect={1}
                 cropShape="round"
                 showGrid={false}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={(_, areaPixels) =>
-                  setCroppedAreaPixels(areaPixels)
-                }
+                onCropChange={handleCropChange}
+                onZoomChange={handleZoomChange}
+                onCropComplete={handleCropComplete}
               />
             </div>
           )}
-          {selectedImage && cropping && (
+          {state.selectedImage && state.cropping && (
             <Slider
               min={1}
               step={0.1}
-              value={[zoom]}
-              onValueChange={(value) => setZoom(value[0])}
+              value={[state.zoom]}
+              onValueChange={(value) =>
+                dispatch({
+                  type: "SET_STATE",
+                  state: "zoom",
+                  value: value[0],
+                })
+              }
               className={cn("w-[100%] mt-4", className)}
             />
           )}
 
-          {selectedImage && !cropping && (
+          {state.selectedImage && !state.cropping && (
             <div className="flex items-center justify-center">
               <div className="relative">
                 <X
@@ -224,7 +341,7 @@ function UserAvatarChange({ className }: { className?: string }) {
                 />
                 <div className="w-[150px] h-[150px] relative rounded-full overflow-hidden mb-4 border mx-auto">
                   <Image
-                    src={selectedImage}
+                    src={state.selectedImage}
                     alt="avatar"
                     layout="fill"
                     style={{ objectFit: "cover" }}
@@ -234,7 +351,7 @@ function UserAvatarChange({ className }: { className?: string }) {
             </div>
           )}
 
-          <Form action={formAction} className="w-full">
+          <form onSubmit={handleSubmit} className="w-full">
             {!isPending && (
               <div
                 className="flex flex-col items-center justify-center w-full border border-dashed px-1 py-5 rounded-2xl cursor-pointer relative"
@@ -262,14 +379,16 @@ function UserAvatarChange({ className }: { className?: string }) {
                   onChange={handleInputChange}
                   ref={inputRef}
                 />
-                {error && (
-                  <span className="text-sm text-red-400 mt-2">{error}</span>
+                {state.error && (
+                  <span className="text-sm text-red-400 mt-2">
+                    {state.error.error}
+                  </span>
                 )}
               </div>
             )}
 
             <DialogFooter className="mt-5">
-              {selectedImage && cropping ? (
+              {state.selectedImage && state.cropping ? (
                 <Button
                   type="button"
                   onClick={handleApplyCrop}
@@ -277,7 +396,7 @@ function UserAvatarChange({ className }: { className?: string }) {
                 >
                   Apply Crop
                 </Button>
-              ) : state?.statusCode === 200 ? (
+              ) : status === "success" ? (
                 <AnimatedTick />
               ) : isPending ? (
                 <div className="w-full flex items-center justify-center">
@@ -287,13 +406,13 @@ function UserAvatarChange({ className }: { className?: string }) {
                 <Button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full border-none cursor-pointer"
-                  disabled={!selectedImage}
+                  disabled={!state.selectedImage}
                 >
                   Update avatar
                 </Button>
               )}
             </DialogFooter>
-          </Form>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

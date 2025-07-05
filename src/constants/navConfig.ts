@@ -1,19 +1,19 @@
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 
 export const mediaSectionItems = [
   {
     title: "Home",
-    url: `${API_ROUTES.HOME}`,
+    url: `${ROUTES.PAGES_ROUTES.HOME}`,
     icon: "Home",
   },
   {
     title: "Shorts",
-    url: `${API_ROUTES.SHORTS}`,
+    url: `${ROUTES.PAGES_ROUTES.SHORTS}`,
     icon: "Film",
   },
   {
     title: "Community posts",
-    url: `${API_ROUTES.COMMUNITY_POSTS}`,
+    url: `${ROUTES.PAGES_ROUTES.COMMUNITY_POSTS}`,
     icon: "MessageSquare",
   },
 ];
@@ -21,37 +21,37 @@ export const mediaSectionItems = [
 export const userSectionItems = [
   {
     title: "Profile",
-    url: `${API_ROUTES.PROFILE}`,
+    url: `${ROUTES.PAGES_ROUTES.PROFILE}`,
     icon: "UserRound",
   },
   {
     title: "History",
-    url: `${API_ROUTES.HISTORY}`,
+    url: `${ROUTES.PAGES_ROUTES.HISTORY}`,
     icon: "History",
   },
   {
     title: "Playlists",
-    url: `${API_ROUTES.PLAYLISTS}`,
+    url: `${ROUTES.PAGES_ROUTES.PLAYLISTS}`,
     icon: "ListVideo",
   },
   {
     title: "Your videos",
-    url: `${API_ROUTES.VIDEO_UPLOADS}`,
+    url: `${ROUTES.PAGES_ROUTES.VIDEO_UPLOADS}`,
     icon: "Video",
   },
   {
     title: "Watch later",
-    url: `${API_ROUTES.WATCH_LATER}`,
+    url: `${ROUTES.PAGES_ROUTES.WATCH_LATER}`,
     icon: "Clock",
   },
   {
     title: "Liked videos",
-    url: `${API_ROUTES.LIKEDVIDEOS}`,
+    url: `${ROUTES.PAGES_ROUTES.LIKEDVIDEOS}`,
     icon: "ThumbsUp",
   },
   {
     title: "Disliked videos",
-    url: `${API_ROUTES.DISLIKEDVIDEOS}`,
+    url: `${ROUTES.PAGES_ROUTES.DISLIKEDVIDEOS}`,
     icon: "ThumbsDown",
   },
 ];

@@ -1,21 +1,20 @@
-import React from "react";
 import { NavUser } from "./nav-user";
 import Image from "next/legacy/image";
 import Link from "next/link";
 import { imagePaths } from "@/lib/ImagePaths";
-import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import { Button } from "../ui/button";
 import { fullname } from "@/lib/fullname";
+import { useUser } from "@/store/features/user/userSlice";
 
 export default function SidebarBottom({
   status,
-  userData,
   state,
 }: {
   status: string;
   state: string;
-  userData: IRedisDBUser | null;
 }) {
+  const userData = useUser();
+
   if (status === "unauthenticated") {
     return (
       <Link href="/sign-in" className="w-full flex grow">
@@ -50,7 +49,7 @@ export default function SidebarBottom({
         fullName,
         email: userData.email || null,
         avatar: userData.avatarURL || imagePaths.defaultUserLogo,
-        isVerified: userData.isVerified,
+        isVerified: userData?.isVerified,
       }}
     />
   );

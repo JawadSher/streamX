@@ -10,7 +10,7 @@ interface Props {
   accountStatus?: string | null;
   phoneNumber?: string | null;
   country?: string | null;
-  isVerified?: boolean | null;
+  isVerified?: boolean | null | string;
   createdAt?: Date | number | string | null;
 }
 
@@ -84,10 +84,10 @@ const SecondSection = ({
     {
       icon: "Calendar",
       label: (
-        <span className="text-zinc-500 dark:text-zinc-300">
+        <span className="text-zinc-800 dark:text-zinc-300">
           Since joined •{" "}
           <span className="font-semibold">
-            {createdAt?.toString().split("-")[0] || "Unknown"}
+            {createdAt ? new Date(createdAt).getFullYear() : "Unknown"}
           </span>
         </span>
       ),
@@ -118,7 +118,7 @@ const SecondSection = ({
 
       <Separator className="mt-6 mb-4" />
 
-      <div className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+      <div className="space-y-2 text-sm text-zinc-700 dark:text-zinc-400">
         <p className="font-semibold">Important Notes:</p>
         <ul className="list-disc list-inside space-y-1 text-center">
           <li>Ensure your account information is up to date.</li>

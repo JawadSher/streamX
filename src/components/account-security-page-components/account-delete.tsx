@@ -3,18 +3,14 @@
 import { debounce } from "lodash";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { useActionState, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import Form from "next/form";
-import { deleteUserAccount } from "@/app/actions/user-actions/deleteUserAccount";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useUserAccountDeletion } from "@/hooks/apollo";
 
 function AccountDelete() {
   const [isAccDelBtnDisabled, setIsAccBtnDisabled] = useState<boolean>(true);
   const [isChecked, setIsChecked] = useState<boolean>(false);
-  const router = useRouter();
 
   const debouncedCheck = useCallback(
     debounce((checked: boolean) => {
@@ -31,31 +27,22 @@ function AccountDelete() {
     };
   }, [isChecked, debouncedCheck]);
 
-  const [state, formAction, isPending] = useActionState(
-    deleteUserAccount,
-    null
-  );
-
-  useEffect(() => {
-    if (state && state.message) {
-      if (state.statusCode === 200) {
-        toast.success(state.message);
-      } else {
-        toast.error(state.message);
-      }
-    }
-  }, [state, router]);
+  const [accountDelete, { loading }] = useUserAccountDeletion();
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    accountDelete();
+  }
 
   return (
     <div>
       <div className="flex flex-col gap-3 w-full ">
         <h1 className="font-semibold text-2xl">Permanently Delete Account</h1>
-        <div className="flex flex-col items-center border-1 border-red-400 rounded-2xl py-3 px-2 gap-10 overflow-clip">
-          <p className="bg-amber-600 rounded-xl p-2 text-center w-fit">
+        <div className="flex flex-col justify-center border-1 border-red-400 rounded-2xl py-3 px-3 gap-10 overflow-clip">
+          <p className="bg-amber-600 rounded-sm px-2 py-1 text-center w-fit">
             Are you sure you want to permanently delete your account? This
             action cannot be undone.
           </p>
-          <Form action={formAction} className="">
+          <form onSubmit={handleSubmit} className="">
             <div className="flex flex-col leading-none gap-2 mb-4">
               <div className="flex items-center justify-start">
                 <Checkbox
@@ -77,7 +64,7 @@ function AccountDelete() {
               </p>
             </div>
 
-            {isPending ? (
+            {loading ? (
               <Loader2 className="animate-spin justify-self-center" size={24} />
             ) : (
               <Button
@@ -88,7 +75,7 @@ function AccountDelete() {
                 Delete Account Permanently
               </Button>
             )}
-          </Form>
+          </form>
         </div>
         <Separator className="mt-5" />
         <p className="text-sm text-gray-500 text-center">

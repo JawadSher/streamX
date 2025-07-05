@@ -53,12 +53,18 @@ function ChannelAboutMore({
 
         <div className="space-y-6 mt-4">
           <section className="space-y-2">
-            <h2 className="text-lg font-semibold dark:text-white text-zinc-800">Description</h2>
-            <p className="text-sm dark:text-gray-300 leading-relaxed">{channelDescription}</p>
+            <h2 className="text-lg font-semibold dark:text-white text-zinc-800">
+              Description
+            </h2>
+            <p className="text-sm dark:text-gray-300 leading-relaxed">
+              {channelDescription}
+            </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-lg font-semibold dark:text-white text-zinc-800">More Info</h2>
+            <h2 className="text-lg font-semibold dark:text-white text-zinc-800">
+              More Info
+            </h2>
             <div className="flex items-center gap-3 text-sm dark:text-gray-200 text-zinc-700">
               <Mail size={20} strokeWidth={1.5} />
               <span>{email}</span>

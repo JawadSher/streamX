@@ -3,7 +3,7 @@
 import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import Link from "next/link";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { usePathname } from "next/navigation";
 
 const TopHeader = () => {
@@ -17,7 +17,7 @@ const TopHeader = () => {
           "account" : "security"
         } className="w-full h-full">
           <TabsList className="flex items-center justify-start w-full h-full">
-            <Link href={API_ROUTES.ACCOUNT}>
+            <Link href={ROUTES.PAGES_ROUTES.ACCOUNT}>
               <TabsTrigger
                 className="cursor-pointer max-w-fit px-6"
                 value="account"
@@ -26,7 +26,7 @@ const TopHeader = () => {
               </TabsTrigger>
             </Link>
 
-            <Link href={API_ROUTES.ACCOUNT_SECURITY}>
+            <Link href={ROUTES.PAGES_ROUTES.ACCOUNT_SECURITY}>
               <TabsTrigger
                 className="cursor-pointer max-w-fit px-6"
                 value="security"

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "../ui/button";
 import { UserAvatar } from "../user-avatar";
 import Container from "./container";
@@ -14,7 +16,7 @@ interface Props {
   avatarURL: string;
 }
 
-const UserProfile = async ({ fullName, userName, avatarURL }: Props) => {
+const UserProfile = ({ fullName, userName, avatarURL }: Props) => {
   return (
     <Container className="gap-2 items-center">
       <UserAvatar avatarURL={avatarURL} />

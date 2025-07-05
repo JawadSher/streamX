@@ -1,31 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { API_ROUTES } from "./lib/api/ApiRoutes";
+import { ROUTES } from "./constants/ApiRoutes";
+import { verifyAuth } from "./lib/verifyAuth";
+import { tokenLimiter } from "./lib/tokenLimiter";
 
-const SECRET = process.env.NEXTAUTH_SECRET;
-
+const protectedPaths = ["/feed", "/profile", "/account"];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const token = await getToken({
-    req: request,
-    secret: SECRET,
-    secureCookie: process.env.NODE_ENV === "production",
+  const rateLimitResponse = await tokenLimiter(request, {
+    maxTokens: 50,
+    refillRate: 3,
   });
+
+  if (rateLimitResponse) return rateLimitResponse;
+
+  const token = await verifyAuth(request);
 
   const isAuthenticated = !!token;
 
   if (isAuthenticated && pathname === "/sign-in") {
-    return NextResponse.redirect(new URL(API_ROUTES.HOME, request.url));
+    return NextResponse.redirect(
+      new URL(ROUTES.PAGES_ROUTES.HOME, request.url)
+    );
   }
 
+  if (!isAuthenticated && pathname === "/sign-up") return NextResponse.next();
+
   if (
-    !isAuthenticated &&
-    (pathname.startsWith("/feed") ||
-      pathname.startsWith("/profile") ||
-      pathname.startsWith("/account"))
+    request.nextUrl.pathname === "/api/graphql" &&
+    request.method === "POST"
   ) {
-    return NextResponse.redirect(new URL(API_ROUTES.SIGN_IN, request.url));
+    const token = await verifyAuth(request);
+    if (!token && pathname === "/sign-up") {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
+  }
+
+  const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
+
+  if (!isAuthenticated && isProtected) {
+    return NextResponse.redirect(
+      new URL(ROUTES.PAGES_ROUTES.SIGN_IN, request.url)
+    );
   }
 
   return NextResponse.next();
@@ -33,10 +49,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
     "/feed/:path*",
     "/profile/:path*",
     "/sign-in",
     "/account",
     "/account/:path*",
+    "/api/graphql",
   ],
 };

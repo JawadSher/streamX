@@ -14,7 +14,7 @@ const FirstSection = ({ avatarURL, fullName }: Props) => {
         <UserAvatar avatarURL={avatarURL || imagePaths.defaultUserLogo} />
         <UserAvatarChange />
       </div>
-      <h1 className="text-[30px] font-bold text-gray-400">{fullName}</h1>
+      <h1 className="text-[30px] font-bold dark:text-gray-200 text-zinc-700">{fullName}</h1>
     </>
   );
 };

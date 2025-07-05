@@ -1,38 +1,50 @@
+"use client";
+import { useEffect, useState, useRef } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Header from "@/components/header";
-import { getPathName } from "@/lib/getPathName";
-import { auth } from "../api/auth/[...nextauth]/configs";
-import { Suspense } from "react";
-import { getUserData } from "../actions/user-actions/getUserData.action";
+import NetworkStatus from "@/components/network-status-components/network-status";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
-export const revalidate = 60;
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const isOnline = useNetworkStatus();
+  const [showNetworkStatus, setShowNetworkStatus] = useState(false);
+  const hasMounted = useRef(false);
 
-const layout = async ({ children }: { children: React.ReactNode }) => {
-  const url = await getPathName();
-  const isShortsPage = url.startsWith("/shorts/");
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
 
-  const session = await auth();
-  const status = session ? "authenticated" : "unauthenticated";
-  const userData = status === "authenticated" ? await getUserData() : null;
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+
+      if (!isOnline) {
+        setShowNetworkStatus(true);
+      }
+      return;
+    }
+
+    if (!isOnline) {
+      setShowNetworkStatus(true);
+    } else {
+      setShowNetworkStatus(true);
+      timer = setTimeout(() => {
+        setShowNetworkStatus(false);
+      }, 5000);
+    }
+
+    return () => clearTimeout(timer);
+  }, [isOnline]);
 
   return (
-    <div className="h-screen flex bg-white-100">
-      <SidebarProvider>
-        <Suspense fallback={<p>Loading ....</p>}>
-          <AppSidebar status={status} userData={userData} />
-        </Suspense>
-        <div
-          className={`flex-1 flex flex-col h-screen px-2 pl-2 md:pl-4 ${
-            isShortsPage ? "overflow-hidden" : "overflow-auto custom-scroll-bar"
-          }`}
-        >
-            <Header />
-          <main className="flex-1 mx-auto w-full mt-3">{children}</main>
-        </div>
-      </SidebarProvider>
-    </div>
+    <SidebarProvider className="py-2 pr-1">
+      <AppSidebar />
+      <div className="flex-1 flex flex-col h-screen md:pl-2 relative ml-2 gap-2 pb-2">
+        <Header />
+        {showNetworkStatus && <NetworkStatus isOnline={isOnline} />}
+        {children}
+      </div>
+    </SidebarProvider>
   );
 };
 
-export default layout;
+export default Layout;

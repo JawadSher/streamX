@@ -50,6 +50,40 @@ export async function fetchUserFromMongoDB({
       },
     },
     {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "userId",
+        pipeline: [
+          {
+            $match: {
+              likeableType: {
+                $in: ["Video"]
+              },
+            }
+          },
+        ],
+        as: "likedVideos"
+      },
+    },
+    {
+      $lookup: {
+        from: "dislikes",
+        localField: "_id",
+        foreignField: "userId",
+        pipeline: [
+          {
+            $match: {
+              likeableType: {
+                $in: ["Video"]
+              },
+            }
+          },
+        ],
+        as: "dislikedVideos"
+      },
+    },
+    {
       $project: {
         _id: 1,
         firstName: 1,
@@ -65,6 +99,9 @@ export async function fetchUserFromMongoDB({
         updatedAt: 1,
         accountStatus: 1,
         watchHistory: 1,
+        watchLater: 1,
+        likedVideos: 1,
+        dislikedVideos: 1,
         avatarURL: {
           $arrayElemAt: [
             {
@@ -106,11 +143,22 @@ export async function fetchUserFromMongoDB({
         country: 1,
         phoneNumber: 1,
         accountStatus: 1,
-        watchHistory: 1,
         createdAt: 1,
         updatedAt: 1,
         avatarURL: "$avatarURL.fileURL",
         bannerURL: "$bannerURL.fileURL",
+        watchHistory: {
+          $slice: [{ $ifNull: ["$watchHistory", []] }, -6],
+        },
+        watchLater: {
+          $slice: [{ $ifNull: ["$watchLater", []] }, -6],
+        },
+        likedVideos: {
+          $slice: [{ $ifNull: ["$likedVideos", []]}, -6],
+        },
+        disLikedVideos: {
+          $slice: [{ $ifNull: ["$dislikedVideos", []]}, -6],
+        }
       },
     },
   ]);

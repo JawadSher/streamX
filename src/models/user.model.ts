@@ -59,6 +59,7 @@ export interface IUser extends Document {
   accountStatus: "active" | "suspended" | "deleted";
   lastLogin: Date;
   watchHistory: Schema.Types.ObjectId[];
+  watchLater: Schema.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -156,6 +157,11 @@ const userSchema = new Schema<IUser>(
       ref: "Video",
       default: [],
     },
+    watchLater: {
+      type: [Schema.Types.ObjectId],
+      ref: "Video",
+      default: [],
+    },
   },
   { timestamps: true }
 );
@@ -176,7 +182,6 @@ userSchema.pre("save", async function (this: IUser, next) {
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
   try {
-    console.log("Comparing password:", password, "with hash:", this.password);
     return await bcrypt.compare(password, this.password);
   } catch (error) {
     console.log("Error comparing password: ", error);

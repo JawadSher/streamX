@@ -37,7 +37,6 @@ const InputField = ({
   className = "",
   rightElement,
   isVerified = true,
-  userId
 }: Props) => {
   return (
     <div className="flex flex-col gap-1 w-full px-2 h-fit relative">
@@ -46,7 +45,7 @@ const InputField = ({
           {label}
         </Label>
         {validationError && <p className="text-red-600">{validationError}</p>}
-        {name === "email" && !isVerified && <VerifyAccountForm userEmail={inputValue!} userId={userId!} />}
+        {name === "email" && !isVerified && <VerifyAccountForm />}
       </div>
 
       <div className="relative w-full">

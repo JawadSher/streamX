@@ -1,32 +1,29 @@
 import Container from "./container";
 import VideoCard from "../video-card/video-card";
 import Link from "next/link";
+import { ROUTES } from "@/constants/ApiRoutes";
 
-interface Props {
-  videos?: string[];
-  videoThumbnails?: string[];
-}
 
-const LikedVideos = ({ videos = [], videoThumbnails = [] }: Props) => {
-  // const isEmpty = videos.length === 0;
-  const isEmpty = 1;
-  console.log(videos, videoThumbnails)
-  
+const LikedVideos = ({ likedVideos }: { likedVideos: string[] | null | undefined}) => {
+  const isEmpty = likedVideos && likedVideos.length === 0 ? true : false;
+
   return (
-    <Container className="flex flex-col gap-4">
+    <Container className="flex flex-col gap-2">
       <div>
         <h1 className="text-xl font-semibold">Liked videos</h1>
         <p className="text-[14px] text-zinc-400">
-          Want to revisit your liked watched content?
-          <Link href="/liked-videos" className="text-blue-500 ml-1 hover:underline">
+          Want to revisit your liked content?
+          <Link href={ROUTES.PAGES_ROUTES.LIKEDVIDEOS} className="text-blue-500 ml-1 hover:underline">
             click here
           </Link>
         </p>
       </div>
 
       <div className="relative">
-        {!isEmpty ? (
-          <p className="text-gray-500">No videos in liked yet.</p>
+        {isEmpty ? (
+          <div className="w-full flex items-center justify-center border-1 rounded-2xl h-40 ">
+            <p className="text-gray-500">No videos liked yet.</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-fit">
             {/* {videos.map((videoUrl, index) => (

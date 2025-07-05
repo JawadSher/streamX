@@ -1,18 +1,16 @@
-"use client";
-
-import { handleUserOTP } from "@/app/actions/user-actions/handleUserOTP";
-import { actionError } from "@/lib/actions-templates/ActionError";
-import { actionResponse } from "@/lib/actions-templates/ActionResponse";
-import { generateOTP } from "@/lib/generateOTP";
-import emailjs from "@emailjs/browser";
-import Error from "next/error";
+import { EmailTemplate } from "@/components/email-template";
+import { Resend } from "resend";
 
 export async function SendVerificationCode({
+  firstName,
   userEmail,
-  userId,
+  OTP,
+  expiryTime,
 }: {
   userEmail: string;
-  userId: string;
+  firstName: string;
+  OTP: string;
+  expiryTime: string;
 }) {
   try {
     if (
@@ -21,56 +19,58 @@ export async function SendVerificationCode({
         userEmail
       )
     ) {
-      return actionError(400, "Invalid email address", null);
+      return {
+        success: false,
+        message: "Invalid format email address",
+      };
     }
 
-    const serviceId: string = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
-    const templateId: string = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
-    const pubKey: string = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
+    console.log("--- STEP 1 ----");
+    const resend_API_KEY = process.env.NEXT_RESEND_API_KEY;
 
-    if (!serviceId || !templateId || !pubKey) {
-      return actionError(500, "Email service configuration error", null);
+    if (!resend_API_KEY) {
+      return {
+        success: false,
+        message: "Resend email service configuration error",
+      };
     }
 
-    const { OTP, expiryTime } = await generateOTP();
+    const resend = new Resend(resend_API_KEY);
 
-    const templateParams = {
-      email: userEmail,
-      passcode: OTP,
-      time: expiryTime,
+    console.log("--- STEP 2 ----");
+    const { data, error } = await resend.emails.send({
+      from: "streamX <onboarding@resend.dev>",
+      to: [`${userEmail}`],
+      subject: "streamX Verification Code",
+      react: EmailTemplate({ firstName, OTP, expiryTime }),
+    });
+
+    console.log("--- STEP 3 ----");
+    if (error) {
+      console.error("Email send failed:", error);
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+
+    console.log("--- STEP 4 ----");
+    return {
+      success: true,
+      message: "OTP email send successfully",
+      data: {
+        OTP,
+        expiryTime,
+        resend: {
+          ...data,
+        },
+      },
     };
-
-    const response = await emailjs.send(serviceId, templateId, templateParams, {
-      publicKey: pubKey,
-    });
-
-    if (response.status !== 200) {
-      console.error("EmailJS send failed:", response.text);
-      return actionError(400, `Failed to send OTP: ${response.text}`, null);
-    }
-
-    await handleUserOTP({
-      userId,
-      code: OTP,
-      state: "store",
-    });
-
-    return actionResponse(200, "OTP email sent successfully", {
-      OTP,
-      expiryTime,
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return actionError(
-        500,
-        `Internal server error while sending OTP: ${"Unknown error"}`,
-        null
-      );
-    }
-    return actionError(
-      500,
-      `Internal server error while sending OTP: ${"Unknown error"}`,
-      null
-    );
+  } catch (error: any) {
+    console.log("--- STEP 5 ----");
+    return {
+      success: false,
+      message: `Internal server error while sending OTP: ${error}`,
+    };
   }
 }

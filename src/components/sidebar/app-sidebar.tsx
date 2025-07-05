@@ -8,9 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import SideBarTop from "./sidebar-header";
 import { Separator } from "../ui/separator";
-
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
-import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
+import { ROUTES } from "@/constants/ApiRoutes";
 import SidebarBottom from "./sidebar-footer";
 import { Suspense } from "react";
 import UserSkeleton from "../skeletons/user-skeleton";
@@ -19,26 +17,23 @@ import { usePathname } from "next/navigation";
 import MainSidebarContent from "./sidebar-content";
 import AccountSidebarContent from "../account-page-components/account-sidebar-content";
 import { mediaSectionItems, userSectionItems } from "@/constants/navConfig";
+import { useUser } from "@/store/features/user/userSlice";
+import { useSession } from "next-auth/react";
 
 const navItems = {
   mediaItems: mediaSectionItems,
   profileItems: userSectionItems,
 
   subscriptionItems: [
-    { title: "XYZ", url: `${API_ROUTES.CHANNEL}`, avatar: "" },
-    
+    { title: "XYZ", url: `${ROUTES.PAGES_ROUTES.CHANNEL}`, avatar: "" },
   ],
 };
 
-export function AppSidebar({
-  status,
-  userData,
-}: {
-  status: string;
-  userData: IRedisDBUser | null;
-}) {
+export function AppSidebar() {
   const { state } = useSidebar();
   const path = usePathname();
+  const userData = useUser();
+  const { status } = useSession();
 
   return (
     <Sidebar
@@ -62,7 +57,7 @@ export function AppSidebar({
       <Separator />
       <SidebarFooter>
         <Suspense fallback={<UserSkeleton />}>
-          <SidebarBottom status={status} userData={userData} state={state} />
+          <SidebarBottom status={status} state={state} />
         </Suspense>
       </SidebarFooter>
       <SidebarRail />

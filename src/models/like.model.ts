@@ -3,7 +3,7 @@ import { Document, model, models, Schema } from "mongoose";
 export interface ILike extends Document {
   userId: Schema.Types.ObjectId;
   likeable: Schema.Types.ObjectId;
-  likeableType: "audio" | "video" | "comment";
+  likeableType: "Audio" | "Video" | "Comment";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,14 +18,14 @@ const likeSchema = new Schema<ILike>(
     },
     likeable: {
       type: Schema.Types.ObjectId,
-      required: [true, "Likeable reference is required"],
       refPath: "likeableType",
+      required: [true, "Likeable reference is required"],
       index: true,
     },
     likeableType: {
       type: String,
       required: [true, "Likeable type is required"],
-      enum: ["audio", "video", "comment"],
+      enum: ["Audio", "Video", "Comment"],
     },
   },
   { timestamps: true }

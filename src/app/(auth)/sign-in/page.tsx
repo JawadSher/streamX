@@ -1,6 +1,6 @@
 import { auth } from "@/app/api/auth/[...nextauth]/configs";
 import { LoginForm } from "@/components/auth-components/loginForm";
-import { API_ROUTES } from "@/lib/api/ApiRoutes";
+import { ROUTES } from "@/constants/ApiRoutes";
 import { Home } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -9,7 +9,7 @@ export default async function LoginPage() {
   const session = await auth();
 
   if (session?.user || session?.user?._id) {
-    redirect(API_ROUTES.HOME);
+    redirect(ROUTES.PAGES_ROUTES.HOME);
   }
 
   return (

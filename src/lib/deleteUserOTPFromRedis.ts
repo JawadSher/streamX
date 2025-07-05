@@ -5,7 +5,7 @@ export async function deleteUserOTPFromRedis({
   state,
 }: {
   userId: string;
-  state?: "verified";
+  state?: string | null;
 }) {
   if (!userId) return false;
 
@@ -13,7 +13,7 @@ export async function deleteUserOTPFromRedis({
     const redis = await connectRedis();
 
     await redis.del(`app:OTP:${userId}`);
-    if (state === "verified") {
+    if (state && state === "verify") {
       await redis.hset(`app:user:${userId}`, {
         isVerified: true,
       });

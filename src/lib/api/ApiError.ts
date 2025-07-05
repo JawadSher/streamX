@@ -1,24 +1,32 @@
-export class ApiError extends Error {
-  public success: boolean;
-  public message: string;
-  public statusCode: number;
-  public stack?: string;
+import { GraphQLError } from "graphql";
+import { NextResponse } from "next/server";
 
-  constructor(message: string = "An error occurred", statusCode: number = 500) {
-    super(message);
-    this.success = false;
-    this.message = message;
-    this.statusCode = statusCode;
-    if (process.env.NODE_ENV === 'development') {
-      this.stack = this.stack;
-    }
+export const ApiError = ({
+  statusCode = 400,
+  success = false,
+  code = "INTERNAL_ERROR",
+  message,
+  data,
+  isGraphql = true,
+}: {
+  message: string;
+  statusCode?: number;
+  success?: boolean;
+  code?: string;
+  data?: any;
+  isGraphql?: boolean;
+}) => {
+  if (isGraphql) {
+    throw new GraphQLError(message, {
+      extensions: { code, success, message, statusCode, data },
+    });
+  } else {
+    return NextResponse.json({
+      statusCode,
+      message,
+      success,
+      code,
+      data,
+    });
   }
-
-  get error() {
-    return {
-      message: this.message,
-      statusCode: this.statusCode,
-      ...(this.stack && { stack: this.stack })
-    };
-  }
-}
+};
