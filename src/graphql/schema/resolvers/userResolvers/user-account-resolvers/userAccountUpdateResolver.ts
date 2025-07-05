@@ -1,5 +1,5 @@
 import { ApiError } from "@/lib/api/ApiError";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import notifyKakfa from "@/lib/notifyKafka";
 import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
 import { userUpdateSchema } from "@/schemas/userUpdateSchema";
@@ -73,7 +73,7 @@ export const UserAccountUpdateMutation = extendType({
 
           await notifyKakfa({ userData, action: "user-update" });
 
-          return ApiResponse({
+          return GraphqlApiResponse({
             statusCode: 200,
             success: true,
             code: "USER_UPDATE",

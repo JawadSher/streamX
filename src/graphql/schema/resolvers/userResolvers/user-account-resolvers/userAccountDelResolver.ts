@@ -3,7 +3,7 @@ import { extendType } from "nexus";
 import notifyKakfa from "@/lib/notifyKafka";
 import { connectRedis } from "@/lib/redis";
 import { signOut } from "@/app/api/auth/[...nextauth]/configs";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { GraphQLError } from "graphql";
 import mongoose from "mongoose";
 
@@ -38,7 +38,7 @@ export const UserAccountDeleteMutation = extendType({
           });
           await signOut({ redirect: false });
 
-          return ApiResponse({
+          return GraphqlApiResponse({
             statusCode: 202,
             success: true,
             code: "ACCOUNT_DELETION",

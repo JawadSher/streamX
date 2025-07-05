@@ -1,5 +1,5 @@
 import { ApiError } from "@/lib/api/ApiError";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { connectRedis } from "@/lib/redis";
 import { GraphQLError } from "graphql";
 import mongoose from "mongoose";
@@ -42,7 +42,7 @@ export const UserProfileQuery = extendType({
             ...fields
           );
 
-          return ApiResponse({
+          return GraphqlApiResponse({
             statusCode: 200,
             success: true,
             code: "PROFILE_FETCHED",

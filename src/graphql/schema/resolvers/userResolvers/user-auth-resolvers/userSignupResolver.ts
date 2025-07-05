@@ -5,7 +5,7 @@ import { connectDB } from "@/lib/database";
 import User from "@/models/user.model";
 import notifyKakfa from "@/lib/notifyKafka";
 import bcrypt from "bcryptjs";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
 import { validateUserCredentials } from "@/lib/validateUserCredentials";
 import { GraphQLError } from "graphql";
@@ -135,7 +135,7 @@ export const UserSignupMutation = extendType({
           const session = await getSession();
           console.log(session);
 
-          return ApiResponse({
+          return GraphqlApiResponse({
             statusCode: 201,
             success: true,
             code: "CREATION_SUCCESS",

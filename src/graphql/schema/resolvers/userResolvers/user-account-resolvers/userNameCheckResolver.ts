@@ -3,7 +3,7 @@ import { connectDB } from "@/lib/database";
 import { booleanArg, extendType, stringArg } from "nexus";
 import UserModel from "@/models/user.model";
 import { z } from "zod";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { GraphQLError } from "graphql";
 
 const userNameSchema = z
@@ -74,7 +74,7 @@ export const UserNameCheckQuery = extendType({
             });
           }
 
-          return ApiResponse({
+          return GraphqlApiResponse({
             statusCode: 200,
             success: true,
             message: "Username is available",

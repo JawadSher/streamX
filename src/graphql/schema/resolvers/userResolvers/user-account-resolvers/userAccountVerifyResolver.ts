@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import { generateOTP } from "@/lib/generateOTP";
 import { SendVerificationCode } from "@/lib/sendOTP";
 import { connectRedis } from "@/lib/redis";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { z } from "zod";
 import { GraphQLError } from "graphql";
 import { storeOTPresendCoolDown } from "@/lib/storeOTPresendCoolDown";
@@ -183,7 +183,7 @@ export const UserAccountVerifyMutation = extendType({
                 break;
               }
 
-              return ApiResponse({
+              return GraphqlApiResponse({
                 statusCode: 200,
                 success: true,
                 code: "OTP_SENDED",
@@ -250,7 +250,7 @@ export const UserAccountVerifyMutation = extendType({
 
               await verifiedUser(userId);
 
-              return ApiResponse({
+              return GraphqlApiResponse({
                 statusCode: 200,
                 success: true,
                 code: "OTP_VALID",

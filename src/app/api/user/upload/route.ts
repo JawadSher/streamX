@@ -8,10 +8,9 @@ import { IUserAssetsUpdate } from "@/interfaces/userAssetsUpdate";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/verifyAuth";
 import { ApiError } from "@/lib/api/ApiError";
-import { ApiResponse } from "@/lib/api/ApiResponse";
 import { uploadToLocalServer } from "./uploadToLocalServer";
 import { isValidObjectId } from "mongoose";
-import { PlainObject } from "nexus/dist/typeHelpersInternal";
+import { NextApiResponse } from "@/lib/api/NextApiResponse";
 
 export interface IUserAsset {
   userAsset?: File | null;
@@ -19,9 +18,7 @@ export interface IUserAsset {
   assetMemeType?: "image" | "video" | "audio" | undefined;
 }
 
-export async function PATCH(
-  request: NextRequest
-): Promise<NextResponse | PlainObject> {
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
   const token = await verifyAuth(request);
   if (!token?._id || !token || !isValidObjectId(token._id)) {
     return ApiError({
@@ -166,12 +163,11 @@ export async function PATCH(
       userData: data,
     });
 
-    return ApiResponse({
+    return NextApiResponse({
       statusCode: 200,
       success: true,
       code: "FILE_UPLOADED",
       message: `${capitalize(assetType!)} uploaded successfully`,
-      isGraphql: false,
       data: {
         avatar: cloudinaryResponse?.body?.secure_url,
       },

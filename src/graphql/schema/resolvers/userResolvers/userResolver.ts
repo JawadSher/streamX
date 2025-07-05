@@ -3,7 +3,7 @@ import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
 import { getUserFromRedis } from "@/lib/getUserFromRedis";
 import { storeUserInRedis } from "@/lib/storeUserInRedis";
 import { ApiError } from "@/lib/api/ApiError";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { GraphQLError } from "graphql";
 import mongoose from "mongoose";
 import { getOTPCoolDown } from "@/lib/getOTPCoolDownRedis";
@@ -59,7 +59,7 @@ export const UserQuery = extendType({
             });
           }
 
-          return ApiResponse({
+          return GraphqlApiResponse({
             statusCode: 200,
             success: true,
             code: "USER_FETCHED",

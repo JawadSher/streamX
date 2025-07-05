@@ -1,5 +1,5 @@
 import { ApiError } from "@/lib/api/ApiError";
-import { ApiResponse } from "@/lib/api/ApiResponse";
+import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import notifyKakfa from "@/lib/notifyKafka";
 import bcrypt from "bcryptjs";
 import { GraphQLError } from "graphql";
@@ -65,7 +65,7 @@ export const UserAccountPasswdUpdateMutation = extendType({
             action: "user-passwd-change",
           });
 
-          return ApiResponse({
+          return GraphqlApiResponse({
             statusCode: 200,
             success: true,
             code: "PASSWORD_UPDATED",
