@@ -1,4 +1,4 @@
-name: Build and Lint Next.js App streamX
+name: CI - Production Build (Next.js)
 
 on:
   push:
@@ -8,19 +8,29 @@ on:
 
 jobs:
   build:
+    name: Build and Validate
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: 📦 Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18.x
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
 
-    - name: Install Dependencies
-      run: npm install
+      - name: 📥 Install Dependencies
+        run: npm ci
 
-    - name: Build Next.js App
-      run: npm run build
+      - name: 🔍 Run Lint (Optional)
+        run: npm run lint
+        continue-on-error: true  # Set false if you want to fail build on lint errors
+
+      - name: 🔎 Type Check (Optional)
+        run: npm run type-check
+        continue-on-error: true  # Set false if you want to fail build on TS errors
+
+      - name: 🛠️ Build Next.js App
+        run: npm run build
