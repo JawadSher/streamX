@@ -31,6 +31,11 @@ jobs:
       - name: 🔎 Type Check (Optional)
         run: npm run type-check
         continue-on-error: true  # Set false if you want to fail build on TS errors
-
+        
+      - name: 📄 Create .env.production from GitHub secret
+        run: echo "${{ secrets.ENV_FILE }}" > .env.production
+        
       - name: 🛠️ Build Next.js App
         run: npm run build
+        env:
+          NODE_ENV: production
