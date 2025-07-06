@@ -17,8 +17,6 @@ export const UserQuery = extendType({
         try {
           const { user: authUser } = ctx;
 
-          console.log(authUser);
-
           if (
             !authUser ||
             !authUser._id ||
