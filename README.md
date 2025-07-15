@@ -58,6 +58,8 @@ System design is the process of defining the architecture, components, modules, 
 ### System Design (1)
 ![system-design-1](https://github.com/user-attachments/assets/1b3b7fb4-646e-4774-97b5-70fef48e5fd8)
 
+### Event Sourcing Archeticture
+<img width="1176" height="2968" alt="image" src="https://github.com/user-attachments/assets/b25518f2-628e-4b21-b484-e067c8a0c41b" />
 
 ## 📬 Contact
 
