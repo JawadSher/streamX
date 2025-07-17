@@ -1,13 +1,13 @@
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
 import { ApolloServer } from "@apollo/server";
 import { NextRequest } from "next/server";
-import { tokenLimiter } from "@/lib/tokenLimiter";
 import { schema } from "@/graphql/schema";
 import { createContext } from "@/graphql/context";
+import { nodeEnv } from "@/configs/env-exports";
 
 const server = new ApolloServer({
   schema,
-  introspection: process.env.NODE_ENV !== "production",
+  introspection: nodeEnv.NODE_ENV !== "production",
 });
 
 const handler = startServerAndCreateNextHandler(server, {
@@ -15,23 +15,9 @@ const handler = startServerAndCreateNextHandler(server, {
 });
 
 export async function GET(request: NextRequest) {
-  const rateLimitResponse = await tokenLimiter(request, {
-    maxTokens: 50,
-    refillRate: 3,
-  });
-
-  if (rateLimitResponse) return rateLimitResponse;
-
   return handler(request);
 }
 
 export async function POST(request: NextRequest) {
-  const rateLimitResponse = await tokenLimiter(request, {
-    maxTokens: 50,
-    refillRate: 3,
-  });
-
-  if (rateLimitResponse) return rateLimitResponse;
-
   return handler(request);
 }

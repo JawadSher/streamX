@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { connectRedis } from './redis';
+import { connectRedis } from '../data-access/redisDB/redis';
 
 const TOKEN_BUCKET_SCRIPT = `
 local key = KEYS[1]

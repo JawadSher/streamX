@@ -1,5 +1,5 @@
 import UserModel from "@/models/user.model";
-import { connectDB } from "@/lib/database";
+import { connectDB } from "./database";
 
 export const validateUserCredentials = async (
   email: string,

@@ -1,15 +1,15 @@
 import { ApiError } from "@/lib/api/ApiError";
 import { signupSchema } from "@/schemas/signupSchema";
 import { extendType, nonNull, stringArg } from "nexus";
-import { connectDB } from "@/lib/database";
 import User from "@/models/user.model";
 import notifyKakfa from "@/lib/notifyKafka";
 import bcrypt from "bcryptjs";
 import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { signIn } from "@/app/api/auth/[...nextauth]/configs";
-import { validateUserCredentials } from "@/lib/validateUserCredentials";
 import { GraphQLError } from "graphql";
 import { getSession } from "next-auth/react";
+import { validateUserCredentials } from "@/data-access/mongoDB/validateUserCredentials";
+import { connectDB } from "@/data-access/mongoDB/database";
 
 export interface IUserData {
   firstName?: string;

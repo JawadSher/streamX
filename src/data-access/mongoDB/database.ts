@@ -1,6 +1,7 @@
+import { mongoEnv } from "@/configs/env-exports";
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI = mongoEnv.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI must be defined");

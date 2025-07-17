@@ -4,12 +4,13 @@ import Credentials from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import UserModel from "@/models/user.model";
 import * as bcrypt from "bcryptjs";
-import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
-import { storeUserInRedis } from "@/lib/storeUserInRedis";
+import { storeUserInRedis } from "@/data-access/redisDB/storeUserInRedis";
 import notifyKakfa from "@/lib/notifyKafka";
 import { IRedisDBUser } from "@/interfaces/IRedisDBUser";
 import loginSchema from "@/schemas/loginSchema";
-import { validateUserCredentials } from "@/lib/validateUserCredentials";
+import { validateUserCredentials } from "@/data-access/mongoDB/validateUserCredentials";
+import { fetchUserFromMongoDB } from "@/data-access/mongoDB/fetchUserFromMongoDB";
+import { googleAuthEnv, nextAuthEnv } from "@/configs/env-exports";
 
 const authConfigs = await initAuthConfigs();
 const handler = NextAuth(authConfigs);
@@ -62,8 +63,8 @@ export async function initAuthConfigs() {
         },
       }),
       GoogleProvider({
-        clientId: process.env.AUTH_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.AUTH_GOOGLE_CLIENT_SECRET,
+        clientId: googleAuthEnv.AUTH_GOOGLE_CLIENT_ID,
+        clientSecret: googleAuthEnv.AUTH_GOOGLE_CLIENT_SECRET,
       }),
     ],
     callbacks: {
@@ -168,7 +169,7 @@ export async function initAuthConfigs() {
       maxAge: 30 * 24 * 60 * 60,
       updateAge: 24 * 60 * 60,
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: nextAuthEnv.NEXTAUTH_SECRET,
   };
 
   return authConfigs;

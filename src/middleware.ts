@@ -1,60 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ROUTES } from "./constants/ApiRoutes";
-import { verifyAuth } from "./lib/verifyAuth";
-import { tokenLimiter } from "./lib/tokenLimiter";
+import { NextRequest } from "next/server";
+import { arcjetMiddleware } from "./middlewares/arcjet.middleware";
+import { authMiddleware } from "./middlewares/auth.middleware";
 
-const protectedPaths = ["/feed", "/profile", "/account"];
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const arcjetResponse = await arcjetMiddleware(request);
+  if (arcjetResponse) return arcjetResponse;
 
-  const rateLimitResponse = await tokenLimiter(request, {
-    maxTokens: 50,
-    refillRate: 3,
-  });
-
-  if (rateLimitResponse) return rateLimitResponse;
-
-  const token = await verifyAuth(request);
-
-  const isAuthenticated = !!token;
-
-  if (isAuthenticated && pathname === "/sign-in") {
-    return NextResponse.redirect(
-      new URL(ROUTES.PAGES_ROUTES.HOME, request.url)
-    );
-  }
-
-  if (!isAuthenticated && pathname === "/sign-up") return NextResponse.next();
-
-  if (
-    request.nextUrl.pathname === "/api/graphql" &&
-    request.method === "POST"
-  ) {
-    const token = await verifyAuth(request);
-    if (!token && pathname === "/sign-up") {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
-  }
-
-  const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
-
-  if (!isAuthenticated && isProtected) {
-    return NextResponse.redirect(
-      new URL(ROUTES.PAGES_ROUTES.SIGN_IN, request.url)
-    );
-  }
-
-  return NextResponse.next();
+  const authResponse = await authMiddleware(request);
+  if (authResponse) return authResponse;
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-    "/feed/:path*",
-    "/profile/:path*",
-    "/sign-in",
-    "/account",
-    "/account/:path*",
-    "/api/graphql",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)", "/api/:path*"],
 };

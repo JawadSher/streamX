@@ -1,10 +1,10 @@
 import { ApiError } from "@/lib/api/ApiError";
-import { connectDB } from "@/lib/database";
 import { booleanArg, extendType, stringArg } from "nexus";
 import UserModel from "@/models/user.model";
 import { z } from "zod";
 import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { GraphQLError } from "graphql";
+import { connectDB } from "@/data-access/mongoDB/database";
 
 const userNameSchema = z
   .string()

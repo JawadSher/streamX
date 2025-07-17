@@ -46,7 +46,7 @@ export async function getUserFromRedis(
     const userData = Object.fromEntries(
       fields.map((key, index) => [key, values[index] ?? ""])
     ) as Record<(typeof fields)[number], string>;
-
+    
     const user: IRedisDBUser = {
       _id: userData._id,
       userName: userData.userName,
@@ -56,7 +56,7 @@ export async function getUserFromRedis(
       accountStatus: userData.accountStatus,
       bannerURL: userData.banner,
       avatarURL: userData.avatar,
-      isVerified: userData.isVerified === "true" ? true : false,
+      isVerified: !!userData.isVerified,
       bio: userData.bio,
       country: userData.country,
       phoneNumber: userData.phoneNumber,

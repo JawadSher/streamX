@@ -3,7 +3,7 @@
 import { signOut } from "next-auth/react";
 import { persistPurge } from "@/lib/persistPurge";
 import { toast } from "sonner";
-import { connectRedis } from "@/lib/redis";
+import { connectRedis } from "@/data-access/redisDB/redis";
 
 export async function logoutHandler(
   session: any,

@@ -29,18 +29,7 @@ export const UserProvider = () => {
       const { message } = extractGraphQLError(error);
       dispatch(setError(message));
 
-      let isRateLimit = false;
-      if (error?.networkError) {
-        const message = error.networkError.message?.toLowerCase();
-        isRateLimit =
-          message?.includes("429") || message?.includes("too many requests");
-      }
-
-      if (isRateLimit) {
-        toast.error("Too many requests. Please try again later.");
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error.message);
     } else {
       dispatch(setError(null));
     }

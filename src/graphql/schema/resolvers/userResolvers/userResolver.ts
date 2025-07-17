@@ -1,12 +1,12 @@
 import { extendType } from "nexus";
-import { fetchUserFromMongoDB } from "@/lib/fetchUserFromMongoDB";
-import { getUserFromRedis } from "@/lib/getUserFromRedis";
-import { storeUserInRedis } from "@/lib/storeUserInRedis";
+import { getUserFromRedis } from "@/data-access/redisDB/getUserFromRedis";
+import { storeUserInRedis } from "@/data-access/redisDB/storeUserInRedis";
 import { ApiError } from "@/lib/api/ApiError";
 import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { GraphQLError } from "graphql";
 import mongoose from "mongoose";
-import { getOTPCoolDown } from "@/lib/getOTPCoolDownRedis";
+import { getOTPCoolDown } from "@/data-access/redisDB/getOTPCoolDownRedis";
+import { fetchUserFromMongoDB } from "@/data-access/mongoDB/fetchUserFromMongoDB";
 
 export const UserQuery = extendType({
   type: "Query",

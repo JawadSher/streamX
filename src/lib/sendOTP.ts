@@ -1,4 +1,5 @@
 import { EmailTemplate } from "@/components/email-template";
+import { resendEnv } from "@/configs/env-exports";
 import { Resend } from "resend";
 
 export async function SendVerificationCode({
@@ -26,7 +27,7 @@ export async function SendVerificationCode({
     }
 
     console.log("--- STEP 1 ----");
-    const resend_API_KEY = process.env.NEXT_RESEND_API_KEY;
+    const resend_API_KEY = resendEnv.NEXT_RESEND_API_KEY;
 
     if (!resend_API_KEY) {
       return {

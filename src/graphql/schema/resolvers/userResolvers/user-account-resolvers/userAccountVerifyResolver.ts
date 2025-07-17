@@ -1,20 +1,20 @@
 import { ApiError } from "@/lib/api/ApiError";
-import { connectDB } from "@/lib/database";
-import { deleteUserOTPFromRedis } from "@/lib/deleteUserOTPFromRedis";
-import { getUserOTPFromRedis } from "@/lib/getUserOTPFromRedis";
-import { storeUserOTPInRedis } from "@/lib/storeUserOTPInRedis";
+import { deleteUserOTPFromRedis } from "@/data-access/redisDB/deleteUserOTPFromRedis";
+import { getUserOTPFromRedis } from "@/data-access/redisDB/getUserOTPFromRedis";
+import { storeUserOTPInRedis } from "@/data-access/redisDB/storeUserOTPInRedis";
 import { extendType, nullable, stringArg } from "nexus";
 import User from "@/models/user.model";
 import mongoose from "mongoose";
 import { generateOTP } from "@/lib/generateOTP";
 import { SendVerificationCode } from "@/lib/sendOTP";
-import { connectRedis } from "@/lib/redis";
+import { connectRedis } from "@/data-access/redisDB/redis";
 import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { z } from "zod";
 import { GraphQLError } from "graphql";
-import { storeOTPresendCoolDown } from "@/lib/storeOTPresendCoolDown";
-import { removeOTPCoolDown } from "@/lib/removeOTPcoolDown";
-import { getOTPCoolDown } from "@/lib/getOTPCoolDownRedis";
+import { storeOTPresendCoolDown } from "@/data-access/redisDB/storeOTPresendCoolDown";
+import { removeOTPCoolDown } from "@/data-access/redisDB/removeOTPcoolDown";
+import { getOTPCoolDown } from "@/data-access/redisDB/getOTPCoolDownRedis";
+import { connectDB } from "@/data-access/mongoDB/database";
 
 const allowedStates = ["store", "verify"] as const;
 type StateType = (typeof allowedStates)[number];

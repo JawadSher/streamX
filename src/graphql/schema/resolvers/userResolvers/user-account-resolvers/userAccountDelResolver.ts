@@ -1,7 +1,7 @@
 import { ApiError } from "@/lib/api/ApiError";
 import { extendType } from "nexus";
 import notifyKakfa from "@/lib/notifyKafka";
-import { connectRedis } from "@/lib/redis";
+import { connectRedis } from "@/data-access/redisDB/redis";
 import { signOut } from "@/app/api/auth/[...nextauth]/configs";
 import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { GraphQLError } from "graphql";

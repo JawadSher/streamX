@@ -1,6 +1,6 @@
 import { ApiError } from "@/lib/api/ApiError";
 import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
-import { connectRedis } from "@/lib/redis";
+import { connectRedis } from "@/data-access/redisDB/redis";
 import { GraphQLError } from "graphql";
 import mongoose from "mongoose";
 import { extendType } from "nexus";
