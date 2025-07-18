@@ -13,12 +13,10 @@ export const arcjetMiddleware = async (req: NextRequest) => {
 
   const userAgent = req.headers.get("user-agent") || "";
   const referer = req.headers.get("referer") || "";
-  const email = req.nextUrl.searchParams.get("email") || "";
 
   try {
     const decision = await arcJetConf.protect(req, {
       requested: 1,
-      email,
       "header.user-agent": userAgent,
       "header.referer": referer,
     });

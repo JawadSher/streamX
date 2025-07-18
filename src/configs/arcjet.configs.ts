@@ -21,6 +21,12 @@ export const arcJetConf = arcjet({
       interval: 10,
       capacity: 15,
     }),
+  ],
+});
+
+export const arcJetEmailValidationConf = arcjet({
+  key: arcJetENV.ARCJET_KEY,
+  rules: [
     validateEmail({
       mode: "LIVE",
       deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
