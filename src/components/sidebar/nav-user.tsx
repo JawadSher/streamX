@@ -53,7 +53,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
   }
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="flex items-center justify-center w-full">
       <SidebarMenuItem>
         {loading ? (
           <Loader2 size={24} className="animate-spin mx-auto" />

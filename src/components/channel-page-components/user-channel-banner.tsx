@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/legacy/image";
-import { imagePaths } from "@/lib/ImagePaths";
+import { imagePaths } from "@/constants/ImagePaths";
 import SelectBannerImage from "./select-Banner-Image";
 
 function UserChannelBanner({

@@ -56,7 +56,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="sticky top-2 p-4 z-50 bg-accent h-16 flex items-center px-4 border-b w-full mx-auto rounded-lg">
+    <header className="sticky top-2 p-4 z-50 bg-sidebar h-16 flex items-center px-4  w-full mx-auto rounded-t-md rounded-b-sm">
       <div className="flex items-center gap-3">
         {mounted ? (
           (!path.includes("/account") ||

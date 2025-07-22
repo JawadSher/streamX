@@ -10,7 +10,7 @@ import { ROUTES } from "@/constants/ApiRoutes";
 import { useUserProfile } from "@/hooks/apollo/user/user-profile/use-user-profile-queries";
 import { RootState } from "@/store/store";
 import { fullname } from "@/lib/fullname";
-import { imagePaths } from "@/lib/ImagePaths";
+import { imagePaths } from "@/constants/ImagePaths";
 
 import UserProfile from "@/components/profile-page-components/user-profile";
 import History from "@/components/profile-page-components/history";

@@ -10,6 +10,9 @@ import { GraphQLError } from "graphql";
 import { getSession } from "next-auth/react";
 import { validateUserCredentials } from "@/data-access/mongoDB/validateUserCredentials";
 import { connectDB } from "@/data-access/mongoDB/database";
+import { arcJetEmailValidationConf } from "@/configs/arcjet.configs";
+import { getClientIP } from "@/lib/getClientIP";
+import { NextRequest } from "next/server";
 
 export interface IUserData {
   firstName?: string;
@@ -17,6 +20,42 @@ export interface IUserData {
   email?: string;
   password?: string;
   userName?: string;
+}
+
+export async function emailValidationWithArcjet(
+  req: NextRequest,
+  email: string
+) {
+  const decision = await arcJetEmailValidationConf.protect(req, {
+    requested: 1,
+    fingerprint: await getClientIP(req),
+    email,
+  });
+
+  if (decision.isDenied()) {
+    let message = "";
+    if (decision.reason.isEmail()) {
+      if (decision.reason.emailTypes.includes("DISPOSABLE")) {
+        message = "We do not allow disposable email addresses.";
+      } else if (decision.reason.emailTypes.includes("NO_MX_RECORDS")) {
+        message =
+          "Your email domain does not have an MX record. Is there a typo?";
+      } else if (decision.reason.emailTypes.includes("NO_GRAVATAR")) {
+        message = "We require a Gravatar profile to verify your account.";
+      } else {
+        message = "Invalid email address.";
+      }
+    }
+    return {
+      success: false,
+      message,
+    };
+  }
+
+  return {
+    success: true,
+    message: "Every thing is oky",
+  };
 }
 
 export async function signupHelper({ userData }: { userData: IUserData }) {
@@ -37,7 +76,6 @@ export async function signupHelper({ userData }: { userData: IUserData }) {
     }
 
     const encryptedPassword = await bcrypt.hash(userData.password!, 10);
-
     const user = {
       firstName: userData?.firstName,
       lastName: userData?.lastName,
@@ -74,7 +112,7 @@ export const UserSignupMutation = extendType({
         email: nonNull(stringArg()),
         password: nonNull(stringArg()),
       },
-      resolve: async (_parnt, args, _ctx) => {
+      resolve: async (_parnt, args, ctx) => {
         try {
           const { firstName, lastName, userName, email, password } = args;
 
@@ -103,6 +141,21 @@ export const UserSignupMutation = extendType({
             });
           }
 
+          const { req } = ctx;
+          const arcjetResponse = await emailValidationWithArcjet(
+            req,
+            result?.data?.email!
+          );
+          if (!arcjetResponse.success) {
+            ApiError({
+              statusCode: 400,
+              success: false,
+              message: arcjetResponse.message,
+              code: "EMAIL_VALIDATION_ERROR",
+              data: null,
+            });
+          }
+
           const response = await signupHelper({ userData: args });
           if (!response.success) {
             ApiError({
@@ -115,7 +168,6 @@ export const UserSignupMutation = extendType({
           }
 
           const { success } = await validateUserCredentials(email, password);
-
           if (!success) {
             ApiError({
               statusCode: 401,

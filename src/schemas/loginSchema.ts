@@ -11,7 +11,6 @@ export const loginSchema = z
         /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*@gmail\.com$/,
         "Please enter a valid Gmail address (e.g., username@gmail.com)"
       )
-      .optional()
       .refine((val) => val !== "", {
         message: "Email cannot be empty if provided",
       }),

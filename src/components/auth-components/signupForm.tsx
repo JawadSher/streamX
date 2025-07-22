@@ -15,6 +15,13 @@ import { extractGraphQLError } from "@/lib/extractGraphqlError";
 import { useSignUpUser } from "@/hooks/apollo";
 import { GoogleProviderBtn } from "./authProviderBtns";
 import { useCheckUserName } from "@/hooks/apollo/user/user-account/use-user-account-queries";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 
 type State = {
   firstName: string;
@@ -256,202 +263,216 @@ export function SignupForm({
   }, [state.userName, debouncedCheck]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <form
-        className={cn("flex flex-col gap-6", className)}
-        {...props}
-        onSubmit={(e) => {
-          e.preventDefault();
-          const formData = new FormData(e.currentTarget);
-          handleSubmit(formData);
-        }}
-      >
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Create new account</h1>
-          <p className="text-balance text-sm text-muted-foreground">
+    <div className="flex flex-col gap-6 min-w-[350px]">
+      <Card className="flex flex-col gap-6">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Create New Account
+          </CardTitle>
+          <CardDescription>
             Enter your details to create new streamX account
-          </p>
-        </div>
-        <div className="grid gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="firstName">First name</Label>
-            <Input
-              id="firstName"
-              type="text"
-              name="firstName"
-              placeholder="First name"
-              required
-              value={state.firstName}
-              onChange={(e) => {
-                dispatch({
-                  type: "SET_FIELD",
-                  field: "firstName",
-                  value: e.target.value,
-                });
-              }}
-              aria-invalid={!!state.errors?.firstName}
-            />
-            {state.errors?.firstName && (
-              <p className="text-sm text-destructive">
-                {state.errors?.firstName}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input
-              id="lastName"
-              type="text"
-              name="lastName"
-              placeholder="Last name"
-              required
-              value={state.lastName}
-              onChange={(e) => {
-                dispatch({
-                  type: "SET_FIELD",
-                  field: "lastName",
-                  value: e.target.value,
-                });
-              }}
-              aria-invalid={!!state.errors?.lastName}
-            />
-            {state.errors?.lastName && (
-              <p className="text-sm text-destructive">
-                {state.errors?.lastName}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="userName">User name</Label>
-            <Input
-              id="userName"
-              type="text"
-              name="userName"
-              placeholder="@username"
-              required
-              value={state.userName}
-              onChange={(e) => {
-                dispatch({
-                  type: "SET_FIELD",
-                  field: "userName",
-                  value: e.target.value,
-                });
-              }}
-              aria-invalid={!!state.errors?.userName}
-            />
-            {state.userNameAvailable && (
-              <p className="text-sm text-green-400">
-                {state.userNameAvailable}
-              </p>
-            )}
-            {state.errors?.userName && (
-              <p className="text-sm text-destructive">
-                {state.errors?.userName}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="m@example.com"
-              required
-              value={state.email}
-              onChange={(e) => {
-                dispatch({
-                  type: "SET_FIELD",
-                  field: "email",
-                  value: e.target.value,
-                });
-              }}
-              aria-invalid={!!state.errors?.email}
-            />
-            {state.errors?.email && (
-              <p className="text-sm text-destructive">{state.errors?.email}</p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              name="password"
-              required
-              value={state.password}
-              onChange={(e) => {
-                dispatch({
-                  type: "SET_FIELD",
-                  field: "password",
-                  value: e.target.value,
-                });
-              }}
-              aria-invalid={!!state.errors?.password}
-            />
-            {state.errors?.password && (
-              <p className="text-sm text-destructive">
-                {state.errors?.password}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="confirmPasswd">Confirm Password</Label>
-            <Input
-              id="confirmPasswd"
-              type="password"
-              name="confirmPasswd"
-              required
-              value={state.confirmPasswd}
-              onChange={(e) => {
-                dispatch({
-                  type: "SET_FIELD",
-                  field: "confirmPasswd",
-                  value: e.target.value,
-                });
-              }}
-              aria-invalid={!!state.errors?.confirmPasswd}
-            />
-            {state.errors?.confirmPasswd && (
-              <p className="text-sm text-destructive">
-                {state.errors?.confirmPasswd}
-              </p>
-            )}
-          </div>
-          <Button
-            type="submit"
-            className="w-full cursor-pointer"
-            disabled={
-              loading ||
-              !state.firstName ||
-              !state.lastName ||
-              !state.userName ||
-              !state.email ||
-              !state.password ||
-              !state.confirmPasswd ||
-              !!state.errors?.userName ||
-              state.confirmPasswd !== state.password
-            }
-          >
-            {loading ? <Loader2 className="animate-spin ml-2" /> : "Sign up"}
-          </Button>
-        </div>
-      </form>
-      <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-        <span className="relative z-10 bg-background px-2 text-muted-foreground">
-          Or continue with
-        </span>
-      </div>
+          </CardDescription>
+        </CardHeader>
 
-      <div className="flex flex-col gap-3">
-        <GoogleProviderBtn />
-        <div className="text-center text-sm">
-          Already have an account?{" "}
-          <Link href="/sign-in" className="underline underline-offset-4">
-            Sign in
-          </Link>
-        </div>
-      </div>
+        <CardContent className="flex flex-col gap-4">
+          <form
+            className={cn("flex flex-col gap-6", className)}
+            {...props}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleSubmit(formData);
+            }}
+          >
+            <div className="grid gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="firstName">First name</Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  name="firstName"
+                  placeholder="First name"
+                  required
+                  value={state.firstName}
+                  onChange={(e) => {
+                    dispatch({
+                      type: "SET_FIELD",
+                      field: "firstName",
+                      value: e.target.value,
+                    });
+                  }}
+                  aria-invalid={!!state.errors?.firstName}
+                />
+                {state.errors?.firstName && (
+                  <p className="text-sm text-destructive">
+                    {state.errors?.firstName}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  name="lastName"
+                  placeholder="Last name"
+                  required
+                  value={state.lastName}
+                  onChange={(e) => {
+                    dispatch({
+                      type: "SET_FIELD",
+                      field: "lastName",
+                      value: e.target.value,
+                    });
+                  }}
+                  aria-invalid={!!state.errors?.lastName}
+                />
+                {state.errors?.lastName && (
+                  <p className="text-sm text-destructive">
+                    {state.errors?.lastName}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="userName">User name</Label>
+                <Input
+                  id="userName"
+                  type="text"
+                  name="userName"
+                  placeholder="@username"
+                  required
+                  value={state.userName}
+                  onChange={(e) => {
+                    dispatch({
+                      type: "SET_FIELD",
+                      field: "userName",
+                      value: e.target.value,
+                    });
+                  }}
+                  aria-invalid={!!state.errors?.userName}
+                />
+                {state.userNameAvailable && (
+                  <p className="text-sm text-green-400">
+                    {state.userNameAvailable}
+                  </p>
+                )}
+                {state.errors?.userName && (
+                  <p className="text-sm text-destructive">
+                    {state.errors?.userName}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="m@example.com"
+                  required
+                  value={state.email}
+                  onChange={(e) => {
+                    dispatch({
+                      type: "SET_FIELD",
+                      field: "email",
+                      value: e.target.value,
+                    });
+                  }}
+                  aria-invalid={!!state.errors?.email}
+                />
+                {state.errors?.email && (
+                  <p className="text-sm text-destructive">
+                    {state.errors?.email}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                  value={state.password}
+                  onChange={(e) => {
+                    dispatch({
+                      type: "SET_FIELD",
+                      field: "password",
+                      value: e.target.value,
+                    });
+                  }}
+                  aria-invalid={!!state.errors?.password}
+                />
+                {state.errors?.password && (
+                  <p className="text-sm text-destructive">
+                    {state.errors?.password}
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="confirmPasswd">Confirm Password</Label>
+                <Input
+                  id="confirmPasswd"
+                  type="password"
+                  name="confirmPasswd"
+                  placeholder="••••••••"
+                  required
+                  value={state.confirmPasswd}
+                  onChange={(e) => {
+                    dispatch({
+                      type: "SET_FIELD",
+                      field: "confirmPasswd",
+                      value: e.target.value,
+                    });
+                  }}
+                  aria-invalid={!!state.errors?.confirmPasswd}
+                />
+                {state.errors?.confirmPasswd && (
+                  <p className="text-sm text-destructive">
+                    {state.errors?.confirmPasswd}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                className="w-full cursor-pointer"
+                disabled={
+                  loading ||
+                  !state.firstName ||
+                  !state.lastName ||
+                  !state.userName ||
+                  !state.email ||
+                  !state.password ||
+                  !state.confirmPasswd ||
+                  !!state.errors?.userName ||
+                  state.confirmPasswd !== state.password
+                }
+              >
+                {loading ? (
+                  <Loader2 className="animate-spin ml-2" />
+                ) : (
+                  "Sign up"
+                )}
+              </Button>
+            </div>
+          </form>
+          <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+            <span className="bg-card text-muted-foreground relative z-10 px-2">
+              Or continue with
+            </span>
+          </div>
+          <div className="flex flex-col gap-3">
+            <GoogleProviderBtn />
+            <div className="text-center text-sm">
+              Already have an account?{" "}
+              <Link href="/sign-in" className="underline underline-offset-4">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <Toaster />
     </div>
   );

@@ -1,6 +1,6 @@
 import { UserAvatar } from "../user-avatar";
 import UserAvatarChange from "./user-avatar-change";
-import { imagePaths } from "@/lib/ImagePaths";
+import { imagePaths } from "@/constants/ImagePaths";
 
 interface Props {
   avatarURL?: string | null;

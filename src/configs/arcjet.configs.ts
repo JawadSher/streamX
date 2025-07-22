@@ -8,7 +8,14 @@ import { arcJetENV } from "./env-exports";
 
 export const arcJetConf = arcjet({
   key: arcJetENV.ARCJET_KEY,
-  characteristics: ["ip.src", "header.user-agent", "header.referer"],
+  characteristics: [
+    "fingerprint",
+    "user-agent",
+    "referer",
+    "accept-language",
+    "accept",
+    "sec-ch-ua",
+  ],
   rules: [
     shield({ mode: "LIVE" }),
     detectBot({
@@ -26,10 +33,17 @@ export const arcJetConf = arcjet({
 
 export const arcJetEmailValidationConf = arcjet({
   key: arcJetENV.ARCJET_KEY,
+  characteristics: ["fingerprint"],
   rules: [
     validateEmail({
       mode: "LIVE",
       deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+    }),
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 10,
+      interval: 10,
+      capacity: 15,
     }),
   ],
 });

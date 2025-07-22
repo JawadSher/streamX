@@ -7,7 +7,7 @@ import TotalVideos from "./total-videos";
 import SubscribeBtn from "./subscribeBtn";
 import UserChannelBanner from "./user-channel-banner";
 import ChannelTabs from "./channel-tabs";
-import { imagePaths } from "@/lib/ImagePaths";
+import { imagePaths } from "@/constants/ImagePaths";
 import dynamic from "next/dynamic";
 import useWindowWidth from "@/hooks/useWindowWidth";
 

@@ -38,7 +38,7 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)]"
+      className="m-2 rounded-lg overflow-hidden h-[calc(100vh-16px)] border-none"
     >
       <SideBarTop state={state} />
 
@@ -55,7 +55,7 @@ export function AppSidebar() {
       )}
 
       <Separator />
-      <SidebarFooter>
+      <SidebarFooter className="w-full">
         <Suspense fallback={<UserSkeleton />}>
           <SidebarBottom status={status} state={state} />
         </Suspense>

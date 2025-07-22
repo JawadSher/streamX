@@ -1,7 +1,7 @@
 import { NavUser } from "./nav-user";
 import Image from "next/legacy/image";
 import Link from "next/link";
-import { imagePaths } from "@/lib/ImagePaths";
+import { imagePaths } from "@/constants/ImagePaths";
 import { Button } from "../ui/button";
 import { fullname } from "@/lib/fullname";
 import { useUser } from "@/store/features/user/userSlice";
@@ -17,17 +17,18 @@ export default function SidebarBottom({
 
   if (status === "unauthenticated") {
     return (
-      <Link href="/sign-in" className="w-full flex grow">
+      <Link href="/sign-in" className="w-full">
         {state === "collapsed" ? (
-          <Image
+          <div className="flex items-center justify-center">
+            <Image
             src={imagePaths.defaultUserLogo}
             alt="Login"
             width={32}
             height={32}
-            className="mx-auto"
           />
+          </div>
         ) : (
-          <Button className="w-full flex grow cursor-pointer rounded-2xl h-8">
+          <Button className="flex grow min-w-full cursor-pointer rounded-2xl h-8">
             Sign in
           </Button>
         )}

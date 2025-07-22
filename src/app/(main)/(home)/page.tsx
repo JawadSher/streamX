@@ -19,7 +19,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col w-full h-full rounded-md bg-gray-600 relative items-center overflow-auto custom-scroll-bar mb-2">
+    <div className="flex flex-col w-full h-full rounded-b-md rounded-t-sm relative items-center overflow-auto custom-scroll-bar mb-2 bg-sidebar ">
       {error && (
         <span className="bg-yellow-600 w-[95%] sticky bottom-2 z-10 mx-auto px-2 font-normal text-center text-black rounded-sm">
           {error.message}

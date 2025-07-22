@@ -47,8 +47,8 @@ export function NavMain({
           const isActive = pathname === item.url;
 
           return (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild className="mb-1">
+            <SidebarMenuItem key={item.title} className="flex items-center justify-center">
+              <SidebarMenuButton asChild className="mb-1 min-w-full">
                 <Link
                   href={item.url}
                   title={item.title}

@@ -10,14 +10,11 @@ import { SendVerificationCode } from "@/lib/sendOTP";
 import { connectRedis } from "@/data-access/redisDB/redis";
 import { GraphqlApiResponse } from "@/lib/api/GraphqlApiResponse";
 import { z } from "zod";
-import { GraphQLError, validate } from "graphql";
+import { GraphQLError } from "graphql";
 import { storeOTPresendCoolDown } from "@/data-access/redisDB/storeOTPresendCoolDown";
 import { removeOTPCoolDown } from "@/data-access/redisDB/removeOTPcoolDown";
 import { getOTPCoolDown } from "@/data-access/redisDB/getOTPCoolDownRedis";
 import { connectDB } from "@/data-access/mongoDB/database";
-import { arcJetEmailValidationConf } from "@/configs/arcjet.configs";
-import { request } from "@arcjet/next";
-import { error } from "console";
 
 const allowedStates = ["store", "verify"] as const;
 type StateType = (typeof allowedStates)[number];
@@ -56,6 +53,7 @@ const OTP_Schema = z
   .trim()
   .max(6, "OTP should be max 6 digit long")
   .min(6, "OTP should be min 6 digit long");
+
 
 export const UserAccountVerifyMutation = extendType({
   type: "Mutation",
@@ -127,21 +125,6 @@ export const UserAccountVerifyMutation = extendType({
               );
               const userEmail: string = result?.email as string;
               const firstName: string = result?.firstName as string;
-
-              const req = await request();
-              const decision = await arcJetEmailValidationConf.protect(req, {
-                email: userEmail,
-              });
-
-              if (decision.isDenied()) {
-                ApiError({
-                  statusCode: 403,
-                  success: false,
-                  code: "EMAIL_VALIDATION_ERROR",
-                  message: "Email is not allowed. Use a valid address.",
-                  data: null,
-                });
-              }
 
               const { OTP, expiryTime } = await generateOTP();
 
