@@ -53,8 +53,8 @@ export function NavUser({ user }: { user: INavUserProps }) {
   }
 
   return (
-    <SidebarMenu className="flex items-center justify-center w-full">
-      <SidebarMenuItem>
+    <SidebarMenu className="w-full">
+      <SidebarMenuItem className="flex items-center justify-center w-full">
         {loading ? (
           <Loader2 size={24} className="animate-spin mx-auto" />
         ) : (
@@ -133,7 +133,7 @@ export function NavUser({ user }: { user: INavUserProps }) {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem asChild className="bg-red-800 hover:bg-red-500">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();

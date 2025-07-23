@@ -3,7 +3,6 @@ import { arcjetMiddleware } from "./middlewares/arcjet.middleware";
 import { authMiddleware } from "./middlewares/auth.middleware";
 
 export async function middleware(request: NextRequest) {
-
   const arcjetResponse = await arcjetMiddleware(request);
   if (arcjetResponse) return arcjetResponse;
 

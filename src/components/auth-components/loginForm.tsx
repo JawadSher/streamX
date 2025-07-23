@@ -44,9 +44,8 @@ export function LoginForm() {
     },
   });
 
-  const email = watch("email");
-  const password = watch("password");
-  const isDisabled = loading || !email || !password;
+  const AllFields = watch();
+  const isDisabled = Object.values(AllFields).some((val) => !val) || loading;
 
   const onSubmit = async (data: LoginFormData) => {
     const response = await signinHandler(session, data, setLoading);

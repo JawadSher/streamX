@@ -9,20 +9,16 @@ import { clearUser } from "@/store/features/user/userSlice";
 import { useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { toast } from "sonner";
+import { Toaster } from "@/components/toaster";
 
 export const useUserAccountUpdate = () => {
   return useMutation(USER_ACCNT_UPDATE, {
     onCompleted: (res) => {
-      toast.success(res.userAccountUpdate.message, {
-        duration: 3000,
-      });
+      Toaster.success("Account Updation", res.userAccountUpdate.message);
     },
     onError: (error: any) => {
       const { message } = extractGraphQLError(error);
-      toast.error(message, {
-        duration: 3000,
-      });
+      Toaster.error("Account Update Error", message);
     },
   });
 };
@@ -30,15 +26,11 @@ export const useUserAccountUpdate = () => {
 export const useUserAccountVerification = () => {
   return useMutation(USER_ACCNT_VERIFY, {
     onCompleted: async (res) => {
-      toast.success(res.userAccountVerify.message, {
-        duration: 3000,
-      });
+      Toaster.success("Account Verification", res.userAccountVerify.message);
     },
     onError: (err: any) => {
       const { message } = extractGraphQLError(err);
-      toast.error(message, {
-        duration: 3000,
-      });
+      Toaster.error("Account Verification Error", message);
     },
   });
 };
@@ -56,16 +48,11 @@ export const useUserAccountDeletion = () => {
       purge();
       router.push(ROUTES.PAGES_ROUTES.SIGN_IN);
       const message = res.userAccountDel.message;
-      toast.success("Account Deletion", {
-        description: message,
-        duration: 3000,
-      });
+      Toaster.success("Account Deletion", message);
     },
     onError: (error: any) => {
       const { message } = extractGraphQLError(error);
-      toast.error(message, {
-        duration: 3000,
-      });
+      Toaster.error("Account Deletion Error", message);
     },
   });
 };
@@ -73,15 +60,14 @@ export const useUserAccountDeletion = () => {
 export const useUserAccountPasswdUpdate = () => {
   return useMutation(USER_ACCNT_PASSWD_UPDATE, {
     onCompleted: (res) => {
-      toast.success(res.userAccountPasswdUpdate.message, {
-        duration: 3000,
-      });
+      Toaster.success(
+        "Account Password Update",
+        res.userAccountPasswdUpdate.message
+      );
     },
     onError: (error: any) => {
       const { message } = extractGraphQLError(error);
-      toast.error(message, {
-        duration: 3000,
-      });
+      Toaster.error("Account Password Update Error", message);
     },
   });
 };

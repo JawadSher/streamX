@@ -1,5 +1,3 @@
-"use client";
-
 import { ROUTES } from "@/constants/ApiRoutes";
 import { Button } from "../ui/button";
 import { signIn } from "next-auth/react";

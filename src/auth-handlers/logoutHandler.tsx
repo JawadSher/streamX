@@ -2,8 +2,8 @@
 
 import { signOut } from "next-auth/react";
 import { persistPurge } from "@/lib/persistPurge";
-import { toast } from "sonner";
 import { connectRedis } from "@/data-access/redisDB/redis";
+import { Toaster } from "@/components/toaster";
 
 export async function logoutHandler(
   session: any,
@@ -14,9 +14,10 @@ export async function logoutHandler(
 
     if (!session || !session?.user?._id) {
       await persistPurge();
-      toast.error("User already logged out", {
-        duration: 3000,
-      });
+      Toaster.error(
+        "Session Expired",
+        "You’re already logged out or your session has expired."
+      );
       return true;
     }
 
@@ -27,15 +28,18 @@ export async function logoutHandler(
     await signOut({ redirect: false });
     await persistPurge();
 
-    toast.success("User logout successfully", {
-      duration: 3000,
-    });
+    Toaster.success(
+      "Logged Out Successfully",
+      "You have been signed out of your account."
+    );
 
     return true;
   } catch (error: any) {
-    toast.error(error.message || "Logout failed", {
-      duration: 3000,
-    });
+    Toaster.error(
+      "Logout Failed",
+      error.message ||
+        "Something went wrong while logging out. Please try again."
+    );
     return false;
   } finally {
     setLoading?.(false);

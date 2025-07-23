@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Mic, Search } from "lucide-react";
 import { Input } from "../ui/input";
@@ -6,12 +6,17 @@ import { Input } from "../ui/input";
 function FullSearchBar() {
   return (
     <div className="flex grow mx-2 items-center justify-center">
-      <div className="relative md:max-w-[800px] grow">
-        <Input className="rounded-3xl w-full pr-10" placeholder="Search" />
-        <Search
-          className={`absolute right-3 top-1/2 transform -translate-y-1/2 lucid-icons search`}
-          size={20}
-        />
+      <div className="*:not-first:mt-2 w-[50%]">
+        <div className="relative flex rounded-2xl shadow-xs">
+          <Input
+            className="-me-px rounded-e-none rounded-l-2xl ps-6 shadow-none font-semibold text-[20px]"
+            placeholder="Search here"
+            type="text"
+          />
+          <span className="border-input text-muted-foreground -z-10 inline-flex items-center rounded-e-2xl border px-3 text-sm">
+            <Search />
+          </span>
+        </div>
       </div>
       <Mic size={20} className="lucid-icons ml-1" />
     </div>

@@ -1,3 +1,4 @@
+"use client";
 
 import LeftSideComponent from "@/components/auth-components/leftSide-component";
 import { SignupForm } from "@/components/auth-components/signupForm";
@@ -7,10 +8,11 @@ import Link from "next/link";
 
 const Signup = () => {
   return (
-    <div className="w-full grid lg:grid-cols-2 rounded-2xl border-1 overflow-clip">
+    <div className="grid h-full w-full lg:grid-cols-2 rounded-2xl border overflow-clip">
       <LeftSideComponent />
-      <div className="flex flex-col p-6">
-        <div className="hidden lg:flex justify-start gap-2">
+
+      <div className="flex flex-col justify-between p-4">
+        <div className="hidden lg:flex items-center gap-2">
           <Link
             href={ROUTES.PAGES_ROUTES.HOME}
             className="flex items-center gap-2 font-medium"

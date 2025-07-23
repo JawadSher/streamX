@@ -184,8 +184,8 @@ export function VerifyAccountForm() {
         dispatch({ type: "SET_STATE", state: "dialogOpen", value: open })
       }
     >
-      <DialogTrigger asChild>
-        <Button className="p-0 m-0 bg-transparent hover:bg-transparent cursor-pointer text-sm font-medium text-sky-600 hover:text-sky-700 transition-colors duration-200">
+      <DialogTrigger asChild >
+        <Button className="p-0 m-0 bg-transparent hover:bg-transparent cursor-pointer text-sm font-medium text-sky-600 hover:text-sky-700 transition-colors duration-200 h-0">
           Verify
         </Button>
       </DialogTrigger>

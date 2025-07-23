@@ -1,73 +1,74 @@
 "use client";
 
-import { ReactNode, ChangeEvent } from "react";
+import { ReactNode, InputHTMLAttributes } from "react";
 import { VerifyAccountForm } from "./account-page-components/verify-account-form";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { FieldError } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 
-interface Props {
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   inputValue?: string;
   editable?: boolean;
-  type?: string;
-  name?: string;
-  htmlFor?: string;
   children?: ReactNode;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  validationError?: string;
+  validationError?: string | FieldError;
   disabled?: boolean;
   className?: string;
   rightElement?: React.ReactNode;
   isVerified?: boolean | null;
   userEmail?: string;
-  userId?: string;
+  name?: string;
+  isEmailField?: boolean;
 }
 
 const InputField = ({
+  name,
   label,
   inputValue = "",
   editable = false,
   type = "text",
-  name = "",
-  htmlFor = "",
   children,
-  onChange,
   validationError,
   disabled,
   className = "",
   rightElement,
   isVerified = true,
+  isEmailField = false,
+  ...rest
 }: Props) => {
-  return (
-    <div className="flex flex-col gap-1 w-full px-2 h-fit relative">
-      <div className="flex gap-3 items-center">
-        <Label htmlFor={htmlFor} className="text-lg font-medium">
-          {label}
-        </Label>
-        {validationError && <p className="text-red-600">{validationError}</p>}
-        {name === "email" && !isVerified && <VerifyAccountForm />}
-      </div>
+  const id = uuidv4();
 
-      <div className="relative w-full">
-        <Input
-          className={`${className} font-semibold dark:text-zinc-300 w-full pr-10`}
-          value={inputValue}
-          readOnly={!editable}
-          type={type}
-          name={name}
-          id={htmlFor}
-          onChange={onChange}
-          disabled={disabled}
-        />
-        {rightElement && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer h-full flex items-center">
-            {rightElement}
-          </div>
+  return (
+    <div className="w-full space-y-2">
+      <div className="flex gap-2 items-center">
+        {label && (
+          <Label htmlFor={id} className="text-base font-medium">
+            {label}
+          </Label>
         )}
-        {children && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer h-full flex items-center">
-            {children}
-          </div>
+        {validationError && (
+          <p className="text-sm text-red-600 font-medium">
+            {validationError.toString()}
+          </p>
+        )}
+        {isEmailField && !isVerified && <VerifyAccountForm />}
+      </div>
+      <div className="flex rounded-md shadow-xs relative">
+        <Input
+          id={id}
+          type={type}
+          readOnly={!editable}
+          disabled={disabled}
+          placeholder={inputValue}
+          className={`rounded-e-none font-semibold dark:text-zinc-300 ${className}`}
+          {...rest}
+        />
+
+        {(rightElement || children) && (
+          <span className="border-input text-muted-foreground inline-flex items-center rounded-e-md border px-3 text-sm">
+            {rightElement || children}
+          </span>
         )}
       </div>
     </div>

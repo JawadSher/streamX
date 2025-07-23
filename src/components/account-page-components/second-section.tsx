@@ -3,6 +3,8 @@ import React from "react";
 import { Separator } from "../ui/separator";
 import * as LucideIcons from "lucide-react";
 import { Badge } from "../ui/badge";
+import AccountStatusBadge from "./accountStatusBadge";
+import AccountVerificationStatusBadge from "./accountVerficationStatusBadge";
 
 interface Props {
   userName?: string | null;
@@ -10,7 +12,7 @@ interface Props {
   accountStatus?: string | null;
   phoneNumber?: string | null;
   country?: string | null;
-  isVerified?: boolean | null | string;
+  isVerified?: boolean | null;
   createdAt?: Date | number | string | null;
 }
 
@@ -42,14 +44,7 @@ const SecondSection = ({
       label: (
         <>
           Verification{" "}
-          <Badge
-            variant="secondary"
-            className={`px-3 py-0 rounded-sm ${
-              isVerified ? "text-green-400" : "text-red-400"
-            }`}
-          >
-            {isVerified ? "True" : "False"}
-          </Badge>
+          <AccountVerificationStatusBadge accountVerificationStatus={isVerified} />
         </>
       ),
     },
@@ -58,18 +53,7 @@ const SecondSection = ({
       label: (
         <>
           Account Status{" "}
-          <Badge
-            variant="secondary"
-            className={`px-3 py-0 rounded-sm ${
-              accountStatus === "suspended"
-                ? "text-yellow-400"
-                : accountStatus === "deleted"
-                ? "text-red-400"
-                : "text-green-400"
-            }`}
-          >
-            {accountStatus ? capitalize(accountStatus) : "Unknown"}
-          </Badge>
+          <AccountStatusBadge accountStatus={accountStatus} />
         </>
       ),
     },
