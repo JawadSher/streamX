@@ -6,21 +6,31 @@ import EditButton from "../edit-button";
 import { userUpdateSchema } from "@/schemas/userUpdateSchema";
 import { Toaster } from "../ui/sonner";
 import { phoneNumberSchema } from "@/schemas/phoneNumberSchema";
-import InputField from "../input-field";
 import { updateUser, useUser } from "@/store/features/user/userSlice";
 import { useDispatch } from "react-redux";
 import { useUserAccountUpdate } from "@/hooks/apollo";
-import { useForm, useFormContext } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Loading from "../loading";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { useFormState } from "react-dom";
+import { Input } from "../ui/input";
+import * as RPNInput from "react-phone-number-input";
+import FormLabel from "./form-labels";
+import {
+  CountrySelect,
+  FlagComponent,
+  PhoneInput,
+} from "../phone-number-input-field";
+import { CountryDropdown } from "../country-dropdown-list";
 
 const formSchema = userUpdateSchema.merge(phoneNumberSchema);
+
 const AccountForm = () => {
   const user = useUser();
   const dispatchRedux = useDispatch();
   const [userAccountUpdate, { loading, data }] = useUserAccountUpdate();
+
+  console.log(user);
 
   const [editableFields, setEditableFields] = useState<Record<string, boolean>>(
     {
@@ -34,6 +44,7 @@ const AccountForm = () => {
   const {
     register,
     watch,
+    control,
     handleSubmit,
     formState: { errors, isDirty },
     clearErrors,
@@ -42,8 +53,6 @@ const AccountForm = () => {
     defaultValues: {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      userName: user?.userName || "",
-      email: user?.email || "",
       phoneNumber: user?.phoneNumber || "",
       country: user?.country || "",
     },
@@ -57,17 +66,6 @@ const AccountForm = () => {
     formValues.country !== user?.country;
 
   const isDisabled = !isFormChanged || !isDirty || loading;
-
-  useEffect(() => {
-    console.log(formValues);
-  }, [formValues])
-
-  const toggleEditableField = (field: keyof typeof editableFields) => {
-    setEditableFields((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
 
   useEffect(() => {
     if (!data) return;
@@ -92,16 +90,23 @@ const AccountForm = () => {
     }
   }, [data]);
 
+  const toggleEditableField = (field: keyof typeof editableFields) => {
+    setEditableFields((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
   async function onSubmit(data: any) {
     clearErrors();
 
     console.log(data);
 
-    // await userAccountUpdate({
-    //   variables: {
-    //     ...data,
-    //   },
-    // });
+    await userAccountUpdate({
+      variables: {
+        ...data,
+      },
+    });
   }
 
   if (!user) {
@@ -119,85 +124,140 @@ const AccountForm = () => {
       </CardHeader>
       <CardContent>
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, (errors) => {
+            console.log(errors);
+          })}
           className="grid grid-cols-1 gap-6 lg:grid-cols-2"
         >
-          <InputField
-            label="First Name"
-            editable={editableFields.firstName}
-            className="w-full"
-            validationError={errors?.firstName?.message}
-            inputValue={formValues.firstName}
-            {...register("firstName")}
-            rightElement={
-              <EditButton
-                fieldName="firstName"
-                setEditableField={toggleEditableField}
+          <div className="space-y-2">
+            <FormLabel
+              label="First Name"
+              htmlFor="firstName"
+              error={errors.firstName}
+            />
+            <div className="flex rounded-md shadow-xs relative">
+              <Input
+                id="firstName"
+                type="text"
+                disabled={!editableFields.firstName}
+                className="rounded-e-none font-semibold dark:text-zinc-300 w-full"
+                {...register("firstName")}
               />
-            }
-          />
+              <span className="border-input text-muted-foreground inline-flex items-center rounded-e-md border px-3 text-sm">
+                <EditButton
+                  fieldName="firstName"
+                  setEditableField={toggleEditableField}
+                />
+              </span>
+            </div>
+          </div>
 
-          <InputField
-            label="Last Name"
-            editable={editableFields.lastName}
-            className="w-full"
-            validationError={errors?.lastName?.message}
-            inputValue={formValues.lastName}
-            {...register("lastName")}
-            rightElement={
-              <EditButton
-                fieldName="lastName"
-                setEditableField={toggleEditableField}
+          <div className="space-y-2">
+            <FormLabel
+              label="Last Name"
+              htmlFor="lastName"
+              error={errors.lastName}
+            />
+            <div className="flex rounded-md shadow-xs relative">
+              <Input
+                id="lastName"
+                type="text"
+                disabled={!editableFields.lastName}
+                className="rounded-e-none font-semibold dark:text-zinc-300 w-full"
+                {...register("lastName")}
               />
-            }
-          />
-          <InputField
-            label="Username"
-            editable={false}
-            inputValue={formValues.userName}
-            className="w-full rounded-md"
-            disabled
-          />
+              <span className="border-input text-muted-foreground inline-flex items-center rounded-e-md border px-3 text-sm">
+                <EditButton
+                  fieldName="lastName"
+                  setEditableField={toggleEditableField}
+                />
+              </span>
+            </div>
+          </div>
 
-          <InputField
-            label="Email"
-            editable={false}
-            className="w-full rounded-md"
-            inputValue={formValues.email}
-            disabled
-            isVerified={Boolean(user?.isVerified)}
-            isEmailField={true}
-          />
+          <div className="space-y-2">
+            <FormLabel label="Username" htmlFor="userName" />
+            <Input
+              id="userName"
+              type="text"
+              value={user.userName?.toString()}
+              disabled
+              className="w-full font-semibold dark:text-zinc-300"
+            />
+          </div>
 
-          <InputField
-            label="Phone Number"
-            editable={editableFields.phoneNumber}
-            className="w-full"
-            validationError={errors?.phoneNumber?.message}
-            inputValue={formValues.phoneNumber}
-            type="tel"
-            {...register("phoneNumber")}
-            rightElement={
-              <EditButton
-                fieldName="phoneNumber"
-                setEditableField={toggleEditableField}
+          <div className="space-y-2">
+            <FormLabel label="Email" htmlFor="email" />
+            <Input
+              id="email"
+              type="email"
+              value={user.email?.toString()}
+              disabled
+              className="w-full font-semibold dark:text-zinc-300"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormLabel
+              label="Phone Number"
+              error={errors.phoneNumber?.message}
+              htmlFor="phoneNumber"
+            />
+            <Controller
+              name="phoneNumber"
+              control={control}
+              render={({ field }) => (
+                <div className="flex rounded-md shadow-xs relative">
+                  <RPNInput.default
+                    international
+                    defaultCountry="PK"
+                    id="phoneNumber"
+                    disabled={!editableFields.phoneNumber}
+                    flagComponent={FlagComponent}
+                    countrySelectComponent={CountrySelect}
+                    inputComponent={PhoneInput}
+                    {...field}
+                    className="flex w-full border rounded-e-none rounded-l-xl"
+                  />
+                  <span className="border-input text-muted-foreground inline-flex items-center rounded-e-md border px-3 text-sm">
+                    <EditButton
+                      fieldName="phoneNumber"
+                      setEditableField={toggleEditableField}
+                    />
+                  </span>
+                </div>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormLabel
+              label="Country"
+              htmlFor="country"
+              error={errors.country?.message}
+            />
+            <div className="flex rounded-md shadow-xs relative">
+              <Controller
+                control={control}
+                name="country"
+                render={({ field }) => (
+                  <CountryDropdown
+                    defaultValue={field.value ?? "USA"}
+                    onChange={(selectedCountry) =>
+                      field.onChange(selectedCountry.alpha3)
+                    }
+                    disabled={!editableFields.country}
+                  />
+                )}
               />
-            }
-          />
-          <InputField
-            label="Country"
-            editable={editableFields.country}
-            className="w-full"
-            validationError={errors?.country?.message}
-            inputValue={formValues.country}
-            {...register("country")}
-            rightElement={
-              <EditButton
-                fieldName="country"
-                setEditableField={toggleEditableField}
-              />
-            }
-          />
+              <span className="border-input text-muted-foreground inline-flex items-center rounded-e-md border px-3 text-sm">
+                <EditButton
+                  fieldName="country"
+                  setEditableField={toggleEditableField}
+                />
+              </span>
+            </div>
+          </div>
 
           <div className="w-full lg:col-span-2 flex flex-col items-center mt-10">
             <Button
@@ -207,7 +267,6 @@ const AccountForm = () => {
             >
               {loading ? <Loading /> : "Update Account"}
             </Button>
-
             <p className="text-sm text-muted-foreground mt-2">
               Only editable fields can be updated
             </p>

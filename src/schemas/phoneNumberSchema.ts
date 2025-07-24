@@ -2,11 +2,14 @@ import { z } from "zod";
 
 export const phoneNumberSchema = z.object({
   phoneNumber: z
-    .string()
-    .trim()
-    .max(15, "Phone number cannot exceed 15 characters")
-    .regex(
-      /^0\d{10}$/,
-      "Please enter a valid 11-digit phone number - eg: +xxxxxxxxxxx"
-    ),
+    .union([
+      z
+        .string()
+        .regex(
+          /^\+(?:[1-9]\d{0,3})\d{6,14}$/,
+          "Please enter a valid international phone number (e.g., +1234567890)"
+        ),
+      z.literal(""),
+    ])
+    .optional(),
 });

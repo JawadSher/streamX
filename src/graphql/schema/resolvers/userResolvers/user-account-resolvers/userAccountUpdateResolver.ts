@@ -51,7 +51,8 @@ export const UserAccountUpdateMutation = extendType({
           }
 
           if (phoneNumber && phoneNumber.length > 0) {
-            const numResult = phoneNumberSchema.safeParse(phoneNumber);
+            const numResult = phoneNumberSchema.safeParse({ phoneNumber });
+            
             if (!numResult.success) {
               const fieldError = numResult.error.flatten().fieldErrors;
               ApiError({
